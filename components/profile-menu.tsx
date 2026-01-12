@@ -1,0 +1,40 @@
+"use client";
+
+import { useState } from "react";
+
+type ProfileMenuProps = {
+  fullName: string;
+};
+
+export function ProfileMenu({ fullName }: ProfileMenuProps) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#524a4e]"
+        onClick={() => setOpen((prev) => !prev)}
+        type="button"
+      >
+        <span className="inline-block h-4 w-4 rounded-full border border-[#524a4e]" />
+        Profile
+      </button>
+      {open && (
+        <div className="absolute right-0 mt-2 w-40 rounded-lg border border-[#d6d6d6] bg-white py-2 text-sm shadow-lg">
+          <div className="px-3 py-2 text-xs text-[#6b6b6b]">{fullName}</div>
+          <a className="block px-3 py-2 text-[#3a3a3a] hover:bg-[#f5f5f5]" href="/profile">
+            Detail
+          </a>
+          <form action="/api/logout" method="post">
+            <button
+              className="w-full px-3 py-2 text-left text-[#3a3a3a] hover:bg-[#f5f5f5]"
+              type="submit"
+            >
+              Logout
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
