@@ -8,6 +8,7 @@ const products = [
     name: "BIG ASSISTANT",
     front: "/f-bigassistant.jpg",
     logo: "/bigAssistant_logo.png",
+    href: "/produk/big-assistant",
   },
   {
     name: "BIG LEGAL",
@@ -89,45 +90,91 @@ export default async function ProdukPage() {
 
         <section className="mx-auto max-w-[1237px] px-6 py-12">
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-            {products.map((product) => (
-              <div
-                key={product.name}
-                className="flip-card h-[363px] overflow-hidden rounded-[18px] border border-[#1f1f1f] bg-black shadow-[0_10px_18px_rgba(0,0,0,0.35)]"
-              >
-                <div className="flip-card-inner">
-                  <div className="flip-face">
-                    <div className="relative h-full">
-                      <Image
-                        src={product.front}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/15" />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <p className="text-xl font-semibold uppercase text-white drop-shadow-md">
-                          {product.name}
-                        </p>
+            {products.map((product) => {
+              const card = (
+                <div className="flip-card h-[363px] overflow-hidden rounded-[18px] border border-[#1f1f1f] bg-black shadow-[0_10px_18px_rgba(0,0,0,0.35)]">
+                  <div className="flip-card-inner">
+                    <div className="flip-face">
+                      <div className="relative h-full">
+                        <Image
+                          src={product.front}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/15" />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <p className="text-xl font-semibold uppercase text-white drop-shadow-md">
+                            {product.name}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flip-face flip-back">
+                      <div className="flex h-full items-center justify-center bg-[#b9b9b9]">
+                        <Image
+                          src={product.logo}
+                          alt={`${product.name} logo`}
+                          width={220}
+                          height={90}
+                          className="h-20 w-auto object-contain"
+                        />
                       </div>
                     </div>
                   </div>
-                  <div className="flip-face flip-back">
-                    <div className="flex h-full items-center justify-center bg-[#b9b9b9]">
-                      <Image
-                        src={product.logo}
-                        alt={`${product.name} logo`}
-                        width={220}
-                        height={90}
-                        className="h-20 w-auto object-contain"
-                      />
-                    </div>
-                  </div>
                 </div>
-              </div>
-            ))}
+              );
+
+              if (!product.href) {
+                return <div key={product.name}>{card}</div>;
+              }
+
+              return (
+                <a key={product.name} href={product.href}>
+                  {card}
+                </a>
+              );
+            })}
           </div>
         </section>
       </main>
+
+      <footer className="bg-[#93898f] py-10 text-sm text-white">
+        <div className="mx-auto grid max-w-[1237px] gap-6 px-6 md:grid-cols-[1.4fr_1fr]">
+          <div className="space-y-4">
+            <Image
+              src="/bigbox_logo-removebg-preview.png"
+              alt="BigBox logo"
+              width={215}
+              height={68}
+              className="h-12 w-auto"
+            />
+            <p className="text-[14px] font-medium leading-[164%] text-white">
+              Telkom Kebayoran, 4th Floor, Jl. Sisingamangaraja No.4, Kebayoran
+              Baru, Jakarta Selatan.
+            </p>
+            <p className="text-[14px] font-medium text-white">
+              Ac 2025 BigBox. All Rights Reserved. Privacy Policy | Terms &
+              Conditions
+            </p>
+          </div>
+          <div className="space-y-2 text-right md:justify-self-end">
+            <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-white">
+              Tentang Kami
+            </p>
+            <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-white">
+              Kebijakan Privasi
+            </p>
+            <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-white">
+              Syarat & Ketentuan
+            </p>
+            <p className="text-[14px] font-medium leading-[118%] text-white">
+              Telkom Kebayoran, 4th Floor, Jl. Sisingamangaraja No.4, Kebayoran
+              Baru, Jakarta Selatan.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

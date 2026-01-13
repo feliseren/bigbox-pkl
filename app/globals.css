@@ -67,3 +67,37 @@ body {
 .flip-back {
   transform: rotateY(180deg);
 }
+
+.feature-slide {
+  animation: featureSlideRight 360ms ease both;
+}
+
+.feature-slide-left {
+  animation-name: featureSlideLeft;
+}
+
+.feature-slide-right {
+  animation-name: featureSlideRight;
+}
+
+@keyframes featureSlideRight {
+  0% {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes featureSlideLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
