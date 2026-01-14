@@ -2,69 +2,97 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readSessionUserId } from "@/lib/auth";
 import { ProfileMenu } from "@/components/profile-menu";
-import { FeatureSlider } from "@/components/feature-slider";
+import { LegalFeatureSlider } from "@/components/legal-feature-slider";
 
 const features = [
   {
-    title: "Multidata Knowledge Pembelajaran",
-    icon: "/multidata.png",
+    title: "Document Recap",
+    icon: "/recap.png",
     desc:
-      "Layanan AI yang memungkinkan pembelajaran dari berbagai sumber data untuk jawaban yang lebih kaya dan akurat.",
+      "Membangun sistem untuk mengumpulkan semua kegiatan yang terlibat dalam desain regulasi hukum komprehensif.",
   },
   {
-    title: "Knowledge Reference",
-    icon: "/knowledge.png",
+    title: "Document Analytics",
+    icon:"/analis.png",
     desc:
-      "Menjawab pertanyaan dengan mengacu pada referensi yang tervalidasi secara internal.",
+      " Menganalisis dan menyelaraskan dokumen regulasi hukum dengan membandingkannya satu sama lain.",
   },
   {
-    title: "Integrasi Multi-Channel",
-    icon: "/integrasi.png",
+    title: "Document Setting & Drafting",
+    icon: "/setting.png",
     desc:
-      "AI Assistant dapat terhubung dengan berbagai platform komunikasi digital.",
+      "Secara otomatis menyusun teks regulasi sesuai dengan ketentuan yang disepakati.",
+  },
+  {
+    title: "Search & Reminder",
+    icon: "/search.png",
+    desc:
+      " Mencari dokumen tertentu dan menampilkan daftar dokumen yang tertunda.",
+  },
+  {
+    title: "Social Media Analytics",
+    icon: "/social.png",
+    desc: "Memberikan informasi tentang berita yang sedang tren dan tanggapan publik terkait kata kunci tertentu dari media sosial dan berita online."
   },
 ];
 
 const benefits = [
   {
-    title: "Respon Cepat dan Interaktif",
-    icon: "/respon.png",
+    title: "Efisiensi Biaya",
     desc:
-      "Tingkatkan kepuasan pelanggan dengan chatbot yang selalu siap membantu dan relevan.",
+      "Analisis dokumen pedoman secara otomatis untuk buat kebijakan lebih cepat dan efisien.",
+    icon: "/biaya.png",
   },
   {
-    title: "Efisiensi Waktu dan Sumber Daya",
-    icon: "/efisiensi.png",
+    title: "Mudah Diakses",
     desc:
-      "Jawab beragam kebutuhan pelanggan dengan bantuan AI hemat waktu dan tenaga.",
+      "Selesaikan rancangan peraturan lebih cepat dengan akses BigLegal di mana saja dan kapan saja.",
+    icon: "/akses.png",
   },
   {
-    title: "Sistem Fleksibel dan Adaptif",
-    icon: "/fleksible.png",
+    title: "Tinjau Performa Lebih Mudah",
     desc:
-      "Integrasikan ke berbagai media komunikasi pilihan Anda, dari live chat hingga pesan instan.",
+      "Tingkatkan produktivitas tim dengan kolaborasi susun aturan dalam satu platform terintegrasi.",
+    icon: "/performa.png",
+  },
+  {
+    title: "Prediksi Efektivitas Aturan",
+    desc:
+      "Pantau opini publik untuk buat kebijakan sesuai dengan kebutuhan masyarakat.",
+    icon: "/prediksi.png",
+  },
+  {
+    title: "Jaga Kepatuhan Hukum",
+    desc:
+      "Dapatkan analisis peraturan mendalam untuk rancangan kebijakan yang patuh hukum.",
+    icon: "/hukum.png",
   },
 ];
 
 const pricing = [
   {
-    name: "Chat Bot",
-    price: "Rp 40.000",
-    note: "per bulan",
+    name: "Document Recap",
+    price: "Rp 90.000.000",
+    note: "per tahun",
   },
   {
-    name: "Chat Bot",
-    price: "Rp 40.000",
-    note: "per bulan",
+    name: "Document Analytics",
+    price: "Rp 90.000.000",
+    note: "per tahun",
   },
   {
-    name: "Chat Bot",
-    price: "Rp 40.000",
-    note: "per bulan",
+    name: "Document Drafting",
+    price: "Rp 90.000.000",
+    note: "per tahun",
+  },
+  {
+    name: "Search & Reminder",
+    price: "Rp 240.000.000",
+    note: "per tahun",
   },
 ];
 
-export default async function BigAssistantPage() {
+export default async function BigLegalPage() {
   const userId = await readSessionUserId();
   const user = userId
     ? await prisma.user.findUnique({ where: { id: userId } })
@@ -112,25 +140,19 @@ export default async function BigAssistantPage() {
       <main>
         <section className="relative overflow-hidden bg-[linear-gradient(120deg,#0b0d2b_0%,#06061a_55%,#0b0d2b_100%)] py-20 text-white">
           <div className="absolute inset-0 opacity-40">
-            <Image
-              src="/big-bg.jpg"
-              alt=""
-              fill
-              className="object-cover"
-              priority
-            />
+            <Image src="/big-bg.jpg" alt="" fill className="object-cover" />
           </div>
           <div className="relative mx-auto flex max-w-[1237px] flex-col items-center px-6 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#9aa4ff]">
               BigBox
             </p>
             <h1 className="mt-4 text-4xl font-extrabold tracking-[0.08em] md:text-5xl">
-              BIG ASSISTANT
+              BIG LEGAL
             </h1>
-            <div className="mt-4 h-[3px] w-[300px] bg-white" />
+            <div className="mt-4 h-[3px] w-[220px] bg-white" />
             <p className="mt-5 max-w-3xl text-sm font-medium md:text-base">
-              Solusi Gen-AI untuk mengelola dan menyediakan informasi secara
-              cepat, akurat, dan kontekstual melalui interaksi percakapan.
+              Platform AI untuk membantu penyusunan, analisis, dan harmonisasi
+              dokumen hukum secara cepat, akurat, dan terstruktur.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <a
@@ -152,18 +174,17 @@ export default async function BigAssistantPage() {
         <section className="mx-auto grid max-w-[1237px] gap-10 px-6 py-14 md:grid-cols-[1.1fr_1fr]">
           <div>
             <h2 className="text-2xl font-semibold text-[#1f2355] md:text-3xl">
-              Chatbot AI Assistant Untuk Bisnis Modern
+              Pantau Kinerja Regulasi Anda Secara Real Time
             </h2>
             <p className="mt-4 text-sm font-medium leading-[170%] text-[#2f2f2f] md:text-base">
-              Big Assistant membantu organisasi menjawab kebutuhan informasi
-              pelanggan secara real-time melalui percakapan cerdas yang
-              terintegrasi dengan data internal.
+              Dashboard Big Legal untuk memantau performa regulasi, kepatuhan,
+              dan proses harmonisasi secara real time.
             </p>
           </div>
           <div className="relative h-[240px] overflow-hidden rounded-[20px] border border-[#d9d9d9] bg-[#f1f1f1] shadow-[0_16px_32px_rgba(0,0,0,0.12)] md:h-[280px]">
             <Image
-              src="/chatbot.png"
-              alt="Big Assistant preview"
+              src="/big_legal.png"
+              alt="Big Legal preview"
               fill
               className="object-cover"
             />
@@ -177,35 +198,62 @@ export default async function BigAssistantPage() {
             </h3>
             <div className="mx-auto mt-3 h-[3px] w-[140px] bg-[#2c2c2c]" />
           </div>
-
-          <FeatureSlider features={features} />
+          <LegalFeatureSlider features={features} />
         </section>
 
         <section className="mx-auto max-w-[1237px] px-6 pb-8 text-center">
           <h3 className="text-xl font-semibold text-[#2c2c2c]">
-            Keuntungan Menggunakan AI Assistant
+            Keuntungan Menggunakan Big Legal
           </h3>
-          <div className="mx-auto mt-3 h-[3px] w-[260px] bg-[#2c2c2c]" />
+          <div className="mx-auto mt-3 h-[3px] w-[300px] bg-[#2c2c2c]" />
         </section>
 
         <section className="mx-auto max-w-[1100px] px-6 pb-12">
-          <div className="grid gap-6 md:grid-cols-3">
-            {benefits.map((benefit, index) => (
+          <div className="grid gap-6 md:grid-cols-3 md:justify-items-center">
+            {benefits.slice(0, 3).map((benefit, index) => (
               <div
                 key={benefit.title}
-                className="rounded-[24px] border border-[#1a1a1a] bg-white px-6 py-7 text-center shadow-[0_12px_22px_rgba(0,0,0,0.12)]"
+                className="w-[280px] min-h-[240px] rounded-[24px] border border-[#4a4a4a] bg-white px-6 py-7 text-center shadow-[0_12px_22px_rgba(0,0,0,0.12)]"
               >
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center text-sm font-semibold text-white">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
                   {benefit.icon ? (
                     <Image
                       src={benefit.icon}
                       alt=""
-                      width={48}
-                      height={48}
-                      className="h-15 w-15"
+                      width={44}
+                      height={44}
+                      className="h-11 w-11"
                     />
                   ) : (
                     index + 1
+                  )}
+                </div>
+                <p className="text-base font-semibold text-[#1f2355]">
+                  {benefit.title}
+                </p>
+                <p className="mt-2 text-sm leading-[165%] text-[#5a5a5a]">
+                  {benefit.desc}
+                </p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-6 grid gap-6 md:mx-auto md:max-w-[620px] md:grid-cols-2 md:justify-items-center">
+            {benefits.slice(3).map((benefit, index) => (
+              <div
+                key={benefit.title}
+                className="w-[280px] min-h-[240px] rounded-[24px] border border-[#4a4a4a] bg-white px-6 py-7 text-center shadow-[0_12px_22px_rgba(0,0,0,0.12)]"
+              >
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
+                  {benefit.icon ? (
+                    <Image
+                      src={benefit.icon}
+                      alt=""
+                      width={44}
+                      height={44}
+                      className="h-11 w-11"
+                    />
+                  ) : (
+                    index + 4
                   )}
                 </div>
                 <p className="text-base font-semibold text-[#1f2355]">
@@ -221,16 +269,16 @@ export default async function BigAssistantPage() {
 
         <section className="mx-auto max-w-[1237px] px-6 pb-6 text-center">
           <h3 className="text-xl font-semibold text-[#2c2c2c]">
-            BigAssistant Pricing
+            BigLegal Pricing
           </h3>
           <div className="mx-auto mt-3 h-[3px] w-[200px] bg-[#2c2c2c]" />
         </section>
 
-        <section className="mx-auto max-w-[1037px] px-6 pb-16">
-          <div className="grid gap-6 md:grid-cols-3">
-            {pricing.map((plan, index) => (
+        <section className="mx-auto max-w-[1237px] px-6 pb-16">
+          <div className="grid gap-6 md:grid-cols-2">
+            {pricing.map((plan) => (
               <div
-                key={`${plan.name}-${index}`}
+                key={plan.name}
                 className="rounded-[20px] border border-[#cfcfcf] bg-white px-6 py-8 text-center shadow-[0_12px_24px_rgba(0,0,0,0.08)]"
               >
                 <p className="text-sm font-semibold text-[#1f2355]">
@@ -246,7 +294,10 @@ export default async function BigAssistantPage() {
               </div>
             ))}
           </div>
-          <div className="mt-10 flex justify-center">
+        </section>
+
+        <section className="mx-auto max-w-[1237px] px-6 pb-10">
+          <div className="mt-8 flex justify-center">
             <a
               className="rounded-lg border border-[#1f53ff] px-6 py-2 text-sm font-semibold text-[#1f53ff]"
               href="/produk"
@@ -255,18 +306,18 @@ export default async function BigAssistantPage() {
             </a>
           </div>
         </section>
-
+        
         <section
           id="hubungi"
           className="bg-[linear-gradient(120deg,#0c1140_0%,#0a1c6b_50%,#0c1140_100%)] py-12 text-white"
         >
           <div className="mx-auto flex max-w-[1237px] flex-col items-center gap-4 px-6 text-center">
             <h3 className="text-2xl font-semibold">
-              Kembangkan Chatbot AI Anda Sekarang
+              Jaga Kredibilitas Produk Hukum bersama BigLegal
             </h3>
             <p className="text-sm text-white/80">
-              Tingkatkan kualitas layanan dan efisiensi operasional dengan Big
-              Assistant.
+              Kembangkan sistem pengelolaan dokumen hukum Anda bersama teknologi
+              AI dan big data kami.
             </p>
             <a
               className="rounded-lg bg-white px-5 py-2 text-sm font-semibold text-[#0a1c6b]"

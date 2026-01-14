@@ -14,16 +14,19 @@ const products = [
     name: "BIG LEGAL",
     front: "/f_biglegal.jpg",
     logo: "/bigLegal-logo.png",
+    href: "/produk/big-legal",
   },
   {
     name: "BIG SOCIAL",
     front: "/f_bigSocial.jpg",
     logo: "/bigSocial_logo.png",
+    href: "/produk/big-social",
   },
   {
     name: "BIG VISION",
     front: "/f-bigVision.jpg",
     logo: "/bigVision-logo.png",
+    href: "/produk/big-vision",
   },
 ];
 
