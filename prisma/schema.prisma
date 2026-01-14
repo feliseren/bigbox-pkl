@@ -18,3 +18,19 @@ model User {
   fullName  String
   createdAt DateTime @default(now())
 }
+
+model Employee {
+  id        String   @id
+  fullName  String
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id          String   @id
+  startLabel  String
+  targetLabel String
+  owner       String
+  status      String
+  createdAt   DateTime @default(now())
+}
