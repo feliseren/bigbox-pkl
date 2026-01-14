@@ -7,19 +7,27 @@ import { FeatureSlider } from "@/components/feature-slider";
 const features = [
   {
     title: "Social Media Monitoring",
-    icon: "/social.png",
+    icon: "/monitor.png",
+    iconSize: 64,
     desc:
-      "Memantau data media sosial secara real-time, mengumpulkan data skala besar dengan cepat, serta menganalisis pola perilaku netizen.",
+      "Memantau data media sosial secara real-time, mengumpulkan data skala besar dengan cepat, serta menganalisis pola perilaku netizen, tren periode tertentu, influencer teratas, potensi isu viral, hingga sebaran lokasi pengguna.",
   },
   {
-    title: "Trend & Sentiment Insight",
+    title: "Topic/Product/Brand Sentiment",
+    icon: "/love.png",
     desc:
-      "Melacak tren percakapan dan sentimen publik untuk mengukur persepsi terhadap brand atau isu.",
+      "Membantu mengukur dan memantau opini publik dengan menganalisis sentimen, tingkat minat, dan emosi netizen di media sosial, sehingga organisasi dapat mengenali serta mengelola potensi krisis secara cepat dan proaktif.",
   },
   {
-    title: "Influencer & Virality Tracker",
+    title: "Dashboard Visualization",
+    icon: "/visual.png",
     desc:
-      "Mengidentifikasi akun berpengaruh dan pola sebaran isu viral secara lebih cepat.",
+      "Menyediakan visualisasi data yang cepat dan mudah melalui analisis terpadu dalam satu dasbor, mendukung analisis mandiri, serta dilengkapi notifikasi otomatis melalui email, Telegram, dan WhatsApp sesuai kebutuhan.",
+  },
+  {
+    title: "Social Media Reporting",
+    icon: "/media_report.png",
+    desc: "Menyajikan informasi 10 influencer dan media teratas, menampilkan data terintegrasi dari setiap platform media sosial, menyediakan insight kata kunci terkait isu atau topik, serta memungkinkan grafik dan data diunduh untuk kebutuhan pelaporan.",
   },
 ];
 
@@ -28,65 +36,19 @@ const benefits = [
     title: "Dorong Interaksi Pelanggan",
     desc:
       "Buat strategi media sosial yang tepat dan dapatkan insight mendalam terkait perilaku pelanggan dan tren pasar.",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        className="h-7 w-7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M4 7h16" />
-        <path d="M6 11h12" />
-        <path d="M8 15h8" />
-      </svg>
-    ),
+    icon: "/dorong.png",
   },
   {
     title: "Perkuat Citra Bisnis & Instansi",
     desc:
       "Bangun reputasi yang lebih kuat dengan analisis sentimen yang akurat dan respons yang tepat waktu.",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        className="h-7 w-7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <rect x="3" y="4" width="18" height="14" rx="2" />
-        <path d="M7 8h6" />
-        <path d="M7 12h4" />
-      </svg>
-    ),
+    icon: "/bisnis.png",
   },
   {
     title: "Tinjau Performa Lebih Mudah",
     desc:
       "Dapatkan laporan analitik yang akurat dan intuitif dari aktivitas media sosial hingga sentimen pelanggan Anda.",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        className="h-7 w-7"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="M4 18v-6" />
-        <path d="M10 18v-10" />
-        <path d="M16 18v-4" />
-        <path d="M3 18h18" />
-      </svg>
-    ),
+    icon: "/tinjau.png",
   },
 ];
 
@@ -215,7 +177,7 @@ export default async function BigSocialPage() {
           </div>
           <div className="relative h-[240px] overflow-hidden rounded-[20px] border border-[#d9d9d9] bg-[#f1f1f1] shadow-[0_16px_32px_rgba(0,0,0,0.12)] md:h-[280px]">
             <Image
-              src="/f_bigSocial.jpg"
+              src="/big-social.png"
               alt="Big Social dashboard preview"
               fill
               className="object-cover"
@@ -237,7 +199,7 @@ export default async function BigSocialPage() {
           <h3 className="text-xl font-semibold text-[#2c2c2c]">
             Keuntungan Menggunakan Big Social
           </h3>
-          <div className="mx-auto mt-3 h-[3px] w-[320px] bg-[#2c2c2c]" />
+          <div className="mx-auto mt-3 h-[3px] w-[300px] bg-[#2c2c2c]" />
         </section>
 
         <section className="mx-auto max-w-[1100px] px-6 pb-12">
@@ -247,8 +209,16 @@ export default async function BigSocialPage() {
                 key={benefit.title}
                 className="w-[280px] min-h-[240px] rounded-[24px] border border-[#4a4a4a] bg-white px-6 py-7 text-center shadow-[0_12px_22px_rgba(0,0,0,0.12)]"
               >
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#1f53ff] text-white">
-                  {benefit.icon}
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center">
+                  {benefit.icon ? (
+                    <Image
+                      src={benefit.icon}
+                      alt=""
+                      width={64}
+                      height={64}
+                      className="h-12 w-12"
+                    />
+                  ) : null}
                 </div>
                 <p className="text-base font-semibold text-[#1f2355]">
                   {benefit.title}
@@ -287,6 +257,14 @@ export default async function BigSocialPage() {
                 </button>
               </div>
             ))}
+          </div>
+          <div className="mt-10 flex justify-center">
+            <a
+              className="rounded-lg border border-[#1f53ff] px-6 py-2 text-sm font-semibold text-[#1f53ff]"
+              href="/produk"
+            >
+              Lihat Produk BigBox Lainnya
+            </a>
           </div>
         </section>
 
