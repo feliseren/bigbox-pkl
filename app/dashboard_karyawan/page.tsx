@@ -2,36 +2,6 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 
-const weeklyBars = [
-  { day: 1, last6: 52, lastWeek: 30 },
-  { day: 2, last6: 40, lastWeek: 54 },
-  { day: 3, last6: 48, lastWeek: 28 },
-  { day: 4, last6: 36, lastWeek: 46 },
-  { day: 5, last6: 58, lastWeek: 40 },
-  { day: 6, last6: 64, lastWeek: 32 },
-  { day: 7, last6: 52, lastWeek: 34 },
-  { day: 8, last6: 44, lastWeek: 54 },
-  { day: 9, last6: 48, lastWeek: 30 },
-  { day: 10, last6: 36, lastWeek: 46 },
-  { day: 11, last6: 58, lastWeek: 40 },
-  { day: 12, last6: 66, lastWeek: 32 },
-];
-
-const topProducts = [
-  { name: "Enterprise ERP", price: "800K", sold: "100", revenue: "16M" },
-  { name: "Enterprise ERP", price: "700K", sold: "75", revenue: "35M" },
-  { name: "Web devt", price: "500K", sold: "50", revenue: "500K" },
-  { name: "App devt", price: "800K", sold: "45", revenue: "16M" },
-  { name: "Enterprise ERP", price: "2M", sold: "40", revenue: "4M" },
-];
-
-const aiOrders = [
-  { name: "Big Vision", value: 40, color: "bg-[#5456ff]" },
-  { name: "Big Social", value: 32, color: "bg-[#7d87ff]" },
-  { name: "Big Assistant", value: 18, color: "bg-[#b3b8ff]" },
-  { name: "Big Legal", value: 10, color: "bg-[#e0e3ff]" },
-];
-
 const popularNews = [
   { name: "Kementrian Perhubungan", views: "1.200k" },
   { name: "Kementrian Perhubungan", views: "800k" },
@@ -40,11 +10,212 @@ const popularNews = [
 
 const viewerBars = [20, 28, 35, 22, 18, 30, 26, 40, 32, 36, 38, 44];
 
+const aiOrderColors = [
+  { name: "Big Vision", color: "bg-[#5456ff]", hex: "#5456ff" },
+  { name: "Big Social", color: "bg-[#7d87ff]", hex: "#7d87ff" },
+  { name: "Big Assistant", color: "bg-[#b3b8ff]", hex: "#b3b8ff" },
+  { name: "Big Legal", color: "bg-[#e0e3ff]", hex: "#e0e3ff" },
+];
+
+function parseCurrency(value: string) {
+  const numeric = value.replace(/[^0-9]/g, "");
+  const parsed = Number(numeric);
+  return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function formatRupiah(value: number) {
+  if (!value) return "Rp 0";
+  return `Rp ${value.toLocaleString("id-ID")}`;
+}
+
+function formatPrice(value: string) {
+  return value.startsWith("Rp") ? value : `Rp ${value}`;
+}
+
 export default async function DashboardKaryawanPage() {
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
+  const today = new Date();
+  const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+  const startPrevWeek = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() - 13,
+  );
+  const doneOrdersRange = await prisma.order.findMany({
+    where: {
+      statusPesanan: "Done",
+      createdAt: { gte: startPrevWeek, lt: endOfToday },
+    },
+  });
+  const doneOrdersAll = await prisma.order.findMany({
+    where: { statusPesanan: "Done" },
+  });
+  const dailyTotals = new Map<string, number>();
+  doneOrdersRange.forEach((order) => {
+    const dateKey = new Date(order.createdAt);
+    const key = `${dateKey.getFullYear()}-${String(
+      dateKey.getMonth() + 1,
+    ).padStart(2, "0")}-${String(dateKey.getDate()).padStart(2, "0")}`;
+    const amount = parseCurrency(order.totalPesanan);
+    dailyTotals.set(key, (dailyTotals.get(key) ?? 0) + amount);
+  });
+  const currentWeekRaw = Array.from({ length: 7 }).map((_, index) => {
+    const date = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - (6 - index),
+    );
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      "0",
+    )}-${String(date.getDate()).padStart(2, "0")}`;
+    return { date, value: dailyTotals.get(key) ?? 0 };
+  });
+  const prevWeekRaw = Array.from({ length: 7 }).map((_, index) => {
+    const date = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - (13 - index),
+    );
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+      2,
+      "0",
+    )}-${String(date.getDate()).padStart(2, "0")}`;
+    return { date, value: dailyTotals.get(key) ?? 0 };
+  });
+  const maxValue = Math.max(
+    1,
+    ...currentWeekRaw.map((item) => item.value),
+    ...prevWeekRaw.map((item) => item.value),
+  );
+  const weeklyBars = currentWeekRaw.map((item, index) => {
+    const prevItem = prevWeekRaw[index];
+    const scale = (value: number) => Math.round((value / maxValue) * 70);
+    return {
+      day: item.date.getDate(),
+      last6: scale(item.value),
+      lastWeek: scale(prevItem?.value ?? 0),
+    };
+  });
+  const currentWeekTotal = currentWeekRaw.reduce(
+    (sum, item) => sum + item.value,
+    0,
+  );
+  const prevWeekTotal = prevWeekRaw.reduce((sum, item) => sum + item.value, 0);
+  const percentChange =
+    prevWeekTotal > 0 ? ((currentWeekTotal - prevWeekTotal) / prevWeekTotal) * 100 : 0;
+  const percentLabel = `${percentChange >= 0 ? "+" : ""}${percentChange.toFixed(1)}%`;
+  const percentColor = percentChange >= 0 ? "text-[#36a56d]" : "text-[#e32626]";
+  const [bigAssistant, bigLegal, bigSocial, bigVision] = await Promise.all([
+    prisma.bigAssistant.findMany(),
+    prisma.bigLegal.findMany(),
+    prisma.bigSocial.findMany(),
+    prisma.bigVision.findMany(),
+  ]);
+  const productByKey = new Map<string, { name: string; price: string }>();
+  bigAssistant.forEach((item) => {
+    productByKey.set(`BIG_ASSISTANT:${item.id}`, {
+      name: item.namaProduk,
+      price: item.hargaProduk,
+    });
+  });
+  bigLegal.forEach((item) => {
+    productByKey.set(`BIG_LEGAL:${item.id}`, {
+      name: item.namaProduk,
+      price: item.hargaProduk,
+    });
+  });
+  bigSocial.forEach((item) => {
+    productByKey.set(`BIG_SOCIAL:${item.id}`, {
+      name: item.namaProduk,
+      price: item.hargaProduk,
+    });
+  });
+  bigVision.forEach((item) => {
+    productByKey.set(`BIG_VISION:${item.id}`, {
+      name: item.namaProduk,
+      price: item.hargaProduk,
+    });
+  });
+  const productStats = new Map<
+    string,
+    { count: number; revenue: number; price: string; name: string }
+  >();
+  doneOrdersAll.forEach((order) => {
+    const key = `${order.productType}:${order.productId}`;
+    const product = productByKey.get(key);
+    if (!product) return;
+    const entry = productStats.get(key) ?? {
+      count: 0,
+      revenue: 0,
+      price: product.price,
+      name: product.name,
+    };
+    const unitPrice = parseCurrency(product.price);
+    entry.count += 1;
+    entry.revenue += unitPrice;
+    productStats.set(key, entry);
+  });
+  const topProducts = Array.from(productStats.values())
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 5)
+    .map((item) => ({
+      name: item.name,
+      price: formatPrice(item.price),
+      sold: String(item.count),
+      revenue: formatRupiah(item.revenue),
+    }));
+  const totalOrders = doneOrdersAll.length;
+  const aiOrderCounts = doneOrdersAll.reduce(
+    (acc, order) => {
+      acc[order.productType] += 1;
+      return acc;
+    },
+    {
+      BIG_ASSISTANT: 0,
+      BIG_LEGAL: 0,
+      BIG_SOCIAL: 0,
+      BIG_VISION: 0,
+    },
+  );
+  const aiOrders = aiOrderColors.map((item) => {
+    const key =
+      item.name === "Big Vision"
+        ? "BIG_VISION"
+        : item.name === "Big Social"
+          ? "BIG_SOCIAL"
+          : item.name === "Big Assistant"
+            ? "BIG_ASSISTANT"
+            : "BIG_LEGAL";
+    const value = aiOrderCounts[key];
+    return { ...item, value };
+  });
+  const aiDonutGradient = (() => {
+    if (!totalOrders) {
+      return "conic-gradient(#eef0ff 0 100%)";
+    }
+    let start = 0;
+    const slices = aiOrderColors.map((item) => {
+      const key =
+        item.name === "Big Vision"
+          ? "BIG_VISION"
+          : item.name === "Big Social"
+            ? "BIG_SOCIAL"
+            : item.name === "Big Assistant"
+              ? "BIG_ASSISTANT"
+              : "BIG_LEGAL";
+      const value = aiOrderCounts[key];
+      const pct = (value / totalOrders) * 100;
+      const from = start;
+      const to = start + pct;
+      start = to;
+      return `${item.hex} ${from}% ${to}%`;
+    });
+    return `conic-gradient(${slices.join(", ")})`;
+  })();
   return (
     <div className="min-h-screen bg-slate-100 text-[#24262d]">
       <div className="flex min-h-screen">
@@ -69,7 +240,10 @@ export default async function DashboardKaryawanPage() {
               <span className="h-2 w-2 rounded-full bg-[#2a3ad7]" />
               Dashboard
             </a>
-            <a className="flex items-center gap-2 rounded-lg px-3 py-2" href="#">
+            <a
+              className="flex items-center gap-2 rounded-lg px-3 py-2"
+              href="/dashboard_karyawan/daftar-produk"
+            >
               <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
               Daftar Produk
             </a>
@@ -84,7 +258,10 @@ export default async function DashboardKaryawanPage() {
               <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
               Success History
             </a>
-            <a className="flex items-center gap-2 rounded-lg px-3 py-2" href="#">
+            <a
+              className="flex items-center gap-2 rounded-lg px-3 py-2"
+              href="/dashboard_karyawan/daftar-pemesanan"
+            >
               <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
               Daftar Pemesanan
             </a>
@@ -110,9 +287,11 @@ export default async function DashboardKaryawanPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-[#7a8092]">Pendapatan Mingguan</p>
-                    <p className="mt-2 text-xl font-semibold">IDR 7.852.000</p>
-                    <p className="mt-1 text-xs text-[#36a56d]">
-                      + 2.1% vs last week
+                    <p className="mt-2 text-xl font-semibold">
+                      {formatRupiah(currentWeekTotal)}
+                    </p>
+                    <p className={`mt-1 text-xs ${percentColor}`}>
+                      {percentLabel} vs last week
                     </p>
                   </div>
                   <button className="rounded-lg border border-[#e6e9f5] px-3 py-1 text-xs text-[#4a4f60]">
@@ -151,7 +330,7 @@ export default async function DashboardKaryawanPage() {
                 <div className="mt-3 flex items-center gap-4 text-xs text-[#8f95a8]">
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-[#5256ff]" />
-                    Last 6 days
+                    Last 7 days
                   </span>
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-slate-200" />
@@ -227,7 +406,9 @@ export default async function DashboardKaryawanPage() {
                     <h3 className="text-base font-semibold">
                       Jenis AI Yang Dibeli
                     </h3>
-                    <p className="text-xs text-[#7a8092]">From 1-6 Dec, 2020</p>
+                    <p className="text-xs text-[#7a8092]">
+                      Total pesanan selesai: {totalOrders}
+                    </p>
                   </div>
                   <button className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-[#6b7185]">
                     View Report
@@ -235,12 +416,14 @@ export default async function DashboardKaryawanPage() {
                 </div>
                 <div className="mt-6 flex items-center justify-center">
                   <div className="relative h-40 w-40">
-                    <div className="absolute inset-0 rounded-full border-[14px] border-[#eef0ff]" />
-                    <div className="absolute inset-0 rounded-full border-[14px] border-transparent border-t-[#5456ff] border-r-[#7d87ff] border-b-[#b3b8ff] border-l-[#e0e3ff]" />
-                    <div className="absolute inset-0 flex items-center justify-center text-center text-xs font-semibold text-[#2a2e3b]">
-                      Big Vision
+                    <div
+                      className="ai-donut"
+                      style={{ background: aiDonutGradient }}
+                    />
+                    <div className="ai-donut-center">
+                      Total Order
                       <br />
-                      1.890 orders
+                      {totalOrders}
                     </div>
                   </div>
                 </div>
@@ -251,7 +434,7 @@ export default async function DashboardKaryawanPage() {
                       className="flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1"
                     >
                       <span className={`h-2 w-2 rounded-full ${item.color}`} />
-                      {item.name} {item.value}%
+                      {item.name} {item.value}
                     </span>
                   ))}
                 </div>

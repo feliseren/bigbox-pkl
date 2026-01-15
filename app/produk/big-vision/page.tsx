@@ -46,59 +46,21 @@ const benefits = [
   },
 ];
 
-const pricing = [
-  {
-    name: "People Counting",
-    price: "Rp 18.500.000",
-    note: "per tahun",
-  },
-  {
-    name: "Vehicle Counting",
-    price: "Rp 18.500.000",
-    note: "per tahun",
-  },
-  {
-    name: "Crowd Detection",
-    price: "Rp 18.500.000",
-    note: "per tahun",
-  },
-  {
-    name: "Traffic Measurement",
-    price: "Rp 18.500.000",
-    note: "per tahun",
-  },
-  {
-    name: "License Plate Recognition",
-    price: "Rp 18.500.000",
-    note: "per tahun",
-  },
-  {
-    name: "Web Dashboard",
-    price: "Rp 12.000.000",
-    note: "per tahun",
-  },
-  {
-    name: "Object Detection Manage Service",
-    price: "Rp 3.000.000",
-    note: "per tahun",
-  },
-  {
-    name: "Platform Integration",
-    price: "Rp 10.000.000",
-    note: "per tahun",
-  },
-  {
-    name: "Picaso API Integration",
-    price: "Rp 10.000.000",
-    note: "per tahun",
-  },
-];
-
 export default async function BigVisionPage() {
   const userId = await readSessionUserId();
   const user = userId
     ? await prisma.user.findUnique({ where: { id: userId } })
     : null;
+  const formatPrice = (value: string) =>
+    value.startsWith("Rp") ? value : `Rp ${value}`;
+  const pricing = (await prisma.bigVision.findMany({ orderBy: { id: "desc" } })).map(
+    (item) => ({
+      id: item.id,
+      name: item.namaProduk,
+      price: item.hargaProduk,
+      note: item.durasiProduk || "per tahun",
+    }),
+  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -257,16 +219,28 @@ export default async function BigVisionPage() {
                 key={plan.name}
                 className="rounded-[20px] border border-[#cfcfcf] bg-white px-6 py-8 text-center shadow-[0_12px_24px_rgba(0,0,0,0.08)]"
               >
-                <p className="text-sm font-semibold text-[#1f2355]">
+                <p className="text-base font-semibold text-[#1f2355]">
                   {plan.name}
                 </p>
                 <p className="mt-2 text-lg font-bold text-[#1f53ff]">
-                  {plan.price}
+                  {formatPrice(plan.price)}
                 </p>
                 <p className="text-xs text-[#6a6a6a]">{plan.note}</p>
-                <button className="mt-5 rounded-md bg-[#1f53ff] px-4 py-2 text-xs font-semibold text-white">
-                  Beli Sekarang
-                </button>
+                {user ? (
+                  <a
+                    className="mt-5 inline-flex rounded-md bg-[#1f53ff] px-4 py-2 text-xs font-semibold text-white"
+                    href={`/pembayaran?productType=big-vision&productId=${plan.id}`}
+                  >
+                    Beli Sekarang
+                  </a>
+                ) : (
+                  <a
+                    className="mt-5 inline-flex rounded-md bg-[#1f53ff] px-4 py-2 text-xs font-semibold text-white"
+                    href={`/login?redirect=/pembayaran?productType=big-vision&productId=${plan.id}`}
+                  >
+                    Beli Sekarang
+                  </a>
+                )}
               </div>
             ))}
           </div>

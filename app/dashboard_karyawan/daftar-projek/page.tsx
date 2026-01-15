@@ -1,5 +1,5 @@
-import Image from "next/image";
-import type { Project } from "@prisma/client";
+﻿import Image from "next/image";
+import type { Prisma, Project } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { ProjectStatusSelect } from "@/components/project-status-select";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function DaftarProjekPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string | string[] }>;
+  searchParams?: Promise<{ q?: string | string[]; status?: string | string[] }>;
 }) {
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
@@ -17,22 +17,49 @@ export default async function DaftarProjekPage({
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
   const rawQuery = resolvedSearchParams?.q;
+  const rawStatus = resolvedSearchParams?.status;
   const query =
     (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery)?.trim() ?? "";
-  const projects: Project[] = await prisma.project.findMany({
-    where: query
+  const statusFilter = Array.isArray(rawStatus) ? rawStatus[0] : rawStatus;
+  const normalizedStatus =
+    statusFilter === "Process" || statusFilter === "Done" ? statusFilter : undefined;
+  const buildTabHref = (status?: "Process" | "Done") => {
+    const params = new URLSearchParams();
+    if (query) {
+      params.set("q", query);
+    }
+    if (status) {
+      params.set("status", status);
+    }
+    const queryString = params.toString();
+    return `/dashboard_karyawan/daftar-projek${queryString ? `?${queryString}` : ""}`;
+  };
+  const where: Prisma.ProjectWhereInput | undefined =
+    query || normalizedStatus
       ? {
-          OR: [
-            { id: { contains: query, mode: "insensitive" } },
-            { startLabel: { contains: query, mode: "insensitive" } },
-            { targetLabel: { contains: query, mode: "insensitive" } },
-            { owner: { contains: query, mode: "insensitive" } },
-            { status: { contains: query, mode: "insensitive" } },
+          AND: [
+            ...(query
+              ? [
+                  {
+                    OR: [
+                      { id: { contains: query } },
+                      { startLabel: { contains: query } },
+                      { targetLabel: { contains: query } },
+                      { owner: { contains: query } },
+                      { status: { contains: query } },
+                    ],
+                  },
+                ]
+              : []),
+            ...(normalizedStatus ? [{ status: normalizedStatus }] : []),
           ],
         }
-      : undefined,
+      : undefined;
+  const projects: Project[] = await prisma.project.findMany({
+    where,
     orderBy: { createdAt: "desc" },
   });
+  const totalProjects = await prisma.project.count({ where });
   const hasProjects = projects.length > 0;
   const sanitizeId = (value: string) => value.replace(/[^a-zA-Z0-9_-]/g, "");
 
@@ -54,7 +81,7 @@ export default async function DaftarProjekPage({
             <a className="project-link" href="/dashboard_karyawan">
               Dashboard
             </a>
-            <a className="project-link" href="#">
+            <a className="project-link" href="/dashboard_karyawan/daftar-produk">
               Daftar Produk
             </a>
             <a className="project-link active" href="/dashboard_karyawan/daftar-projek">
@@ -63,7 +90,7 @@ export default async function DaftarProjekPage({
             <a className="project-link" href="#">
               Success History
             </a>
-            <a className="project-link" href="#">
+            <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
               Daftar Pemesanan
             </a>
           </nav>
@@ -83,28 +110,58 @@ export default async function DaftarProjekPage({
             <section className="project-card">
               <div className="project-toolbar">
                 <div className="project-tabs">
-                  <button className="project-tab active" type="button">
+                  <a
+                    className={`project-tab${!normalizedStatus ? " active" : ""}`}
+                    href={buildTabHref()}
+                  >
                     Show All
-                  </button>
-                  <button className="project-tab" type="button">
+                  </a>
+                  <a
+                    className={`project-tab${
+                      normalizedStatus === "Process" ? " active" : ""
+                    }`}
+                    href={buildTabHref("Process")}
+                  >
                     Process
-                  </button>
-                  <button className="project-tab" type="button">
+                  </a>
+                  <a
+                    className={`project-tab${
+                      normalizedStatus === "Done" ? " active" : ""
+                    }`}
+                    href={buildTabHref("Done")}
+                  >
                     Done
-                  </button>
+                  </a>
                 </div>
                 <form
                   className="project-search"
                   method="get"
                   action="/dashboard_karyawan/daftar-projek"
                 >
+                  {normalizedStatus ? (
+                    <input type="hidden" name="status" value={normalizedStatus} />
+                  ) : null}
                   <input
                     name="q"
                     placeholder="Search project"
                     defaultValue={query}
                   />
                   <button className="project-search-icon" type="submit">
-                    🔍
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      width="18"
+                      height="18"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="11" cy="11" r="7" />
+                      <line x1="16.65" y1="16.65" x2="21" y2="21" />
+                    </svg>
+                    <span className="sr-only">Search</span>
                   </button>
                 </form>
               </div>
@@ -166,12 +223,12 @@ export default async function DaftarProjekPage({
                 <div className="project-showing">
                   <span>Showing</span>
                   <button className="select" type="button">
-                    10 <span className="caret">▾</span>
+                    {projects.length} <span className="caret">v</span>
                   </button>
-                  <span>of 50</span>
+                  <span>of {totalProjects}</span>
                 </div>
                 <div className="project-pagination">
-                  <button type="button">‹</button>
+                  <button type="button">&lt;</button>
                   <button className="active" type="button">
                     1
                   </button>
@@ -179,7 +236,7 @@ export default async function DaftarProjekPage({
                   <button type="button">3</button>
                   <button type="button">4</button>
                   <button type="button">5</button>
-                  <button type="button">›</button>
+                  <button type="button">&gt;</button>
                 </div>
               </div>
 
@@ -195,7 +252,7 @@ export default async function DaftarProjekPage({
                 <div className="project-modal-header">
                   <h2>Tambah Project</h2>
                   <a className="project-modal-close" href="#">
-                    ✕
+                    x
                   </a>
                 </div>
                 <form className="project-form" method="post" action="/api/projects">
@@ -240,7 +297,7 @@ export default async function DaftarProjekPage({
                     <div className="project-modal-header">
                       <h2>Edit Project</h2>
                       <a className="project-modal-close" href="#">
-                        ✕
+                        x
                       </a>
                     </div>
                     <form
@@ -303,3 +360,8 @@ export default async function DaftarProjekPage({
     </div>
   );
 }
+
+
+
+
+
