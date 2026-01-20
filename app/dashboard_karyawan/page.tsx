@@ -3,9 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 
 const popularNews = [
-  { name: "Kementrian Perhubungan", views: "1.200k" },
-  { name: "Kementrian Perhubungan", views: "800k" },
-  { name: "Company Networking", views: "500k" },
+  { id: "kemenhub-1", name: "Kementrian Perhubungan", views: "1.200k" },
+  { id: "kemenhub-2", name: "Kementrian Perhubungan", views: "800k" },
+  { id: "company-networking", name: "Company Networking", views: "500k" },
 ];
 
 const viewerBars = [20, 28, 35, 22, 18, 30, 26, 40, 32, 36, 38, 44];
@@ -16,6 +16,37 @@ const aiOrderColors = [
   { name: "Big Assistant", color: "bg-[#b3b8ff]", hex: "#b3b8ff" },
   { name: "Big Legal", color: "bg-[#e0e3ff]", hex: "#e0e3ff" },
 ];
+const TIME_ZONE = "Asia/Jakarta";
+
+function getDatePartsInTimeZone(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const lookup: Record<string, string> = {};
+  parts.forEach((part) => {
+    if (part.type !== "literal") {
+      lookup[part.type] = part.value;
+    }
+  });
+  return {
+    year: Number(lookup.year),
+    month: Number(lookup.month),
+    day: Number(lookup.day),
+  };
+}
+
+function dateKeyInTimeZone(date: Date) {
+  const { year, month, day } = getDatePartsInTimeZone(date);
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+}
+
+function startOfDayInTimeZone(date: Date) {
+  const { year, month, day } = getDatePartsInTimeZone(date);
+  return new Date(year, month - 1, day);
+}
 
 function parseCurrency(value: string) {
   const numeric = value.replace(/[^0-9]/g, "");
@@ -37,7 +68,7 @@ export default async function DashboardKaryawanPage() {
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
-  const today = new Date();
+  const today = startOfDayInTimeZone(new Date());
   const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
   const startPrevWeek = new Date(
     today.getFullYear(),
@@ -54,13 +85,12 @@ export default async function DashboardKaryawanPage() {
     where: { statusPesanan: "Done" },
   });
   const dailyTotals = new Map<string, number>();
+  const dailyCounts = new Map<string, number>();
   doneOrdersRange.forEach((order) => {
-    const dateKey = new Date(order.createdAt);
-    const key = `${dateKey.getFullYear()}-${String(
-      dateKey.getMonth() + 1,
-    ).padStart(2, "0")}-${String(dateKey.getDate()).padStart(2, "0")}`;
+    const key = dateKeyInTimeZone(order.createdAt);
     const amount = parseCurrency(order.totalPesanan);
     dailyTotals.set(key, (dailyTotals.get(key) ?? 0) + amount);
+    dailyCounts.set(key, (dailyCounts.get(key) ?? 0) + 1);
   });
   const currentWeekRaw = Array.from({ length: 7 }).map((_, index) => {
     const date = new Date(
@@ -68,10 +98,7 @@ export default async function DashboardKaryawanPage() {
       today.getMonth(),
       today.getDate() - (6 - index),
     );
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-      2,
-      "0",
-    )}-${String(date.getDate()).padStart(2, "0")}`;
+    const key = dateKeyInTimeZone(date);
     return { date, value: dailyTotals.get(key) ?? 0 };
   });
   const prevWeekRaw = Array.from({ length: 7 }).map((_, index) => {
@@ -80,12 +107,43 @@ export default async function DashboardKaryawanPage() {
       today.getMonth(),
       today.getDate() - (13 - index),
     );
-    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-      2,
-      "0",
-    )}-${String(date.getDate()).padStart(2, "0")}`;
+    const key = dateKeyInTimeZone(date);
     return { date, value: dailyTotals.get(key) ?? 0 };
   });
+  const currentWeekViewerTotal = Array.from({ length: 7 }).reduce(
+    (sum, _, index) => {
+      const date = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() - (6 - index),
+      );
+      const key = dateKeyInTimeZone(date);
+      return sum + (dailyCounts.get(key) ?? 0);
+    },
+    0,
+  );
+  const prevWeekViewerTotal = Array.from({ length: 7 }).reduce(
+    (sum, _, index) => {
+      const date = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate() - (13 - index),
+      );
+      const key = dateKeyInTimeZone(date);
+      return sum + (dailyCounts.get(key) ?? 0);
+    },
+    0,
+  );
+  const viewerPercentChange =
+    prevWeekViewerTotal > 0
+      ? ((currentWeekViewerTotal - prevWeekViewerTotal) / prevWeekViewerTotal) * 100
+      : 0;
+  const viewerPercentLabel = `${viewerPercentChange >= 0 ? "+" : ""}${viewerPercentChange.toFixed(1)}%`;
+  const viewerPercentColor =
+    viewerPercentChange >= 0 ? "text-[#36a56d]" : "text-[#e32626]";
+  const viewerBarScale = Math.max(currentWeekViewerTotal, prevWeekViewerTotal, 1);
+  const viewerCurrentHeight = Math.round((currentWeekViewerTotal / viewerBarScale) * 100);
+  const viewerPrevHeight = Math.round((prevWeekViewerTotal / viewerBarScale) * 100);
   const maxValue = Math.max(
     1,
     ...currentWeekRaw.map((item) => item.value),
@@ -95,7 +153,7 @@ export default async function DashboardKaryawanPage() {
     const prevItem = prevWeekRaw[index];
     const scale = (value: number) => Math.round((value / maxValue) * 70);
     return {
-      day: item.date.getDate(),
+      day: getDatePartsInTimeZone(item.date).day,
       last6: scale(item.value),
       lastWeek: scale(prevItem?.value ?? 0),
     };
@@ -265,6 +323,13 @@ export default async function DashboardKaryawanPage() {
               <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
               Daftar Pemesanan
             </a>
+            <a
+              className="flex items-center gap-2 rounded-lg px-3 py-2"
+              href="/dashboard_karyawan/kontak-pelanggan"
+            >
+              <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
+              Kontak Pelanggan
+            </a>
           </nav>
         </aside>
 
@@ -294,9 +359,12 @@ export default async function DashboardKaryawanPage() {
                       {percentLabel} vs last week
                     </p>
                   </div>
-                  <button className="rounded-lg border border-[#e6e9f5] px-3 py-1 text-xs text-[#4a4f60]">
+                  <a
+                    className="rounded-lg border border-[#e6e9f5] px-3 py-1 text-xs text-[#4a4f60]"
+                    href="/api/reports/weekly-revenue"
+                  >
                     View Report
-                  </button>
+                  </a>
                 </div>
                 <div className="relative mt-6">
                   <div className="absolute inset-0 grid grid-rows-4 gap-6">
@@ -342,28 +410,36 @@ export default async function DashboardKaryawanPage() {
               <section className="rounded-[20px] bg-white p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-[#7a8092]">Total Viewers</p>
-                    <p className="mt-2 text-xl font-semibold">65%</p>
-                    <p className="mt-1 text-xs text-[#7a8092]">
-                      Monthly Earning
+                    <p className="text-sm text-[#7a8092]">Total Viewers Mingguan</p>
+                    <p className="mt-2 text-xl font-semibold">
+                      {currentWeekViewerTotal}
+                    </p>
+                    <p className={`mt-1 text-xs ${viewerPercentColor}`}>
+                      {viewerPercentLabel} vs minggu lalu
                     </p>
                   </div>
                   <span className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-[#6b7185]">
-                    Quarterly
+                    Mingguan
                   </span>
                 </div>
-                <div className="mt-6 flex items-center justify-center">
-                  <div className="relative h-36 w-36">
-                    <div className="absolute inset-0 rounded-full border-[12px] border-[#eef0ff]" />
-                    <div className="absolute inset-0 rounded-full border-[12px] border-transparent border-t-[#ff4fa2] border-r-[#6f55ff]" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-2xl font-semibold text-[#2a2e3b]">
-                        65%
-                      </span>
-                      <span className="text-xs text-[#7a8092]">
-                        Total Viewers
-                      </span>
+                <div className="mt-6 flex items-end justify-center gap-6">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="flex h-28 items-end">
+                      <div
+                        className="w-8 rounded-full bg-[#5256ff]"
+                        style={{ height: `${viewerCurrentHeight}px` }}
+                      />
                     </div>
+                    <span className="text-[11px] text-[#7a8092]">Minggu ini</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="flex h-28 items-end">
+                      <div
+                        className="w-8 rounded-full bg-slate-200"
+                        style={{ height: `${viewerPrevHeight}px` }}
+                      />
+                    </div>
+                    <span className="text-[11px] text-[#7a8092]">Minggu lalu</span>
                   </div>
                 </div>
               </section>
@@ -444,7 +520,7 @@ export default async function DashboardKaryawanPage() {
                 <h3 className="text-base font-semibold">Berita Terpopuler</h3>
                 <div className="mt-4 space-y-4">
                   {popularNews.map((item) => (
-                    <div key={item.name} className="space-y-2">
+                    <div key={item.id} className="space-y-2">
                       <div className="flex items-center justify-between text-xs font-semibold text-[#2a2e3b]">
                         <span>{item.name}</span>
                         <span className="text-[#6b7185]">

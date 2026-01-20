@@ -102,3 +102,19 @@ model Order {
 
   @@map("orders")
 }
+
+model CustomerContact {
+  id            String   @id @default(cuid())
+  fullName      String   @map("full_name")
+  phoneCode     String   @map("phone_code")
+  phoneNumber   String   @map("phone_number")
+  companyName   String   @map("company_name")
+  industry      String   @map("industry")
+  industryOther String?  @map("industry_other")
+  companyEmail  String   @map("company_email")
+  companyScale  String   @map("company_scale")
+  message       String   @map("message")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("customer_contacts")
+}

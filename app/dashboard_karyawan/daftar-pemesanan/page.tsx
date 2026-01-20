@@ -134,6 +134,9 @@ export default async function DaftarPemesananPage({
             >
               Daftar Pemesanan
             </a>
+            <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
+              Kontak Pelanggan
+            </a>
           </nav>
         </aside>
 
@@ -182,8 +185,17 @@ export default async function DaftarPemesananPage({
                   {normalizedStatus ? (
                     <input type="hidden" name="status" value={normalizedStatus} />
                   ) : null}
-                  <input name="q" placeholder="Search order" defaultValue={query} />
-                  <button className="project-search-icon" type="submit">
+                  <input
+                    name="q"
+                    placeholder="Search order"
+                    defaultValue={query}
+                    suppressHydrationWarning
+                  />
+                  <button
+                    className="project-search-icon"
+                    type="submit"
+                    suppressHydrationWarning
+                  >
                     <svg
                       aria-hidden="true"
                       viewBox="0 0 24 24"
@@ -337,21 +349,10 @@ export default async function DaftarPemesananPage({
               <div className="project-footer">
                 <div className="project-showing">
                   <span>Showing</span>
-                  <button className="select" type="button">
+                  <button className="select" type="button" suppressHydrationWarning>
                     {filteredOrders.length} <span className="caret">v</span>
                   </button>
                   <span>of {totalOrders}</span>
-                </div>
-                <div className="project-pagination">
-                  <button type="button">&lt;</button>
-                  <button className="active" type="button">
-                    1
-                  </button>
-                  <button type="button">2</button>
-                  <button type="button">3</button>
-                  <button type="button">4</button>
-                  <button type="button">5</button>
-                  <button type="button">&gt;</button>
                 </div>
               </div>
             </section>

@@ -344,6 +344,24 @@ body {
   word-break: break-word;
 }
 
+.contact-table .project-table-header,
+.contact-table .project-table-row {
+  grid-template-columns: 0.9fr 1.2fr 1.3fr 1.6fr 1.1fr 1.1fr 1.6fr 0.6fr;
+  column-gap: 12px;
+}
+
+.contact-table .project-table-header span,
+.contact-table .project-table-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contact-table {
+  overflow: hidden;
+}
+
 .align-right {
   text-align: right;
 }
@@ -434,6 +452,10 @@ body {
 
 .btn-detail {
   background: #f07c1d;
+}
+
+.btn-wa {
+  background: #25d366;
 }
 
 .btn-confirm {
@@ -1048,5 +1070,10 @@ input[type="file"]::-webkit-file-upload-button:hover {
   .project-table-header,
   .project-table-row {
     grid-template-columns: 100px 120px 120px 1fr 120px 120px;
+  }
+
+  .contact-table .project-table-header,
+  .contact-table .project-table-row {
+    grid-template-columns: 90px 120px 140px 1fr 120px 120px 1.2fr 80px;
   }
 }

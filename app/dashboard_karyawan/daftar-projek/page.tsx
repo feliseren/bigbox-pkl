@@ -93,6 +93,9 @@ export default async function DaftarProjekPage({
             <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
               Daftar Pemesanan
             </a>
+            <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
+              Kontak Pelanggan
+            </a>
           </nav>
         </aside>
 
@@ -226,17 +229,6 @@ export default async function DaftarProjekPage({
                     {projects.length} <span className="caret">v</span>
                   </button>
                   <span>of {totalProjects}</span>
-                </div>
-                <div className="project-pagination">
-                  <button type="button">&lt;</button>
-                  <button className="active" type="button">
-                    1
-                  </button>
-                  <button type="button">2</button>
-                  <button type="button">3</button>
-                  <button type="button">4</button>
-                  <button type="button">5</button>
-                  <button type="button">&gt;</button>
                 </div>
               </div>
 

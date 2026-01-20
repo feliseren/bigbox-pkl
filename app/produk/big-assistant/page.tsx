@@ -133,7 +133,7 @@ export default async function BigAssistantPage() {
               </a>
               <a
                 className="rounded-lg bg-white px-6 py-2 text-sm font-semibold text-[#151a5b]"
-                href="#hubungi"
+                href="/hubungi-kami"
               >
                 Hubungi Kami
               </a>
@@ -274,7 +274,7 @@ export default async function BigAssistantPage() {
             </p>
             <a
               className="rounded-lg bg-white px-5 py-2 text-sm font-semibold text-[#0a1c6b]"
-              href="#demo"
+              href="/hubungi-kami"
             >
               Hubungi Tim BigBox
             </a>

@@ -7,8 +7,72 @@ type ProfileSearchParams = {
   success?: string | string[];
 };
 
+const TIME_ZONE = "Asia/Jakarta";
+
 function normalizeParam(value?: string | string[]) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function parseDuration(value?: string) {
+  if (!value) return null;
+  const normalized = value.toLowerCase();
+  if (normalized.includes("per bulan") || normalized.includes("perbulan")) {
+    return { amount: 1, unit: "month" as const };
+  }
+  if (normalized.includes("per tahun") || normalized.includes("pertahun")) {
+    return { amount: 1, unit: "year" as const };
+  }
+  const match = normalized.match(/(\d+)\s*(bulan|month|tahun|year)/);
+  if (!match) return null;
+  const amount = Number(match[1]);
+  const unit = match[2];
+  if (!amount || Number.isNaN(amount)) return null;
+  if (unit === "bulan" || unit === "month") {
+    return { amount, unit: "month" as const };
+  }
+  return { amount, unit: "year" as const };
+}
+
+function addDuration(date: Date, duration: { amount: number; unit: "month" | "year" }) {
+  if (duration.unit === "month") {
+    return new Date(date.getFullYear(), date.getMonth() + duration.amount, date.getDate());
+  }
+  return new Date(date.getFullYear() + duration.amount, date.getMonth(), date.getDate());
+}
+
+function formatDate(value: Date) {
+  const parts = new Intl.DateTimeFormat("id-ID", {
+    timeZone: TIME_ZONE,
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).formatToParts(value);
+  const lookup: Record<string, string> = {};
+  parts.forEach((part) => {
+    if (part.type !== "literal") {
+      lookup[part.type] = part.value;
+    }
+  });
+  return `${lookup.day}-${lookup.month}-${lookup.year}`;
+}
+
+function startOfDayInTimeZone(date: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const lookup: Record<string, string> = {};
+  parts.forEach((part) => {
+    if (part.type !== "literal") {
+      lookup[part.type] = part.value;
+    }
+  });
+  const year = Number(lookup.year);
+  const month = Number(lookup.month);
+  const day = Number(lookup.day);
+  return new Date(year, month - 1, day);
 }
 
 export default async function ProfilePage({
@@ -56,6 +120,25 @@ export default async function ProfilePage({
     BIG_SOCIAL: new Map(bigSocial.map((item) => [item.id, item.namaProduk])),
     BIG_VISION: new Map(bigVision.map((item) => [item.id, item.namaProduk])),
   };
+  const productDurations: Record<
+    "BIG_ASSISTANT" | "BIG_LEGAL" | "BIG_SOCIAL" | "BIG_VISION",
+    Map<string, string>
+  > = {
+    BIG_ASSISTANT: new Map(bigAssistant.map((item) => [item.id, item.durasiProduk])),
+    BIG_LEGAL: new Map(bigLegal.map((item) => [item.id, item.durasiProduk])),
+    BIG_SOCIAL: new Map(bigSocial.map((item) => [item.id, item.durasiProduk])),
+    BIG_VISION: new Map(bigVision.map((item) => [item.id, item.durasiProduk])),
+  };
+  const productLinks: Record<
+    "BIG_ASSISTANT" | "BIG_LEGAL" | "BIG_SOCIAL" | "BIG_VISION",
+    string
+  > = {
+    BIG_ASSISTANT: "/produk/big-assistant",
+    BIG_LEGAL: "/produk/big-legal",
+    BIG_SOCIAL: "/produk/big-social",
+    BIG_VISION: "/produk/big-vision",
+  };
+  const today = startOfDayInTimeZone(new Date());
 
   return (
     <div className="min-h-screen bg-[#f4f3f6] px-6 py-12">
@@ -129,15 +212,17 @@ export default async function ProfilePage({
             </p>
           ) : (
             <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
-              <div className="grid grid-cols-[1fr_1.2fr_1fr] gap-3 bg-slate-50 px-4 py-2 text-xs font-semibold text-[#7a8092]">
+              <div className="grid grid-cols-[1fr_1.2fr_0.8fr_1fr_0.8fr] gap-3 bg-slate-50 px-4 py-2 text-xs font-semibold text-[#7a8092]">
                 <span>ORDER ID</span>
                 <span>PRODUK</span>
                 <span>STATUS</span>
+                <span>MASA AKTIF</span>
+                <span>AKSI</span>
               </div>
               {orders.map((order) => (
                 <div
                   key={order.id}
-                  className="grid grid-cols-[1fr_1.2fr_1fr] gap-3 border-t border-slate-200 px-4 py-3 text-sm text-[#2b2f3b]"
+                  className="grid grid-cols-[1fr_1.2fr_0.8fr_1fr_0.8fr] gap-3 border-t border-slate-200 px-4 py-3 text-sm text-[#2b2f3b]"
                 >
                   <span>{order.id}</span>
                   <span>
@@ -145,6 +230,34 @@ export default async function ProfilePage({
                       order.productId}
                   </span>
                   <span>{order.statusPesanan}</span>
+                  <span>
+                    {(() => {
+                      const durationRaw =
+                        productDurations[order.productType].get(order.productId);
+                      const duration = parseDuration(durationRaw);
+                      if (!duration) return "-";
+                      const endDate = addDuration(order.createdAt, duration);
+                      return formatDate(endDate);
+                    })()}
+                  </span>
+                  <span>
+                    {(() => {
+                      const durationRaw =
+                        productDurations[order.productType].get(order.productId);
+                      const duration = parseDuration(durationRaw);
+                      if (!duration || order.statusPesanan !== "Done") return "-";
+                      const endDate = addDuration(order.createdAt, duration);
+                      if (endDate >= today) return "-";
+                      return (
+                        <a
+                          className="inline-flex items-center rounded-md border border-[#2a3ad7] px-3 py-1 text-xs font-semibold text-[#2a3ad7]"
+                          href={productLinks[order.productType]}
+                        >
+                          Pesan Lagi
+                        </a>
+                      );
+                    })()}
+                  </span>
                 </div>
               ))}
             </div>

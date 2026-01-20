@@ -136,6 +136,9 @@ export default async function DaftarProdukPage() {
             <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
               Daftar Pemesanan
             </a>
+            <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
+              Kontak Pelanggan
+            </a>
           </nav>
         </aside>
 
