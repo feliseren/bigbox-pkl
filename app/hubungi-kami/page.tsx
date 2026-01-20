@@ -150,7 +150,7 @@ export default function HubungiKamiPage() {
             />
             <span>
               Saya telah membaca dan menyetujui{" "}
-              <a className="font-semibold text-[#2a3ad7]" href="#">
+              <a className="font-semibold text-[#2a3ad7]" href="/syarat-ketentuan">
                 Syarat &amp; Ketentuan
               </a>{" "}
               dari BigBox
