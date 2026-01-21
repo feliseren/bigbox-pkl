@@ -6,19 +6,35 @@ import { ProfileMenu } from "@/components/profile-menu";
 const tujuanItems = [
   {
     title: "Buat Keputusan Lebih Cerdas",
-    points: ["Insight Berbasis Data", "Prediksi Pertumbuhan Bisnis", "Analisis Sentimen"],
+    points: [
+      { text: "Insight Berbasis Data", icon: "/insightberbasisdata.png" },
+      { text: "Prediksi Pertumbuhan Bisnis", icon: "/prediksipertumbuhan.png" },
+      { text: "Analisis Sentimen", icon: "/analisissentimen.png" },
+    ],
   },
   {
     title: "Optimalkan Produktivitas Bisnis",
-    points: ["Task Automation", "Alur Kerja Efektif", "Efisiensi Biaya"],
+    points: [
+      { text: "Task Automation", icon: "/taskautomation.png" },
+      { text: "Alur Kerja Efektif", icon: "/alurkerjaefektif.png" },
+      { text: "Efisiensi Biaya", icon: "/efisiensibiaya.png" },
+    ],
   },
   {
     title: "Utamakan Kepuasan Pelanggan",
-    points: ["Layanan Pelanggan Setiap Saat", "Jaga Loyalitas Pelanggan", "Alur Kerja Efektif"],
+    points: [
+      { text: "Layanan Pelanggan Setiap Saat", icon: "/layananpelanggan.png" },
+      { text: "Jaga Loyalitas Pelanggan", icon: "/jagaloyalitas.png" },
+      { text: "Alur Kerja Efektif", icon: "/alurkerjaefektif.png" },
+    ],
   },
   {
     title: "Ungguli Persaingan di Industri Anda",
-    points: ["Inovasi Tanpa Hambatan", "Layanan Unik & Kompetitif", "Bisnis yang Adaptif"],
+    points: [
+      { text: "Inovasi Tanpa Hambatan", icon: "/inovasitambahan.png" },
+      { text: "Layanan Unik & Kompetitif", icon: "/layananunik.png" },
+      { text: "Bisnis yang Adaptif", icon: "/bisnisyangadaptif.png" },
+    ],
   },
 ];
 
@@ -27,16 +43,19 @@ const kolaborasiItems = [
     stat: "> 90 Pemerintahan Pusat & Daerah",
     desc:
       "Meningkatkan efisiensi layanan publik, transparansi, dan pengambilan keputusan berbasis data melalui digitalisasi di berbagai sektor.",
+    image: "/modern-urban-buildings-view.jpg",
   },
   {
     stat: "> 20 BUMN & Swasta",
     desc:
       "Meningkatkan efisiensi operasional, analisis pasar, dan keputusan real-time melalui data driven insights di berbagai aspek bisnis.",
+    image: "/bgbumn.jpg",
   },
   {
     stat: "> 80 UMKM & > 1K Active User",
     desc:
       "Meningkatkan efisiensi operasional, memahami pasar, dan mengoptimalkan strategi dengan data-driven insights untuk daya saing yang lebih kuat.",
+    image: "/bgumkm.jpg",
   },
 ];
 
@@ -90,7 +109,7 @@ export default async function Home() {
             <a className="nav-link" href="/produk">
               Produk
             </a>
-            <a className="nav-link" href="#">
+            <a className="nav-link" href="/cerita-kami">
               Cerita Kami
             </a>
           </nav>
@@ -129,24 +148,31 @@ export default async function Home() {
           </p>
         </section>
 
-        <section className="mx-auto max-w-[1237px] px-6 py-6">
-          <div className="mb-8 text-center">
-            <h2 className="text-[28px] font-bold text-[var(--ink)]">TUJUAN</h2>
-            <div className="mx-auto mt-2 h-[4px] w-[147px] bg-[var(--ink)]" />
+        <section className="mx-auto max-w-[1237px] px-6 py-8">
+          <div className="mb-10 text-center">
+            <h2 className="text-[26px] font-bold text-[var(--ink)]">TUJUAN</h2>
+            <div className="mx-auto mt-3 h-[3px] w-[120px] bg-[var(--ink)]" />
           </div>
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
             {tujuanItems.map((item) => (
               <div
                 key={item.title}
-                className="min-h-[420px] rounded-[40px] bg-[var(--panel)] p-5 text-center shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
+                className="min-h-[320px] rounded-[25px] bg-[var(--panel)] p-5 text-center shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.2)] transition-shadow"
               >
-                <h3 className="mb-5 text-[16px] font-bold text-[var(--ink)]">
+                <h3 className="mb-5 text-[14px] font-bold text-[var(--ink)] leading-[1.5]">
                   {item.title}
                 </h3>
-                <ul className="space-y-5 text-[14px] text-black">
+                <ul className="space-y-3 text-[12px] text-black">
                   {item.points.map((point) => (
-                    <li key={point} className="flex items-center justify-center">
-                      {point}
+                    <li key={point.text} className="flex items-center gap-2.5 px-1">
+                      <Image
+                        src={point.icon}
+                        alt={point.text}
+                        width={38}
+                        height={38}
+                        className="h-9 w-9 flex-shrink-0"
+                      />
+                      <span className="text-left font-medium">{point.text}</span>
                     </li>
                   ))}
                 </ul>
@@ -168,7 +194,13 @@ export default async function Home() {
                 key={item.stat}
                 className="overflow-hidden rounded-[20px] bg-white shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
               >
-                <div className="relative h-[275px] bg-gradient-to-br from-slate-200 via-slate-100 to-white">
+                <div className="relative h-[275px] bg-gradient-to-br from-slate-200 via-slate-100 to-white overflow-hidden group">
+                  <Image
+                    src={item.image}
+                    alt={item.stat}
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-300"
+                  />
                   <div className="absolute inset-x-0 top-6 text-center text-[24px] font-bold text-white drop-shadow">
                     {item.stat}
                   </div>

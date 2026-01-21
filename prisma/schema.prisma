@@ -18,3 +18,14 @@ model User {
   fullName  String
   createdAt DateTime @default(now())
 }
+
+model Consultation {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String
+  company   String?
+  product   String   // BigAI atau BigVision
+  message   String   @db.LongText
+  createdAt DateTime @default(now())
+}
