@@ -11,6 +11,9 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "BigBox AI & Big Data",
   description: "Solusi AI dan Big Data untuk keputusan bisnis yang akurat.",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 export default function RootLayout({

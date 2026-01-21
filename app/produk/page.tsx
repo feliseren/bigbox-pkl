@@ -14,16 +14,19 @@ const products = [
     name: "BIG LEGAL",
     front: "/f_biglegal.jpg",
     logo: "/bigLegal-logo.png",
+    href: "/produk/big-legal",
   },
   {
     name: "BIG SOCIAL",
     front: "/f_bigSocial.jpg",
     logo: "/bigSocial_logo.png",
+    href: "/produk/big-social",
   },
   {
     name: "BIG VISION",
     front: "/f-bigVision.jpg",
     logo: "/bigVision-logo.png",
+    href: "/produk/big-vision",
   },
 ];
 
@@ -165,9 +168,12 @@ export default async function ProdukPage() {
             <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-white">
               Kebijakan Privasi
             </p>
-            <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-white">
+            <a
+              className="text-[14px] font-semibold uppercase tracking-[0.06em] text-white"
+              href="/syarat-ketentuan"
+            >
               Syarat & Ketentuan
-            </p>
+            </a>
             <p className="text-[14px] font-medium leading-[118%] text-white">
               Telkom Kebayoran, 4th Floor, Jl. Sisingamangaraja No.4, Kebayoran
               Baru, Jakarta Selatan.

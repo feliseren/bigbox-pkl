@@ -274,9 +274,12 @@ export default async function Home() {
             <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-white">
               Kebijakan Privasi
             </p>
-            <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-white">
+            <a
+              className="text-[14px] font-semibold uppercase tracking-[0.06em] text-white"
+              href="/syarat-ketentuan"
+            >
               Syarat & Ketentuan
-            </p>
+            </a>
             <p className="text-[14px] font-medium leading-[118%] text-white">
               Telkom Kebayoran, 4th Floor, Jl. Sisingamangaraja No.4, Kebayoran
               Baru, Jakarta Selatan.

@@ -7,6 +7,7 @@ type Feature = {
   title: string;
   desc: string;
   icon?: string;
+  iconSize?: number;
 };
 
 type FeatureSliderProps = {
@@ -29,6 +30,14 @@ export function FeatureSlider({ features }: FeatureSliderProps) {
   }
 
   const feature = features[activeIndex];
+  const iconSrc =
+    feature.icon &&
+    (feature.icon.startsWith("/") || feature.icon.startsWith("http"))
+      ? feature.icon
+      : feature.icon
+      ? `/${feature.icon}`
+      : null;
+  const iconSize = feature.iconSize ?? 56;
 
   return (
     <div className="relative mx-auto max-w-[1237px] px-6 pb-12">
@@ -59,13 +68,13 @@ export function FeatureSlider({ features }: FeatureSliderProps) {
         <div className="mx-auto flex max-w-[640px] flex-col items-center gap-3">
           <div className="flex items-center justify-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center text-[#9a9a9a]">
-              {feature.icon ? (
+              {iconSrc ? (
                 <Image
-                  src={feature.icon}
+                  src={iconSrc}
                   alt=""
-                  width={32}
-                  height={32}
-                  className="h-8 w-8"
+                  width={iconSize}
+                  height={iconSize}
+                  style={{ height: iconSize, width: iconSize }}
                 />
               ) : (
                 <svg

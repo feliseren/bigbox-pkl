@@ -17,6 +17,106 @@ model User {
   password  String
   fullName  String
   createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Employee {
+  id        String   @id
+  fullName  String
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Project {
+  id          String   @id
+  startLabel  String
+  targetLabel String
+  owner       String
+  status      String
+  createdAt   DateTime @default(now())
+}
+
+model BigAssistant {
+  id              String @id
+  namaProduk      String @map("nama_produk")
+  hargaProduk     String @map("harga_produk")
+  deskripsiProduk String @map("deskripsi_produk")
+  durasiProduk    String @map("durasi_produk")
+  terjual         String
+
+  @@map("big_assistant")
+}
+
+model BigVision {
+  id              String @id
+  namaProduk      String @map("nama_produk")
+  hargaProduk     String @map("harga_produk")
+  deskripsiProduk String @map("deskripsi_produk")
+  durasiProduk    String @map("durasi_produk")
+  terjual         String
+
+  @@map("big_vision")
+}
+
+model BigLegal {
+  id              String @id
+  namaProduk      String @map("nama_produk")
+  hargaProduk     String @map("harga_produk")
+  deskripsiProduk String @map("deskripsi_produk")
+  durasiProduk    String @map("durasi_produk")
+  terjual         String
+
+  @@map("big_legal")
+}
+
+model BigSocial {
+  id              String @id
+  namaProduk      String @map("nama_produk")
+  hargaProduk     String @map("harga_produk")
+  deskripsiProduk String @map("deskripsi_produk")
+  durasiProduk    String @map("durasi_produk")
+  terjual         String
+
+  @@map("big_social")
+}
+
+enum ProductType {
+  BIG_ASSISTANT
+  BIG_LEGAL
+  BIG_SOCIAL
+  BIG_VISION
+}
+
+model Order {
+  id            String      @id @map("order_id")
+  productType   ProductType @map("product_type")
+  productId     String      @map("product_id")
+  totalPesanan  String      @map("total_pesanan")
+  namaCustomer  String      @map("nama_customer")
+  statusPesanan String      @map("status_pesanan")
+  jenisPembayaran String    @map("jenis_pembayaran")
+  buktiPembayaran String    @map("bukti_pembayaran")
+  userId        String      @map("user_id")
+  user          User        @relation(fields: [userId], references: [id])
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+  @@map("orders")
+}
+
+model CustomerContact {
+  id            String   @id @default(cuid())
+  fullName      String   @map("full_name")
+  phoneCode     String   @map("phone_code")
+  phoneNumber   String   @map("phone_number")
+  companyName   String   @map("company_name")
+  industry      String   @map("industry")
+  industryOther String?  @map("industry_other")
+  companyEmail  String   @map("company_email")
+  companyScale  String   @map("company_scale")
+  message       String   @map("message")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("customer_contacts")
 }
 
 model Consultation {
