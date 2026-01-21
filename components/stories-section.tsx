@@ -32,11 +32,7 @@ const stories = [
 
 export function StoriesSection() {
   const router = useRouter();
-
-  const handleTagClick = (tag: string) => {
-    const product = tag.includes("BigVision") ? "BigVision" : "BigAI";
-    router.push(`/konsultasi?product=${product}`);
-  };
+  const whatsappLink = "https://wa.me/628111720231";
 
   return (
     <>
@@ -48,7 +44,8 @@ export function StoriesSection() {
           </h1>
           <div className="mx-auto mt-3 h-[4px] w-[200px] bg-[#ff6b3d]" />
           <p className="mx-auto mt-6 max-w-[800px] text-[18px] font-normal">
-            Lihat bagaimana organisasi mencapai kesuksesan dengan solusi AI dan Big Data dari BigBox
+            Lihat bagaimana organisasi mencapai kesuksesan dengan solusi AI dan
+            Big Data dari BigBox
           </p>
         </div>
       </section>
@@ -86,28 +83,22 @@ export function StoriesSection() {
                 {/* Tags */}
                 <div className="mt-4 flex flex-wrap gap-2">
                   {story.tags.map((tag) => (
-                    <button
+                    <span
                       key={tag}
-                      onClick={() => handleTagClick(tag)}
-                      className="inline-flex items-center rounded-full bg-[#2d3561] px-3 py-1 text-[12px] font-semibold text-white transition-colors hover:bg-[#ff6b3d]"
+                      className="inline-flex items-center rounded-full bg-[#2d3561] px-3 py-1 text-[12px] font-semibold text-white"
                     >
-                      {tag === "AI BigOne" ? "AI BigOne" : "AI BigVision"}
-                    </button>
+                      {tag}
+                    </span>
                   ))}
                 </div>
 
                 {/* Button */}
                 <button
-                  onClick={() => {
-                    const product = story.tags[0].includes("BigVision")
-                      ? "BigVision"
-                      : "BigAI";
-                    router.push(`/konsultasi?product=${product}`);
-                  }}
+                  onClick={() => router.push(`/cerita-kami/${story.id}`)}
                   className="mt-6 flex w-full items-center justify-between rounded-lg bg-[#2d3561] px-4 py-3 font-semibold text-white transition-colors hover:bg-[#ff6b3d]"
                 >
                   <span>Baca Selengkapnya</span>
-                  <span>→</span>
+                  <span>></span>
                 </button>
 
                 {/* Rating */}
@@ -118,7 +109,7 @@ export function StoriesSection() {
                   <div className="flex gap-1">
                     {[...Array(story.rating)].map((_, i) => (
                       <span key={i} className="text-[16px] text-amber-500">
-                        ★
+                        ƒ~.
                       </span>
                     ))}
                   </div>
@@ -134,43 +125,54 @@ export function StoriesSection() {
         <div className="mx-auto max-w-[1237px] px-6">
           <div className="rounded-[20px] bg-gradient-to-r from-[#2d1b3d] to-[#1a0f2e] p-12 text-center">
             <h2 className="text-[36px] font-bold text-white">
-              Siap Wujudkan <span className="text-[#ff6b3d]">Keputusan Cerdas</span> Bersama BigBox?
+              Siap Wujudkan{" "}
+              <span className="text-[#ff6b3d]">Keputusan Cerdas</span> Bersama
+              BigBox?
             </h2>
             <p className="mx-auto mt-4 max-w-[800px] text-[16px] text-gray-300">
-              Konsultasikan kebutuhan bisnis Anda bersama kami untuk temukan solusi AI dan big data yang tepat
+              Konsultasikan kebutuhan bisnis Anda bersama kami untuk temukan
+              solusi AI dan big data yang tepat
             </p>
 
             {/* Product Selection */}
             <div className="mt-8 grid gap-6 md:grid-cols-2">
-              <button
-                onClick={() => router.push("/konsultasi?product=BigAI")}
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="group rounded-[20px] border-2 border-[#ff6b3d] bg-transparent p-8 transition-all hover:bg-[#ff6b3d]/10"
               >
                 <h3 className="text-[24px] font-bold text-white">BIG AI</h3>
                 <p className="mt-2 text-[14px] text-gray-300">
-                  Solusi AI untuk keputusan bisnis yang lebih cerdas dengan insight berbasis data real-time
+                  Solusi AI untuk keputusan bisnis yang lebih cerdas dengan
+                  insight berbasis data real-time
                 </p>
-              </button>
+              </a>
 
-              <button
-                onClick={() => router.push("/konsultasi?product=BigVision")}
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="group rounded-[20px] border-2 border-[#ff6b3d] bg-transparent p-8 transition-all hover:bg-[#ff6b3d]/10"
               >
                 <h3 className="text-[24px] font-bold text-white">BIG VISION</h3>
                 <p className="mt-2 text-[14px] text-gray-300">
-                  Platform analitik visual dengan dashboard real-time dan laporan cerdas untuk pemahaman mendalam
+                  Platform analitik visual dengan dashboard real-time dan
+                  laporan cerdas untuk pemahaman mendalam
                 </p>
-              </button>
+              </a>
             </div>
 
             {/* Main CTA Button */}
-            <button
-              onClick={() => router.push("/konsultasi")}
+            <a
+              href={whatsappLink}
+              target="_blank"
+              rel="noopener noreferrer"
               className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#ff6b3d] px-8 py-3 font-semibold text-white transition-colors hover:bg-[#ff5722]"
             >
               <span>Konsultasi Sekarang</span>
-              <span>→</span>
-            </button>
+              <span>></span>
+            </a>
           </div>
         </div>
       </section>

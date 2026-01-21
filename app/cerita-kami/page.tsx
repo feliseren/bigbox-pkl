@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { allStories } from "@/lib/stories-data";
@@ -17,6 +18,7 @@ const categories = [
 export default function CeritaKamiPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("Show All");
+  const router = useRouter();
 
     const filteredStories = allStories.filter((story) => {
     const matchesSearch =
@@ -49,7 +51,7 @@ export default function CeritaKamiPage() {
             <a className="nav-link hover:text-gray-200" href="/produk">
               Produk
             </a>
-            <a className="nav-link hover:text-gray-200" href="/cerita-kami">
+            <a className="nav-link active hover:text-gray-200" href="/cerita-kami">
               Cerita Kami
             </a>
           </nav>
@@ -145,7 +147,29 @@ export default function CeritaKamiPage() {
             {filteredStories.map((story) => (
               <div
                 key={story.id}
-                className="group overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-2xl"
+                role="link"
+                tabIndex={0}
+                onClick={(event) => {
+                  if ((event.target as HTMLElement).closest("a")) {
+                    return;
+                  }
+                  router.push(`/cerita-kami/${story.id}`);
+                }}
+                onKeyDown={(event) => {
+                  if (
+                    event.key !== "Enter" &&
+                    event.key !== " " &&
+                    event.key !== "Spacebar"
+                  ) {
+                    return;
+                  }
+                  if ((event.target as HTMLElement).closest("a")) {
+                    return;
+                  }
+                  event.preventDefault();
+                  router.push(`/cerita-kami/${story.id}`);
+                }}
+                className="group cursor-pointer overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff6b3d]"
               >
                 {/* Image with Zoom Effect */}
                 <div className="relative h-[220px] w-full overflow-hidden">
@@ -173,15 +197,12 @@ export default function CeritaKamiPage() {
                   {/* Tags - Clickable */}
                   <div className="mt-4 flex flex-wrap gap-2">
                     {story.tags.map((tag) => (
-                      <Link
+                      <span
                         key={tag}
-                        href={`/konsultasi?product=${
-                          tag === "AI BigOne" ? "BigAI" : "BigVision"
-                        }`}
-                        className="inline-block rounded-full bg-[#3a3a4a] px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-[#ff6b3d]"
+                        className="inline-block rounded-full bg-[#3a3a4a] px-3 py-1 text-xs font-semibold text-white"
                       >
                         {tag}
-                      </Link>
+                      </span>
                     ))}
                   </div>
 
@@ -240,46 +261,54 @@ export default function CeritaKamiPage() {
         </section>
 
         {/* CTA Section */}
-        <section className="relative overflow-hidden bg-gradient-to-r from-[#2d1b3d] via-[#3d2a4d] to-[#2d1b3d] py-16">
+        <section className="relative overflow-hidden bg-gradient-to-r from-[#2d1b3d] via-[#3d2a4d] to-[#2d1b3d] py-12">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute -left-24 top-10 h-28 w-28 rounded-full bg-[#ff6b3d] blur-2xl opacity-60" />
+            <div className="absolute right-20 top-6 h-32 w-32 rounded-full bg-[#ff8a5b] blur-3xl opacity-55" />
+          </div>
           <div className="mx-auto max-w-[1237px] px-6">
-            <div className="rounded-xl bg-gradient-to-r from-[#3d2a4d] to-[#1a0f2e] p-12 text-center text-white">
-              <h2 className="text-3xl font-bold">
+            <div className="rounded-[18px] bg-gradient-to-r from-[#2a1740] via-[#3f2451] to-[#6a2f4b] px-8 py-10 text-center text-white md:px-12">
+              <h2 className="text-2xl font-bold md:text-3xl">
                 Siap Wujudkan{" "}
                 <span className="text-[#ff6b3d]">Keputusan Cerdas</span> Bersama
                 BigBox?
               </h2>
-              <p className="mt-4 text-lg text-gray-300">
+              <p className="mt-3 text-sm text-gray-200 md:text-base">
                 Konsultasikan kebutuhan bisnis Anda bersama kami untuk temukan
                 solusi AI dan big data yang tepat.
               </p>
 
-              <Link
-                href="/konsultasi"
-                className="mt-8 inline-flex items-center gap-2 rounded-full border-2 border-white bg-white px-8 py-3 font-semibold text-[#2d1b3d] transition-all hover:scale-105 hover:shadow-lg"
+              <a
+                href="https://wa.me/628111720231"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#1f1f1f] shadow-md transition-transform hover:scale-[1.02]"
               >
                 Konsultasi Sekarang
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </Link>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1f1f1f] text-white">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </span>
+              </a>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-[#2d1b3d] py-10 text-sm text-white">
-        <div className="mx-auto grid max-w-[1237px] gap-6 px-6 md:grid-cols-[1.4fr_1fr]">
+            {/* Footer */}
+      <footer className="bg-[#9a9a9a] py-10 text-sm text-white">
+        <div className="mx-auto grid max-w-[1237px] gap-6 px-6 md:grid-cols-[1.6fr_1fr]">
           <div className="space-y-4">
             <Image
               src="/bigbox_logo-removebg-preview.png"
@@ -288,12 +317,13 @@ export default function CeritaKamiPage() {
               height={68}
               className="h-12 w-auto"
             />
-            <p className="text-[14px] font-medium leading-[164%] text-gray-300">
+            <p className="text-[14px] font-medium leading-[164%] text-white">
               Telkom Kebayoran, 4th Floor, Jl. Sisingamangaraja No.4, Kebayoran
               Baru, Jakarta Selatan.
             </p>
-            <p className="text-[14px] font-medium text-gray-400">
-              © 2025 BigBox. All Rights Reserved.
+            <p className="text-[13px] font-medium text-white/80">
+              (c) 2025 BigBox, All Rights Reserved. Privacy Policy | Terms &
+              Conditions
             </p>
           </div>
           <div className="space-y-4 text-right md:justify-self-end">
@@ -319,18 +349,12 @@ export default function CeritaKamiPage() {
                 </svg>
               </a>
             </div>
-            <div className="space-y-2">
-              <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-gray-300">
-                TENTANG KAMI
-              </p>
-              <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-gray-300">
-                KEBIJAKAN PRIVASI
-              </p>
-              <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-gray-300">
-                SYARAT & KETENTUAN
-              </p>
+            <div className="space-y-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-white/90">
+              <p>TENTANG KAMI</p>
+              <p>KEBIJAKAN PRIVASI</p>
+              <p>SYARAT & KETENTUAN</p>
             </div>
-            <p className="text-[12px] font-medium leading-[118%] text-gray-400">
+            <p className="text-[12px] font-medium leading-[118%] text-white/80">
               Telkom Kebayoran, 4th Floor, Jl. Sisingamangaraja No.4, Kebayoran
               Baru, Jakarta Selatan.
             </p>

@@ -9,7 +9,13 @@ export async function generateStaticParams() {
 }
 
 export default function StoryDetailPage({ params }: { params: { id: string } }) {
-  const story = allStories.find((s) => s.id === parseInt(params.id));
+  const rawId = Array.isArray(params.id) ? params.id[0] : params.id ?? "";
+  const normalizedId = decodeURIComponent(rawId).trim();
+  const parsedId = Number.parseInt(normalizedId, 10);
+  const story =
+    allStories.find((s) => s.id === parsedId) ??
+    allStories.find((s) => s.id.toString() === normalizedId) ??
+    allStories[0];
 
   if (!story) {
     return (
@@ -28,6 +34,11 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
       </div>
     );
   }
+
+  const heroDescription =
+    story.studyCaseDescription.split("\n").find((line) => line.trim().length) ??
+    story.studyCaseDescription;
+  const impactItems = story.solutions.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-white">
@@ -67,114 +78,91 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
 
       <main>
         {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-[#1a0f2e] via-[#2d1b3d] to-[#4a2d5d] py-20">
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute right-0 top-1/2 h-96 w-96 rounded-full bg-orange-500 blur-3xl" />
+        <section className="relative overflow-hidden bg-[#1a0f2e]">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute -right-32 -top-24 h-[140%] w-[55%] rotate-[18deg] bg-gradient-to-br from-[#4b2b6d] via-[#2f1b44] to-[#1b0f2f] opacity-90" />
+            <div className="absolute right-10 top-[-35%] h-[180%] w-[45%] rotate-[18deg] bg-gradient-to-br from-[#6a2f4b] via-[#4b265a] to-[#2c1a44] opacity-80" />
+            <div className="absolute left-20 bottom-10 h-24 w-24 rounded-full bg-[#ff6b3d] blur-2xl opacity-70" />
+            <div className="absolute right-24 top-24 h-32 w-32 rounded-full bg-[#ff8a5b] blur-3xl opacity-60" />
           </div>
-          <div className="mx-auto max-w-[1237px] px-6 relative z-10">
-            <div className="text-white">
-              <div className="mb-4">
-                <Link
-                  href="/cerita-kami"
-                  className="text-sm font-semibold hover:text-gray-300 transition-colors flex items-center gap-2 mb-8"
-                >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 19l-7-7 7-7"
-                    />
-                  </svg>
-                  Kembali ke Cerita Kami
-                </Link>
-              </div>
-              <h1 className="mb-6 text-4xl md:text-5xl font-bold max-w-3xl">
-                {story.title}
-              </h1>
-              <div className="flex flex-wrap gap-2 mb-6">
-                {story.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="inline-block rounded-full bg-[#3a3a4a] px-4 py-2 text-sm font-semibold text-white"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
+          <div className="relative z-10 mx-auto max-w-[1237px] px-6 py-20 text-center text-white">
+            <h1 className="mb-6 text-4xl font-bold md:text-5xl">
+              {story.subtitle}
+            </h1>
+            <p className="mx-auto max-w-3xl text-sm leading-relaxed text-gray-200 md:text-base">
+              {heroDescription}
+            </p>
           </div>
         </section>
 
-        {/* Main Content with Sidebar */}
+        {/* Ringkasan Dampak */}
         <section className="mx-auto max-w-[1237px] px-6 py-12">
-          <div className="grid gap-8 lg:grid-cols-[1fr_350px]">
-            {/* Main Content */}
-            <div className="space-y-8">
-              {/* Study Case Section */}
-              <div>
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                  {story.studyCase}
-                </h2>
-                <p className="text-gray-700 leading-relaxed text-justify">
-                  {story.studyCaseDescription}
-                </p>
-              </div>
-
-              {/* Background Section */}
-              <div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                  {story.backgroundTitle}
+          <h2 className="text-lg font-bold uppercase tracking-[0.08em] text-gray-900">
+            Ringkasan Dampak Bigbox
+          </h2>
+          <div className="mt-6 grid gap-6 md:grid-cols-3">
+            {impactItems.map((impact) => (
+              <div
+                key={impact.title}
+                className="rounded-2xl bg-gradient-to-b from-[#f5f4f8] via-[#d7d7e7] to-[#5b5d93] p-6 text-white shadow-lg"
+              >
+                <h3 className="text-base font-bold text-gray-900">
+                  {impact.title}
                 </h3>
-                <p className="text-gray-700 leading-relaxed text-justify">
-                  {story.backgroundDescription}
+                <p className="mt-3 text-sm leading-relaxed text-gray-800">
+                  {impact.description}
                 </p>
               </div>
+            ))}
+          </div>
+        </section>
 
-              {/* Solutions Section */}
-              <div>
-                <h3 className="text-2xl font-bold text-gray-800 mb-6">
-                  {story.solutionTitle}
-                </h3>
-                <p className="text-gray-700 leading-relaxed text-justify mb-6">
-                  Sistem Informasi Hukum yang dikembangkan untuk Kemenhub
-                  menggunakan produk BIGONE dan BIGVISION untuk mengotomatiskan
-                  berbagai aspek pengelolaan dokumen hukum. Berikut adalah fitur
-                  utama dari solusi ini:
-                </p>
+        {/* Story Content */}
+        <section className="mx-auto max-w-[1237px] px-6 pb-16">
+          <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
+                Baca Cerita Sukses
+              </p>
+              <h2 className="mt-3 text-2xl font-bold text-gray-900 md:text-3xl">
+                {story.title}
+              </h2>
+              <h3 className="mt-5 text-lg font-semibold text-gray-900">
+                {story.studyCase}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-gray-700 md:text-base whitespace-pre-line">
+                {story.studyCaseDescription}
+              </p>
 
-                <ul className="space-y-4">
-                  {story.solutions.map((solution, index) => (
-                    <li key={index} className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#ff6b3d] text-white font-semibold text-sm">
-                          •
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-gray-800 mb-2">
-                          {solution.title}:
-                        </h4>
-                        <p className="text-gray-700 leading-relaxed text-justify">
-                          {solution.description}
-                        </p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <h3 className="mt-8 text-lg font-semibold text-gray-900">
+                {story.backgroundTitle}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-gray-700 md:text-base whitespace-pre-line">
+                {story.backgroundDescription}
+              </p>
+
+              <h3 className="mt-8 text-lg font-semibold text-gray-900">
+                {story.solutionTitle}
+              </h3>
+              <p className="mt-3 text-sm leading-relaxed text-gray-700 md:text-base">
+                Berikut adalah fitur utama dari solusi ini:
+              </p>
+              <ul className="mt-4 space-y-3 pl-5 text-sm leading-relaxed text-gray-700 md:text-base list-disc">
+                {story.solutions.map((solution) => (
+                  <li key={solution.title}>
+                    <span className="font-semibold text-gray-900">
+                      {solution.title}:
+                    </span>{" "}
+                    {solution.description}
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            {/* Sidebar - Organization Info */}
-            <div className="lg:sticky lg:top-[80px] h-fit">
-              <div className="bg-gradient-to-b from-gray-50 to-gray-100 rounded-lg p-6 border border-gray-200">
-                <div className="flex items-center gap-2 mb-6 pb-4 border-b">
-                  <div className="p-2 bg-blue-100 rounded-lg">
+            <aside className="lg:sticky lg:top-[80px] h-fit">
+              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
+                <div className="mb-6 flex items-center gap-3 border-b pb-4">
+                  <div className="rounded-full bg-blue-50 p-2">
                     <svg
                       className="h-6 w-6 text-blue-600"
                       fill="none"
@@ -189,50 +177,50 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
                       />
                     </svg>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-800">
-                    INFORMASI PELANGGGAN
+                  <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
+                    Informasi Pelanggan
                   </h3>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-4 text-sm">
                   <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
-                      Pelangggan
+                    <p className="text-xs font-semibold uppercase text-gray-500 mb-1">
+                      Pelanggan
                     </p>
-                    <p className="text-gray-800 font-semibold">
+                    <p className="font-semibold text-gray-900">
                       {story.organization.name}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
-                      Jenis Industri
+                    <p className="text-xs font-semibold uppercase text-gray-500 mb-1">
+                      Industri
                     </p>
-                    <p className="text-gray-800 font-semibold">
+                    <p className="font-semibold text-gray-900">
                       {story.organization.industry}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                    <p className="text-xs font-semibold uppercase text-gray-500 mb-1">
                       Ukuran Organisasi
                     </p>
-                    <p className="text-gray-800 font-semibold">
+                    <p className="font-semibold text-gray-900">
                       {story.organization.size}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">
+                    <p className="text-xs font-semibold uppercase text-gray-500 mb-1">
                       Lokasi
                     </p>
-                    <p className="text-gray-800 font-semibold">
+                    <p className="font-semibold text-gray-900">
                       {story.organization.location}
                     </p>
                   </div>
 
-                  <div className="pt-4 border-t">
-                    <p className="text-xs font-semibold text-gray-500 uppercase mb-3">
+                  <div className="border-t pt-4">
+                    <p className="text-xs font-semibold uppercase text-gray-500 mb-3">
                       Produk
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -248,54 +236,59 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
                   </div>
                 </div>
               </div>
-            </div>
+            </aside>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="relative overflow-hidden bg-gradient-to-r from-[#2d1b3d] via-[#3d2a4d] to-[#2d1b3d] py-16">
-          <div className="absolute inset-0 opacity-30">
-            <div className="absolute left-0 top-1/2 h-96 w-96 rounded-full bg-orange-500 blur-3xl" />
+                {/* CTA Section */}
+        <section className="relative overflow-hidden bg-gradient-to-r from-[#2d1b3d] via-[#3d2a4d] to-[#2d1b3d] py-12">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute -left-24 top-10 h-28 w-28 rounded-full bg-[#ff6b3d] blur-2xl opacity-60" />
+            <div className="absolute right-20 top-6 h-32 w-32 rounded-full bg-[#ff8a5b] blur-3xl opacity-55" />
           </div>
-          <div className="mx-auto max-w-[1237px] px-6 relative z-10">
-            <div className="rounded-xl bg-gradient-to-r from-[#3d2a4d] to-[#1a0f2e] p-12 text-center text-white">
-              <h2 className="text-3xl font-bold">
+          <div className="mx-auto max-w-[1237px] px-6">
+            <div className="rounded-[18px] bg-gradient-to-r from-[#2a1740] via-[#3f2451] to-[#6a2f4b] px-8 py-10 text-center text-white md:px-12">
+              <h2 className="text-2xl font-bold md:text-3xl">
                 Siap Wujudkan{" "}
                 <span className="text-[#ff6b3d]">Keputusan Cerdas</span> Bersama
                 BigBox?
               </h2>
-              <p className="mt-4 text-lg text-gray-300">
+              <p className="mt-3 text-sm text-gray-200 md:text-base">
                 Konsultasikan kebutuhan bisnis Anda bersama kami untuk temukan
                 solusi AI dan big data yang tepat.
               </p>
 
-              <Link
-                href="/konsultasi"
-                className="mt-8 inline-flex items-center gap-2 rounded-full border-2 border-white bg-white px-8 py-3 font-semibold text-[#2d1b3d] transition-all hover:scale-105 hover:shadow-lg"
+              <a
+                href="https://wa.me/628111720231"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#1f1f1f] shadow-md transition-transform hover:scale-[1.02]"
               >
                 Konsultasi Sekarang
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 7l5 5m0 0l-5 5m5-5H6"
-                  />
-                </svg>
-              </Link>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1f1f1f] text-white">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </span>
+              </a>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-[#2d1b3d] py-10 text-sm text-white">
-        <div className="mx-auto grid max-w-[1237px] gap-6 px-6 md:grid-cols-[1.4fr_1fr]">
+            {/* Footer */}
+      <footer className="bg-[#9a9a9a] py-10 text-sm text-white">
+        <div className="mx-auto grid max-w-[1237px] gap-6 px-6 md:grid-cols-[1.6fr_1fr]">
           <div className="space-y-4">
             <Image
               src="/bigbox_logo-removebg-preview.png"
@@ -304,12 +297,13 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
               height={68}
               className="h-12 w-auto"
             />
-            <p className="text-[14px] font-medium leading-[164%] text-gray-300">
+            <p className="text-[14px] font-medium leading-[164%] text-white">
               Telkom Kebayoran, 4th Floor, Jl. Sisingamangaraja No.4, Kebayoran
               Baru, Jakarta Selatan.
             </p>
-            <p className="text-[14px] font-medium text-gray-400">
-              © 2025 BigBox. All Rights Reserved.
+            <p className="text-[13px] font-medium text-white/80">
+              (c) 2025 BigBox, All Rights Reserved. Privacy Policy | Terms &
+              Conditions
             </p>
           </div>
           <div className="space-y-4 text-right md:justify-self-end">
@@ -326,7 +320,7 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
               </a>
               <a href="#" className="hover:text-[#ff6b3d]">
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417a9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                  <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
                 </svg>
               </a>
               <a href="#" className="hover:text-[#ff6b3d]">
@@ -335,18 +329,12 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
                 </svg>
               </a>
             </div>
-            <div className="space-y-2">
-              <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-gray-300">
-                TENTANG KAMI
-              </p>
-              <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-gray-300">
-                KEBIJAKAN PRIVASI
-              </p>
-              <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-gray-300">
-                SYARAT & KETENTUAN
-              </p>
+            <div className="space-y-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-white/90">
+              <p>TENTANG KAMI</p>
+              <p>KEBIJAKAN PRIVASI</p>
+              <p>SYARAT & KETENTUAN</p>
             </div>
-            <p className="text-[12px] font-medium leading-[118%] text-gray-400">
+            <p className="text-[12px] font-medium leading-[118%] text-white/80">
               Telkom Kebayoran, 4th Floor, Jl. Sisingamangaraja No.4, Kebayoran
               Baru, Jakarta Selatan.
             </p>

@@ -29,34 +29,41 @@ export const allStories: Story[] = [
   {
     id: 1,
     client: "KEMENHUB",
-    subtitle: "Kementrian Perhubungan",
+    subtitle: "Kementerian Perhubungan",
     image: "/1371542_6424.jpg",
     tags: ["AI BigOne", "AI BigVision"],
     category: "Legal Analytic",
-    title: "Kementerian Perhubungan: Mengotomatiskan Analisis Dokumen Hukum (Legal Analytic)",
-    studyCase: "Studi Kasus: Kemenub",
-    studyCaseDescription: `Kementerian Perhubungan (Kemenhub) Indonesia telah mengambil langkah besar dalam transformasi digital dengan mengimplementasikan Sistem Informasi Hukum yang inovatif. Sistem ini didukung oleh produk BIGONE dan BIGVISION, bertujuan untuk mengotomatiskan analisis dan rekapitulasi dokumen untuk meningkatkan kualitas produk hukum di kementerian Perhubungan.
+    title:
+      "Kementerian Perhubungan: Mengotomatiskan Analisis Dokumen Hukum (Legal Analytic)",
+    studyCase: "Studi Kasus: Kemenhub",
+    studyCaseDescription: `Studi ini menunjukkan bagaimana Sistem Informasi Hukum mengotomatiskan analisis dan rekapitulasi dokumen untuk meningkatkan kualitas produk hukum di Kementerian Perhubungan.
 
-Kemenhub, sebagai salah satu kementerian terbesar di Indonesia dengan berbagai tanggungjawab atas pengelolaan regulasi di sektor transportasi, masuk dalam kategori organisasi dengan lebih dari 1.000 karyawan. Proyek ini dilaksanakan untuk membantu teknologi modern dapat mereevolusi proses pemerintahan.`,
+Kementerian Perhubungan (Kemenhub) Indonesia menjalankan transformasi digital dengan mengimplementasikan sistem yang didukung AI BigOne dan AI BigVision. Inisiatif ini mempercepat proses review dokumen, meminimalkan risiko inkonsistensi, serta memastikan kualitas regulasi tetap terjaga.`,
     backgroundTitle: "Latar Belakang Proyek",
-    backgroundDescription: `Kemenhub, sebagai salah satu kementerian terbesar di Indonesia, bertanggung jawab atas pengelolaan regulasi di sektor transportasi. Dengan proyek ini, Kemenhub memanfaatkan teknologi AI dan big data untuk mengotomatiskan berbagai aspek pengelolaan dokumen hukum. Proses manual dalam menganalisis dan merekapitulasi dokumen-dokumen ini sering kali memakan waktu berminggu-minggu, rentan terhadap kesalahan manusia, dan sulit untuk memastikami konsistensi dengan peraturan yang sudah ada. Untuk mengatasi tantangan ini, Kemenhub bekerja sama dengan penyedia solusi teknologi untuk menemukan kembali cara mereka mengelola dokumen-dokumen ini siring kali melakon waktu berminggu-minggu, rentan terhadap kesalahan manusia, dan sulit untuk memastikan konsistensi dengan peraturan yang sudah ada. Untuk mengatasi tantangan ini, Kemenhub berkerja sama dengan penyedia solusi teknologi untuk menemukan kembali cara mereka mengelola dokumen hukum.`,
+    backgroundDescription: `Kemenhub mengelola regulasi di sektor transportasi darat, laut, udara, dan kereta api. Setiap tahun ribuan dokumen hukum seperti peraturan menteri, keputusan, dan pedoman teknis diterbitkan. Proses manual untuk menganalisis dan merekapitulasi dokumen sering memakan waktu berminggu-minggu, rentan terhadap kesalahan manusia, dan sulit menjaga konsistensi dengan peraturan yang sudah ada.
+
+Untuk mengatasi tantangan tersebut, Kemenhub bekerja sama dengan BigBox agar sistem informasi hukum dapat memanfaatkan AI dan big data, sehingga proses analisis lebih cepat, akurat, dan mudah dipakai oleh tim internal.`,
     solutionTitle: "Solusi yang Diterapkan",
     solutions: [
       {
         title: "Analisis Dokumen Otomatis",
-        description: "Sistem ini menggunakan AI untuk menganalisis ribuan dokumen hukum secara otomatis, mengidentifikasi pola penting, potensi masalah dalam draf peraturan yang ada.",
+        description:
+          "AI menganalisis ribuan dokumen hukum secara otomatis untuk mengidentifikasi pola, inkonsistensi, dan potensi masalah pada draf peraturan.",
       },
       {
-        title: "Rekapitulasi Cepat",
-        description: "Dengan kemampuan memanfaatkan AI, sistem ini dapat menghasilkan laporan rekapitulasi dalam hitungan jam, bukan minggu.",
+        title: "Peningkatan Kualitas Produk Hukum",
+        description:
+          "Sistem memastikan konsistensi regulasi dengan membandingkan draf baru terhadap peraturan yang ada sehingga kualitas produk hukum meningkat.",
       },
       {
-        title: "Peningkatan Kualitas",
-        description: "Sistem memastikan konsistensi dan kualitas regulasi dengan membandingkan draft peraturan yang ada, meningkatkan risiko inkonsistensi hukum.",
+        title: "Menghemat Waktu",
+        description:
+          "Rekapitulasi dokumen yang sebelumnya memakan waktu minggu kini bisa selesai dalam hitungan jam.",
       },
       {
         title: "Antarmuka Pengguna yang Intuitif",
-        description: "Sistem dirancang untuk mudah digunakan oleh pegawai Kemenhub, bahkan bagi mereka yang tidak memiliki latar belakang teknis.",
+        description:
+          "Antarmuka dibuat sederhana agar mudah dipakai pegawai Kemenhub tanpa membutuhkan latar belakang teknis.",
       },
     ],
     organization: {

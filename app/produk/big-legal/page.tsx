@@ -106,7 +106,7 @@ export default async function BigLegalPage() {
             <a className="nav-link active" href="/produk">
               Produk
             </a>
-            <a className="nav-link" href="#">
+            <a className="nav-link" href="/cerita-kami">
               Cerita Kami
             </a>
           </nav>

@@ -1,11 +1,8 @@
-"use client";
-
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+
+const WHATSAPP_LINK = "https://wa.me/628111720231";
 
 export function ConsultationCTA() {
-  const router = useRouter();
-
   return (
     <section className="mx-auto max-w-[1237px] px-6 py-16">
       <div className="rounded-[20px] bg-gradient-to-r from-[#2d1b3d] via-[#451a4a] to-[#2d1b3d] p-12 text-center">
@@ -21,10 +18,7 @@ export function ConsultationCTA() {
         {/* Products Grid */}
         <div className="mb-12 grid gap-8 md:grid-cols-2">
           {/* BIG AI */}
-          <div
-            onClick={() => router.push("/konsultasi?product=BigAI")}
-            className="cursor-pointer rounded-[16px] border-2 border-[#ff6b3d] bg-[#1a0f2e] p-8 transition-all duration-300 hover:scale-105 hover:bg-[#2d1b3d] hover:shadow-lg hover:shadow-[#ff6b3d]/50"
-          >
+          <div className="rounded-[16px] border-2 border-[#ff6b3d] bg-[#1a0f2e] p-8 transition-all duration-300 hover:scale-105 hover:bg-[#2d1b3d] hover:shadow-lg hover:shadow-[#ff6b3d]/50">
             <div className="mb-4 flex justify-center">
               <Image
                 src="/bigAssistant_logo.png"
@@ -39,16 +33,18 @@ export function ConsultationCTA() {
             <p className="mb-6 text-gray-400">
               Solusi AI untuk keputusan bisnis yang lebih cerdas dengan insight berbasis data real-time
             </p>
-            <button className="w-full rounded-[8px] bg-[#ff6b3d] py-2 font-semibold text-white transition-colors hover:bg-[#ff5722]">
+            <a
+              href={WHATSAPP_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full rounded-[8px] bg-[#ff6b3d] py-2 text-center font-semibold text-white transition-colors hover:bg-[#ff5722]"
+            >
               Konsultasi Sekarang
-            </button>
+            </a>
           </div>
 
           {/* BIG VISION */}
-          <div
-            onClick={() => router.push("/konsultasi?product=BigVision")}
-            className="cursor-pointer rounded-[16px] border-2 border-[#ff6b3d] bg-[#1a0f2e] p-8 transition-all duration-300 hover:scale-105 hover:bg-[#2d1b3d] hover:shadow-lg hover:shadow-[#ff6b3d]/50"
-          >
+          <div className="rounded-[16px] border-2 border-[#ff6b3d] bg-[#1a0f2e] p-8 transition-all duration-300 hover:scale-105 hover:bg-[#2d1b3d] hover:shadow-lg hover:shadow-[#ff6b3d]/50">
             <div className="mb-4 flex justify-center">
               <Image
                 src="/bigVision-logo.png"
@@ -63,9 +59,14 @@ export function ConsultationCTA() {
             <p className="mb-6 text-gray-400">
               Platform analitik visual dengan dashboard real-time dan laporan cerdas untuk pemahaman mendalam
             </p>
-            <button className="w-full rounded-[8px] bg-[#ff6b3d] py-2 font-semibold text-white transition-colors hover:bg-[#ff5722]">
+            <a
+              href={WHATSAPP_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full rounded-[8px] bg-[#ff6b3d] py-2 text-center font-semibold text-white transition-colors hover:bg-[#ff5722]"
+            >
               Konsultasi Sekarang
-            </button>
+            </a>
           </div>
         </div>
       </div>
