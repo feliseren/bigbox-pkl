@@ -218,10 +218,10 @@ export default async function DaftarPemesananPage({
               <div className="project-table order-table">
                 <div className="project-table-header">
                   <span>ORDER ID</span>
-                  <span>DAFTAR PESANAN</span>
-                  <span>TOTAL PESANAN</span>
                   <span>NAMA CUSTOMER</span>
                   <span>JENIS PEMBAYARAN</span>
+                  <span>DAFTAR PESANAN</span>
+                  <span>TOTAL PESANAN</span>
                   <span>STATUS</span>
                   <span className="align-right">AKSI</span>
                 </div>
@@ -229,10 +229,10 @@ export default async function DaftarPemesananPage({
                   filteredOrders.map((order) => (
                     <div key={order.id} className="project-table-row">
                       <span className="bold">{order.id}</span>
-                      <span>{order.item}</span>
-                      <span className="bold">{order.total}</span>
                       <span>{order.customer}</span>
                       <span className="order-payment">{order.paymentType}</span>
+                      <span>{order.item}</span>
+                      <span className="bold">{order.total}</span>
                       <span>
                         <span
                           className={`status-pill ${order.status.toLowerCase()}`}

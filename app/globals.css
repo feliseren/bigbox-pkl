@@ -358,6 +358,10 @@ body {
   white-space: nowrap;
 }
 
+.contact-table .project-table-row .align-right {
+  overflow: visible;
+}
+
 .contact-table {
   overflow: hidden;
 }
@@ -433,6 +437,9 @@ body {
 .btn-edit,
 .btn-delete,
 .btn-detail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   border-radius: 999px;
   padding: 6px 14px;
@@ -440,6 +447,7 @@ body {
   font-weight: 600;
   color: #ffffff;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .btn-edit {
