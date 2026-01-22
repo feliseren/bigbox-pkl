@@ -12,6 +12,8 @@
     "@prisma/client": "6.19.1",
     "bcryptjs": "^3.0.3",
     "next": "16.1.1",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^4.10.38",
     "react": "19.2.3",
     "react-dom": "19.2.3"
   },

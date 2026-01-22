@@ -1,33 +1,57 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { fetchNews } from "@/lib/news-db";
 
-import { allStories } from "@/lib/stories-data";
+export const dynamic = "force-dynamic";
 
 const categories = [
   "Show All",
-  "Social Media Analytic",
-  "Chatbot AI Assitant",
-  "Legal Analytic",
-  "Vision AI Analytic",
+  "Big Vision",
+  "Big Assistant",
+  "Big Social",
+  "Big Legal",
 ];
 
-export default function CeritaKamiPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Show All");
-  const router = useRouter();
+const formatTags = (value?: string | null) =>
+  value
+    ? value
+        .split(",")
+        .map((tag) => tag.trim())
+        .filter(Boolean)
+    : [];
+const resolveImageUrl = (value?: string | null) => {
+  if (!value) return "/bg-karyawan.jpeg";
+  if (value.toLowerCase().endsWith(".bin")) return "/bg-karyawan.jpeg";
+  return value;
+};
 
-    const filteredStories = allStories.filter((story) => {
-    const matchesSearch =
-      story.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      story.subtitle.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "Show All" || story.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+export default async function CeritaKamiPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ q?: string | string[]; category?: string | string[] }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  const rawQuery = resolvedSearchParams?.q;
+  const rawCategory = resolvedSearchParams?.category;
+  const searchQuery =
+    (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery)?.trim() ?? "";
+  const categoryParam =
+    (Array.isArray(rawCategory) ? rawCategory[0] : rawCategory)?.trim() ?? "Show All";
+  const selectedCategory = categories.includes(categoryParam)
+    ? categoryParam
+    : "Show All";
+  const stories = await fetchNews({
+    query: searchQuery || undefined,
+    category: selectedCategory === "Show All" ? undefined : selectedCategory,
   });
+  const filteredStories = stories.map((story) => ({
+    id: story.id,
+    client: (story.customerName || story.title).toUpperCase(),
+    subtitle: story.title,
+    image: resolveImageUrl(story.imageUrl),
+    tags: formatTags(story.customerProducts),
+    category: story.category,
+  }));
 
   return (
     <div className="min-h-screen bg-white">
@@ -83,16 +107,19 @@ export default function CeritaKamiPage() {
               </p>
 
               {/* Search Bar */}
-              <div className="mx-auto max-w-3xl">
+              <form className="mx-auto max-w-3xl" method="get">
                 <div className="relative">
                   <input
                     type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    name="q"
+                    defaultValue={searchQuery}
                     placeholder="PELUANG BISNIS. Cari kisah pelanggan berdasarkan kata kunci, nama perusahaan, nama produk, atau solusi."
                     className="w-full rounded-full border-2 border-white bg-white px-6 py-4 pr-12 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#ff6b3d]"
                   />
-                  <button className="absolute right-4 top-1/2 -translate-y-1/2">
+                  <button
+                    className="absolute right-4 top-1/2 -translate-y-1/2"
+                    type="submit"
+                  >
                     <svg
                       className="h-5 w-5 text-gray-600"
                       fill="none"
@@ -108,7 +135,7 @@ export default function CeritaKamiPage() {
                     </svg>
                   </button>
                 </div>
-              </div>
+              </form>
             </div>
           </div>
         </section>
@@ -117,19 +144,29 @@ export default function CeritaKamiPage() {
         <section className="border-b bg-gray-50 py-6">
           <div className="mx-auto max-w-[1237px] px-6">
             <div className="flex flex-wrap justify-center gap-3">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`rounded-full px-6 py-2 text-sm font-semibold transition-all ${
-                    selectedCategory === category
-                      ? "bg-[#2d1b3d] text-white shadow-lg"
-                      : "bg-white text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
+              {categories.map((category) => {
+                const params = new URLSearchParams();
+                if (searchQuery) {
+                  params.set("q", searchQuery);
+                }
+                if (category !== "Show All") {
+                  params.set("category", category);
+                }
+                const href = `/cerita-kami${params.toString() ? `?${params}` : ""}`;
+                return (
+                  <Link
+                    key={category}
+                    href={href}
+                    className={`rounded-full px-6 py-2 text-sm font-semibold transition-all ${
+                      selectedCategory === category
+                        ? "bg-[#2d1b3d] text-white shadow-lg"
+                        : "bg-white text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    {category}
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -147,37 +184,14 @@ export default function CeritaKamiPage() {
             {filteredStories.map((story) => (
               <div
                 key={story.id}
-                role="link"
-                tabIndex={0}
-                onClick={(event) => {
-                  if ((event.target as HTMLElement).closest("a")) {
-                    return;
-                  }
-                  router.push(`/cerita-kami/${story.id}`);
-                }}
-                onKeyDown={(event) => {
-                  if (
-                    event.key !== "Enter" &&
-                    event.key !== " " &&
-                    event.key !== "Spacebar"
-                  ) {
-                    return;
-                  }
-                  if ((event.target as HTMLElement).closest("a")) {
-                    return;
-                  }
-                  event.preventDefault();
-                  router.push(`/cerita-kami/${story.id}`);
-                }}
-                className="group cursor-pointer overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ff6b3d]"
+                className="group overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-2xl"
               >
                 {/* Image with Zoom Effect */}
                 <div className="relative h-[220px] w-full overflow-hidden">
-                  <Image
+                  <img
                     src={story.image}
                     alt={story.client}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
 
@@ -196,7 +210,7 @@ export default function CeritaKamiPage() {
 
                   {/* Tags - Clickable */}
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {story.tags.map((tag) => (
+                    {(story.tags.length ? story.tags : [story.category]).map((tag) => (
                       <span
                         key={tag}
                         className="inline-block rounded-full bg-[#3a3a4a] px-3 py-1 text-xs font-semibold text-white"
@@ -208,7 +222,7 @@ export default function CeritaKamiPage() {
 
                   {/* Read More Link */}
                   <Link
-                      href={`/cerita-kami/${story.id}`}
+                    href={`/cerita-kami/${story.id}`}
                     className="mt-4 inline-flex items-center gap-2 font-semibold text-[#ff6b3d] transition-colors hover:text-[#ff5722]"
                   >
                     Baca Selengkapnya

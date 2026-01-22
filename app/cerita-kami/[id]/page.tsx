@@ -1,21 +1,31 @@
 import Image from "next/image";
 import Link from "next/link";
-import { allStories } from "@/lib/stories-data";
+import { findNewsById } from "@/lib/news-db";
+import { readSessionUserId } from "@/lib/auth";
+import PdfRenderer from "@/components/pdf-renderer";
+import NewsViewTracker from "@/components/news-view-tracker";
 
-export async function generateStaticParams() {
-  return allStories.map((story) => ({
-    id: story.id.toString(),
-  }));
-}
+export const dynamic = "force-dynamic";
 
-export default function StoryDetailPage({ params }: { params: { id: string } }) {
-  const rawId = Array.isArray(params.id) ? params.id[0] : params.id ?? "";
+const formatReviewDate = (value: Date) =>
+  new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(value);
+
+export default async function StoryDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = await params;
+  const rawId = Array.isArray(resolvedParams.id)
+    ? resolvedParams.id[0]
+    : resolvedParams.id ?? "";
   const normalizedId = decodeURIComponent(rawId).trim();
-  const parsedId = Number.parseInt(normalizedId, 10);
-  const story =
-    allStories.find((s) => s.id === parsedId) ??
-    allStories.find((s) => s.id.toString() === normalizedId) ??
-    allStories[0];
+  const story = await findNewsById(normalizedId);
+  const customerId = await readSessionUserId();
 
   if (!story) {
     return (
@@ -35,10 +45,35 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
     );
   }
 
+  const summaries = [
+    story.summaryPart1?.trim() || "",
+    story.summaryPart2?.trim() || "",
+    story.summaryPart3?.trim() || "",
+  ];
+  const storedContent = story.contentText?.trim() || null;
   const heroDescription =
-    story.studyCaseDescription.split("\n").find((line) => line.trim().length) ??
-    story.studyCaseDescription;
-  const impactItems = story.solutions.slice(0, 3);
+    summaries[0] ??
+    storedContent?.split("\n").find((line) => line.trim().length) ??
+    "Cerita sukses BigBox membantu organisasi mencapai keputusan cerdas.";
+  const impactItems = summaries;
+  const products = story.customerProducts
+    ? story.customerProducts
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : [];
+  const resolveImageUrl = (value?: string | null) => {
+    if (!value) return "/bgceritakami.jpg";
+    if (value.toLowerCase().endsWith(".bin")) return "/bgceritakami.jpg";
+    return value;
+  };
+  const storyImage = resolveImageUrl(story.imageUrl);
+  const solutionLines = story.summaryPart3
+    ? story.summaryPart3
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean)
+    : [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -77,40 +112,45 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
       </header>
 
       <main>
+        <NewsViewTracker newsId={story.id} />
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-[#1a0f2e]">
           <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute inset-0 opacity-40">
+              <img
+                src={storyImage}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            </div>
             <div className="absolute -right-32 -top-24 h-[140%] w-[55%] rotate-[18deg] bg-gradient-to-br from-[#4b2b6d] via-[#2f1b44] to-[#1b0f2f] opacity-90" />
             <div className="absolute right-10 top-[-35%] h-[180%] w-[45%] rotate-[18deg] bg-gradient-to-br from-[#6a2f4b] via-[#4b265a] to-[#2c1a44] opacity-80" />
             <div className="absolute left-20 bottom-10 h-24 w-24 rounded-full bg-[#ff6b3d] blur-2xl opacity-70" />
             <div className="absolute right-24 top-24 h-32 w-32 rounded-full bg-[#ff8a5b] blur-3xl opacity-60" />
           </div>
-          <div className="relative z-10 mx-auto max-w-[1237px] px-6 py-20 text-center text-white">
-            <h1 className="mb-6 text-4xl font-bold md:text-5xl">
-              {story.subtitle}
+          <div className="relative z-10 mx-auto max-w-[1237px] px-6 py-16 text-center text-white">
+            <h1 className="text-3xl font-semibold md:text-4xl">
+              {story.title}
             </h1>
-            <p className="mx-auto max-w-3xl text-sm leading-relaxed text-gray-200 md:text-base">
+            <p className="mx-auto mt-4 max-w-2xl text-xs leading-relaxed text-gray-200 md:text-sm">
               {heroDescription}
             </p>
           </div>
         </section>
 
         {/* Ringkasan Dampak */}
-        <section className="mx-auto max-w-[1237px] px-6 py-12">
-          <h2 className="text-lg font-bold uppercase tracking-[0.08em] text-gray-900">
+        <section className="mx-auto max-w-[1237px] px-6 py-10">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-900">
             Ringkasan Dampak Bigbox
           </h2>
-          <div className="mt-6 grid gap-6 md:grid-cols-3">
-            {impactItems.map((impact) => (
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            {impactItems.map((impact, index) => (
               <div
-                key={impact.title}
-                className="rounded-2xl bg-gradient-to-b from-[#f5f4f8] via-[#d7d7e7] to-[#5b5d93] p-6 text-white shadow-lg"
+                key={`impact-${index}`}
+                className="rounded-2xl bg-gradient-to-b from-[#e8e8f4] via-[#c7c7e2] to-[#5b5d93] p-5 text-white shadow-lg"
               >
-                <h3 className="text-base font-bold text-gray-900">
-                  {impact.title}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-gray-800">
-                  {impact.description}
+                <p className="text-xs leading-relaxed text-gray-800">
+                  {impact}
                 </p>
               </div>
             ))}
@@ -119,119 +159,148 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
 
         {/* Story Content */}
         <section className="mx-auto max-w-[1237px] px-6 pb-16">
-          <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+          <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-500">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-500">
                 Baca Cerita Sukses
               </p>
-              <h2 className="mt-3 text-2xl font-bold text-gray-900 md:text-3xl">
+              <h2 className="mt-2 text-xl font-bold text-gray-900 md:text-2xl">
                 {story.title}
               </h2>
-              <h3 className="mt-5 text-lg font-semibold text-gray-900">
-                {story.studyCase}
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-gray-700 md:text-base whitespace-pre-line">
-                {story.studyCaseDescription}
-              </p>
-
-              <h3 className="mt-8 text-lg font-semibold text-gray-900">
-                {story.backgroundTitle}
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-gray-700 md:text-base whitespace-pre-line">
-                {story.backgroundDescription}
-              </p>
-
-              <h3 className="mt-8 text-lg font-semibold text-gray-900">
-                {story.solutionTitle}
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-gray-700 md:text-base">
-                Berikut adalah fitur utama dari solusi ini:
-              </p>
-              <ul className="mt-4 space-y-3 pl-5 text-sm leading-relaxed text-gray-700 md:text-base list-disc">
-                {story.solutions.map((solution) => (
-                  <li key={solution.title}>
-                    <span className="font-semibold text-gray-900">
-                      {solution.title}:
-                    </span>{" "}
-                    {solution.description}
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-4 space-y-6 text-sm leading-relaxed text-gray-700">
+                {story.documentUrl ? (
+                  <PdfRenderer
+                    url={
+                      story.documentUrl.startsWith("/")
+                        ? story.documentUrl
+                        : `/${story.documentUrl}`
+                    }
+                  />
+                ) : (
+                  <>
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        Studi Kasus: {story.customerName || story.title}
+                      </h3>
+                      <p className="mt-2 whitespace-pre-line">
+                        {storedContent ||
+                          story.summaryPart1 ||
+                          "Studi kasus akan ditampilkan setelah berita dilengkapi."}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        Latar Belakang Proyek
+                      </h3>
+                      <p className="mt-2 whitespace-pre-line">
+                        {story.summaryPart2 ||
+                          (storedContent
+                            ? storedContent
+                                .split("\n")
+                                .slice(0, 8)
+                                .join("\n")
+                            : null) ||
+                          "Latar belakang proyek akan ditampilkan setelah berita dilengkapi."}
+                      </p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">
+                        Solusi yang Diterapkan
+                      </h3>
+                      {solutionLines.length > 1 ? (
+                        <ul className="mt-2 list-disc space-y-2 pl-5">
+                          {solutionLines.map((line, index) => (
+                            <li key={index}>{line}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="mt-2 whitespace-pre-line">
+                          {story.summaryPart3 ||
+                            (storedContent
+                              ? storedContent
+                                  .split("\n")
+                                  .slice(8)
+                                  .join("\n")
+                              : null) ||
+                            "Solusi akan ditampilkan setelah berita dilengkapi."}
+                        </p>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
-            <aside className="lg:sticky lg:top-[80px] h-fit">
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
-                <div className="mb-6 flex items-center gap-3 border-b pb-4">
-                  <div className="rounded-full bg-blue-50 p-2">
-                    <svg
-                      className="h-6 w-6 text-blue-600"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-gray-800">
+            <aside className="lg:sticky lg:top-[86px] h-fit">
+              <div className="rounded-[20px] border border-gray-200 bg-white p-5 shadow-lg">
+                <div className="mb-4 flex items-center justify-between border-b pb-3">
+                  <h3 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-800">
                     Informasi Pelanggan
                   </h3>
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#e7efff] text-[#2a3ad7]">
+                    <svg viewBox="0 0 24 24" width="18" height="18">
+                      <path
+                        d="M7 7a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm-3 9a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2H4v-2Zm12-9h5v10h-5V7Zm1.5 1.5v7h2V8.5h-2Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
                 </div>
 
                 <div className="space-y-4 text-sm">
                   <div>
-                    <p className="text-xs font-semibold uppercase text-gray-500 mb-1">
+                    <p className="text-[11px] font-semibold uppercase text-gray-500 mb-1">
                       Pelanggan
                     </p>
                     <p className="font-semibold text-gray-900">
-                      {story.organization.name}
+                      {story.customerName || "-"}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase text-gray-500 mb-1">
+                    <p className="text-[11px] font-semibold uppercase text-gray-500 mb-1">
                       Industri
                     </p>
                     <p className="font-semibold text-gray-900">
-                      {story.organization.industry}
+                      {story.customerIndustry || "-"}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase text-gray-500 mb-1">
+                    <p className="text-[11px] font-semibold uppercase text-gray-500 mb-1">
                       Ukuran Organisasi
                     </p>
                     <p className="font-semibold text-gray-900">
-                      {story.organization.size}
+                      {story.customerSize || "-"}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold uppercase text-gray-500 mb-1">
+                    <p className="text-[11px] font-semibold uppercase text-gray-500 mb-1">
                       Lokasi
                     </p>
                     <p className="font-semibold text-gray-900">
-                      {story.organization.location}
+                      {story.customerLocation || "-"}
                     </p>
                   </div>
 
                   <div className="border-t pt-4">
-                    <p className="text-xs font-semibold uppercase text-gray-500 mb-3">
+                    <p className="text-[11px] font-semibold uppercase text-gray-500 mb-3">
                       Produk
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      {story.organization.products.map((product) => (
-                        <span
-                          key={product}
-                          className="inline-block rounded-full bg-[#3a3a4a] px-3 py-1 text-xs font-semibold text-white"
-                        >
-                          {product}
-                        </span>
-                      ))}
+                      {products.length ? (
+                        products.map((product) => (
+                          <span
+                            key={product}
+                            className="inline-block rounded-full bg-[#3a3a4a] px-3 py-1 text-[11px] font-semibold text-white"
+                          >
+                            {product}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-xs text-gray-500">-</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -240,7 +309,115 @@ export default function StoryDetailPage({ params }: { params: { id: string } }) 
           </div>
         </section>
 
-                {/* CTA Section */}
+        {/* Review Section */}
+        <section className="mx-auto max-w-[1237px] px-6 pb-16">
+          <div className="review-card">
+            <div className="review-header">
+              <h2 className="review-title">
+                {story.reviews.length} Komentar
+              </h2>
+              <button className="review-sort" type="button">
+                <span aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path
+                      d="M4 6h16M4 12h10M4 18h6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </span>
+                Urutkan
+              </button>
+            </div>
+            {customerId ? (
+              <form
+                className="review-form"
+                method="post"
+                action="/api/news/review"
+              >
+                <input type="hidden" name="newsId" value={story.id} />
+                <input
+                  type="hidden"
+                  name="redirect"
+                  value={`/cerita-kami/${story.id}`}
+                />
+                <div className="review-input-row">
+                  <span className="review-avatar">
+                    {story.customerName?.trim()?.[0]?.toUpperCase() || "U"}
+                  </span>
+                  <textarea
+                    name="comment"
+                    rows={2}
+                    placeholder="Tambahkan komentar..."
+                    required
+                  />
+                </div>
+                <div className="review-actions">
+                  <select name="rating" required>
+                    <option value="">Rating</option>
+                    <option value="5">5 - Sangat puas</option>
+                    <option value="4">4 - Puas</option>
+                    <option value="3">3 - Cukup</option>
+                    <option value="2">2 - Kurang</option>
+                    <option value="1">1 - Tidak puas</option>
+                  </select>
+                  <button type="submit">Kirim</button>
+                </div>
+              </form>
+            ) : (
+              <p className="review-login">
+                Silakan{" "}
+                <Link href="/login" className="review-login-link">
+                  login
+                </Link>{" "}
+                sebagai pelanggan untuk menambahkan review.
+              </p>
+            )}
+            <div className="review-list">
+              {story.reviews.length ? (
+                story.reviews.map((review) => (
+                  <div key={review.id} className="review-item">
+                    <span className="review-avatar">
+                      {review.user.fullName?.trim()?.[0]?.toUpperCase() || "U"}
+                    </span>
+                    <div className="review-item-body">
+                      <div className="review-item-head">
+                        <strong>{review.user.fullName}</strong>
+                        <span className="review-date">
+                          {formatReviewDate(review.createdAt)}
+                        </span>
+                      </div>
+                      <p className="review-item-text">{review.comment}</p>
+                      <div className="review-meta">
+                        <span className="review-stars">
+                          {Array.from({ length: review.rating }).map((_, i) => (
+                            <svg
+                              key={i}
+                              viewBox="0 0 24 24"
+                              width="14"
+                              height="14"
+                              aria-hidden="true"
+                            >
+                              <path
+                                d="M12 3.5 14.8 9l6 .9-4.4 4.1 1 6-5.4-2.9-5.4 2.9 1-6L3.2 9.9l6-.9L12 3.5Z"
+                                fill="currentColor"
+                              />
+                            </svg>
+                          ))}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="review-empty">Belum ada review dari pelanggan.</p>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
         <section className="relative overflow-hidden bg-gradient-to-r from-[#2d1b3d] via-[#3d2a4d] to-[#2d1b3d] py-12">
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute -left-24 top-10 h-28 w-28 rounded-full bg-[#ff6b3d] blur-2xl opacity-60" />

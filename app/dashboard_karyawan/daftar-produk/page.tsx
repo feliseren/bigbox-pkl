@@ -130,8 +130,11 @@ export default async function DaftarProdukPage() {
             <a className="project-link" href="/dashboard_karyawan/daftar-projek">
               Daftar Projek
             </a>
-            <a className="project-link" href="#">
+            <a className="project-link" href="/dashboard_karyawan/success-history">
               Success History
+            </a>
+            <a className="project-link" href="/dashboard_karyawan/daftar-berita">
+              Daftar Berita
             </a>
             <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
               Daftar Pemesanan
@@ -140,6 +143,15 @@ export default async function DaftarProdukPage() {
               Kontak Pelanggan
             </a>
           </nav>
+          <form
+            className="project-logout-form"
+            method="post"
+            action="/api/logout_karyawan"
+          >
+            <button className="project-logout" type="submit">
+              Logout
+            </button>
+          </form>
         </aside>
 
         <div className="project-main">

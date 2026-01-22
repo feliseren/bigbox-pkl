@@ -1,0 +1,313 @@
+import Image from "next/image";
+import { readEmployeeSessionId } from "@/lib/auth";
+import ChipsInput from "@/components/chips-input";
+
+export const dynamic = "force-dynamic";
+
+export default async function SuccessHistoryPage() {
+  const employeeId = await readEmployeeSessionId();
+  const employeeName = employeeId ? "Karyawan" : "Karyawan";
+
+  return (
+    <div className="project-layout">
+      <div className="project-shell">
+        <aside className="project-sidebar">
+          <div className="project-brand">
+            <Image
+              src="/bigbox_logo-removebg-preview.png"
+              alt="BigBox logo"
+              width={160}
+              height={52}
+              className="project-logo"
+            />
+          </div>
+          <p className="project-menu-label">Menu</p>
+          <nav className="project-nav">
+            <a className="project-link" href="/dashboard_karyawan">
+              Dashboard
+            </a>
+            <a className="project-link" href="/dashboard_karyawan/daftar-produk">
+              Daftar Produk
+            </a>
+            <a className="project-link" href="/dashboard_karyawan/daftar-projek">
+              Daftar Projek
+            </a>
+            <a
+              className="project-link active"
+              href="/dashboard_karyawan/success-history"
+            >
+              Success History
+            </a>
+            <a className="project-link" href="/dashboard_karyawan/daftar-berita">
+              Daftar Berita
+            </a>
+            <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
+              Daftar Pemesanan
+            </a>
+            <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
+              Kontak Pelanggan
+            </a>
+          </nav>
+          <form
+            className="project-logout-form"
+            method="post"
+            action="/api/logout_karyawan"
+          >
+            <button className="project-logout" type="submit">
+              Logout
+            </button>
+          </form>
+        </aside>
+
+        <div className="project-main">
+          <header className="project-header">
+            <h1 className="project-title">Tambah Berita Baru</h1>
+            <div className="project-user">
+              <span>{employeeName}</span>
+              <span className="project-avatar" />
+              <span className="project-bell" />
+            </div>
+          </header>
+
+          <main className="project-content">
+            <section className="project-card success-card">
+              <form
+                className="success-form"
+                method="post"
+                action="/api/news"
+                encType="multipart/form-data"
+              >
+                <input
+                  type="hidden"
+                  name="redirect"
+                  value="/dashboard_karyawan/daftar-berita"
+                />
+                <div className="success-row">
+                  <div className="success-label">
+                    <span className="success-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                        <path
+                          d="M4 6h16M4 12h10M4 18h8"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </span>
+                    <span>Judul Berita</span>
+                  </div>
+                  <input
+                    className="success-input"
+                    type="text"
+                    name="title"
+                    placeholder="Masukkan Judul Berita..."
+                    required
+                  />
+                </div>
+
+                <div className="success-row">
+                  <div className="success-label">
+                    <span className="success-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                        <path
+                          d="M4 7h16M7 7v10a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V7"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M9 11h6M9 15h6"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </span>
+                    <span>Kategori</span>
+                  </div>
+                  <select
+                    className="success-input"
+                    name="category"
+                    defaultValue=""
+                    required
+                  >
+                    <option value="" disabled>
+                      Pilih Kategori
+                    </option>
+                    <option value="Big Vision">Big Vision</option>
+                    <option value="Big Assistant">Big Assistant</option>
+                    <option value="Big Social">Big Social</option>
+                    <option value="Big Legal">Big Legal</option>
+                  </select>
+                </div>
+
+                <div className="success-row align-top">
+                  <div className="success-label">
+                    <span className="success-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                        <path
+                          d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                        <path
+                          d="M12 4v10m0 0 4-4m-4 4-4-4"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
+                    <span>Upload Gambar</span>
+                  </div>
+                  <label className="success-upload">
+                    <input
+                      className="success-upload-input"
+                      type="file"
+                      name="image"
+                      accept="image/*"
+                    />
+                    <div className="success-upload-body">
+                      <div className="success-upload-icon" aria-hidden="true">
+                        <svg
+                          viewBox="0 0 24 24"
+                          width="22"
+                          height="22"
+                          fill="none"
+                        >
+                          <path
+                            d="M12 16V6m0 0 4 4m-4-4-4 4"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M4 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </div>
+                      <p>Klik atau drag untuk upload gambar</p>
+                    </div>
+                  </label>
+                </div>
+
+                <div className="success-row align-top">
+                  <div className="success-label">
+                    <span className="success-icon" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                        <path
+                          d="M5 4h11l3 3v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <path
+                          d="M8 12h8M8 16h8"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </span>
+                    <span>Isi Berita</span>
+                  </div>
+                  <div className="success-upload-group">
+                    <label className="success-upload-file">
+                      <span className="success-upload-title">Upload PDF</span>
+                      <input
+                        className="success-input-file"
+                        type="file"
+                        name="storyFile"
+                        accept="application/pdf"
+                      />
+                    </label>
+                    <div className="success-summary">
+                      <p className="success-summary-title">Ringkasan Berita</p>
+                      <div className="success-summary-grid">
+                        <textarea
+                          className="success-summary-text"
+                          name="summaryPart1"
+                          placeholder="Ringkasan bagian 1..."
+                        />
+                        <textarea
+                          className="success-summary-text"
+                          name="summaryPart2"
+                          placeholder="Ringkasan bagian 2..."
+                        />
+                        <textarea
+                          className="success-summary-text"
+                          name="summaryPart3"
+                          placeholder="Ringkasan bagian 3..."
+                        />
+                      </div>
+                    </div>
+                    <div className="success-customer-card">
+                      <div className="success-customer-header">
+                        <div>
+                          <p className="success-customer-title">Informasi Pelanggan</p>
+                          <p className="success-customer-subtitle">
+                            Data pelanggan yang tampil di detail cerita
+                          </p>
+                        </div>
+                        <span className="success-customer-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" width="18" height="18">
+                            <path
+                              d="M7 7a3 3 0 1 1 6 0 3 3 0 0 1-6 0Zm-3 9a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2H4v-2Zm12-9h5v10h-5V7Zm1.5 1.5v7h2V8.5h-2Z"
+                              fill="currentColor"
+                            />
+                          </svg>
+                        </span>
+                      </div>
+                      <div className="success-customer-grid">
+                        <label>
+                          Pelanggan
+                          <input name="customerName" />
+                        </label>
+                        <label>
+                          Industri
+                          <input name="customerIndustry" />
+                        </label>
+                        <label>
+                          Ukuran Organisasi
+                          <input name="customerSize" />
+                        </label>
+                        <label>
+                          Lokasi
+                          <input name="customerLocation" />
+                        </label>
+                      </div>
+                      <label className="success-customer-products">
+                        Produk
+                        <ChipsInput
+                          name="customerProducts"
+                          placeholder="Ketik produk lalu Enter"
+                        />
+                        <span className="success-customer-hint">
+                          Tekan Enter atau koma untuk menambah chip.
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="success-actions">
+                  <button className="success-submit" type="submit">
+                    Publikasikan
+                  </button>
+                </div>
+              </form>
+            </section>
+          </main>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -71,6 +71,18 @@ export function createEmployeeSessionCookie(employeeId: string) {
   };
 }
 
+export function clearEmployeeSessionCookie() {
+  return {
+    name: EMPLOYEE_SESSION_COOKIE,
+    value: "",
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 0,
+  };
+}
+
 export async function readEmployeeSessionId() {
   const cookieStore = await cookies();
   const cookie = cookieStore.get(EMPLOYEE_SESSION_COOKIE)?.value;

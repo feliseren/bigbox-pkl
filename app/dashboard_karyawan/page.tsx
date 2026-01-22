@@ -2,14 +2,6 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 
-const popularNews = [
-  { id: "kemenhub-1", name: "Kementrian Perhubungan", views: "1.200k" },
-  { id: "kemenhub-2", name: "Kementrian Perhubungan", views: "800k" },
-  { id: "company-networking", name: "Company Networking", views: "500k" },
-];
-
-const viewerBars = [20, 28, 35, 22, 18, 30, 26, 40, 32, 36, 38, 44];
-
 const aiOrderColors = [
   { name: "Big Vision", color: "bg-[#5456ff]", hex: "#5456ff" },
   { name: "Big Social", color: "bg-[#7d87ff]", hex: "#7d87ff" },
@@ -17,6 +9,20 @@ const aiOrderColors = [
   { name: "Big Legal", color: "bg-[#e0e3ff]", hex: "#e0e3ff" },
 ];
 const TIME_ZONE = "Asia/Jakarta";
+const MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 function getDatePartsInTimeZone(date: Date) {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -92,6 +98,17 @@ export default async function DashboardKaryawanPage() {
     dailyTotals.set(key, (dailyTotals.get(key) ?? 0) + amount);
     dailyCounts.set(key, (dailyCounts.get(key) ?? 0) + 1);
   });
+  const viewLogs = await prisma.newsView.findMany({
+    where: {
+      createdAt: { gte: startPrevWeek, lt: endOfToday },
+    },
+    select: { createdAt: true },
+  });
+  const viewCountsByDay = new Map<string, number>();
+  viewLogs.forEach((view) => {
+    const key = dateKeyInTimeZone(view.createdAt);
+    viewCountsByDay.set(key, (viewCountsByDay.get(key) ?? 0) + 1);
+  });
   const currentWeekRaw = Array.from({ length: 7 }).map((_, index) => {
     const date = new Date(
       today.getFullYear(),
@@ -118,7 +135,7 @@ export default async function DashboardKaryawanPage() {
         today.getDate() - (6 - index),
       );
       const key = dateKeyInTimeZone(date);
-      return sum + (dailyCounts.get(key) ?? 0);
+      return sum + (viewCountsByDay.get(key) ?? 0);
     },
     0,
   );
@@ -130,7 +147,7 @@ export default async function DashboardKaryawanPage() {
         today.getDate() - (13 - index),
       );
       const key = dateKeyInTimeZone(date);
-      return sum + (dailyCounts.get(key) ?? 0);
+      return sum + (viewCountsByDay.get(key) ?? 0);
     },
     0,
   );
@@ -167,6 +184,48 @@ export default async function DashboardKaryawanPage() {
     prevWeekTotal > 0 ? ((currentWeekTotal - prevWeekTotal) / prevWeekTotal) * 100 : 0;
   const percentLabel = `${percentChange >= 0 ? "+" : ""}${percentChange.toFixed(1)}%`;
   const percentColor = percentChange >= 0 ? "text-[#36a56d]" : "text-[#e32626]";
+  const popularNews = await prisma.newsStory.findMany({
+    orderBy: { viewCount: "desc" },
+    take: 5,
+    select: { id: true, title: true, viewCount: true },
+  });
+  const maxPopularViews = Math.max(
+    1,
+    ...popularNews.map((item) => item.viewCount),
+  );
+  const yearStart = new Date(today.getFullYear(), 0, 1);
+  const yearEnd = new Date(today.getFullYear() + 1, 0, 1);
+  const yearViews = await prisma.newsView.findMany({
+    where: { createdAt: { gte: yearStart, lt: yearEnd } },
+    select: { createdAt: true },
+  });
+  const monthlyCounts = Array.from({ length: 12 }, () => 0);
+  yearViews.forEach((view) => {
+    const { month } = getDatePartsInTimeZone(view.createdAt);
+    const index = month - 1;
+    if (index >= 0 && index < 12) {
+      monthlyCounts[index] += 1;
+    }
+  });
+  const maxMonthlyViews = Math.max(1, ...monthlyCounts);
+  const reviewCounts = await prisma.review.groupBy({
+    by: ["rating"],
+    _count: { rating: true },
+  });
+  const totalReviews = reviewCounts.reduce(
+    (sum, item) => sum + item._count.rating,
+    0,
+  );
+  const reviewSummary = [5, 4, 3, 2, 1].map((rating) => {
+    const found = reviewCounts.find((item) => item.rating === rating);
+    const count = found ? found._count.rating : 0;
+    const percent = totalReviews ? Math.round((count / totalReviews) * 100) : 0;
+    return {
+      label: `${rating} Star`,
+      count,
+      percent,
+    };
+  });
   const [bigAssistant, bigLegal, bigSocial, bigVision] = await Promise.all([
     prisma.bigAssistant.findMany(),
     prisma.bigLegal.findMany(),
@@ -312,9 +371,19 @@ export default async function DashboardKaryawanPage() {
               <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
               Daftar Projek
             </a>
-            <a className="flex items-center gap-2 rounded-lg px-3 py-2" href="#">
+            <a
+              className="flex items-center gap-2 rounded-lg px-3 py-2"
+              href="/dashboard_karyawan/success-history"
+            >
               <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
               Success History
+            </a>
+            <a
+              className="flex items-center gap-2 rounded-lg px-3 py-2"
+              href="/dashboard_karyawan/daftar-berita"
+            >
+              <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
+              Daftar Berita
             </a>
             <a
               className="flex items-center gap-2 rounded-lg px-3 py-2"
@@ -331,6 +400,15 @@ export default async function DashboardKaryawanPage() {
               Kontak Pelanggan
             </a>
           </nav>
+          <form
+            className="project-logout-form"
+            method="post"
+            action="/api/logout_karyawan"
+          >
+            <button className="project-logout" type="submit">
+              Logout
+            </button>
+          </form>
         </aside>
 
         <div className="flex-1">
@@ -522,13 +600,20 @@ export default async function DashboardKaryawanPage() {
                   {popularNews.map((item) => (
                     <div key={item.id} className="space-y-2">
                       <div className="flex items-center justify-between text-xs font-semibold text-[#2a2e3b]">
-                        <span>{item.name}</span>
+                        <span>{item.title}</span>
                         <span className="text-[#6b7185]">
-                          {item.views} Dilihat
+                          {item.viewCount} Dilihat
                         </span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-slate-200">
-                        <div className="h-2 w-[70%] rounded-full bg-gradient-to-r from-[#ffb049] to-[#ff5d6c]" />
+                        <div
+                          className="h-2 rounded-full bg-gradient-to-r from-[#ffb049] to-[#ff5d6c]"
+                          style={{
+                            width: `${Math.round(
+                              (item.viewCount / maxPopularViews) * 100,
+                            )}%`,
+                          }}
+                        />
                       </div>
                     </div>
                   ))}
@@ -548,14 +633,16 @@ export default async function DashboardKaryawanPage() {
                   </span>
                 </div>
                 <div className="mt-6 flex items-end gap-2">
-                  {viewerBars.map((value, index) => (
+                  {monthlyCounts.map((value, index) => (
                     <div key={index} className="flex flex-col items-center">
                       <div
                         className="w-5 rounded-full bg-[#5a3df0]"
-                        style={{ height: `${value * 3}px` }}
+                        style={{
+                          height: `${Math.round((value / maxMonthlyViews) * 120)}px`,
+                        }}
                       />
                       <span className="mt-2 text-[10px] text-[#9aa0b4]">
-                        {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][index]}
+                        {MONTH_LABELS[index]}
                       </span>
                     </div>
                   ))}
@@ -564,24 +651,20 @@ export default async function DashboardKaryawanPage() {
 
               <section className="rounded-[20px] bg-white p-6 shadow-lg">
                 <h3 className="text-base font-semibold">User Feedbacks</h3>
-                <p className="text-xs text-[#7a8092]">All Rating 5</p>
+                <p className="text-xs text-[#7a8092]">
+                  Total review: {totalReviews}
+                </p>
                 <div className="mt-4 space-y-3">
-                  {[
-                    { label: "5 Star", value: 80 },
-                    { label: "4 Star", value: 60 },
-                    { label: "3 Star", value: 40 },
-                    { label: "2 Star", value: 25 },
-                    { label: "1 Star", value: 10 },
-                  ].map((item) => (
+                  {reviewSummary.map((item) => (
                     <div key={item.label} className="space-y-1 text-xs">
                       <div className="flex items-center justify-between text-[#6b7185]">
                         <span>{item.label}</span>
-                        <span>{item.value}</span>
+                        <span>{item.count}</span>
                       </div>
                       <div className="h-2 w-full rounded-full bg-slate-200">
                         <div
                           className="h-2 rounded-full bg-gradient-to-r from-[#ffb049] to-[#ff5d6c]"
-                          style={{ width: `${item.value}%` }}
+                          style={{ width: `${item.percent}%` }}
                         />
                       </div>
                     </div>
