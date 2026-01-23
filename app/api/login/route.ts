@@ -6,6 +6,7 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
+  const remember = formData.get("remember") === "1";
 
   if (!email || !password) {
     return NextResponse.redirect(new URL("/login?error=1", request.url));
@@ -22,6 +23,15 @@ export async function POST(request: Request) {
   }
 
   const response = NextResponse.redirect(new URL("/", request.url));
-  response.cookies.set(createSessionCookie(user.id));
+  response.cookies.set(createSessionCookie(user.id, remember));
+  response.cookies.set({
+    name: "bb_remember",
+    value: remember ? "1" : "0",
+    httpOnly: false,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: remember ? 60 * 60 * 24 * 7 : 60 * 60 * 24,
+  });
   return response;
 }

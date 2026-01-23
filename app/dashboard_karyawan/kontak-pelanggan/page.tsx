@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
+import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 
 const TIME_ZONE = "Asia/Jakarta";
 
@@ -78,8 +79,9 @@ export default async function KontakPelangganPage() {
             className="project-logout-form"
             method="post"
             action="/api/logout_karyawan"
+            suppressHydrationWarning
           >
-            <button className="project-logout" type="submit">
+            <button className="project-logout" type="submit" suppressHydrationWarning>
               Logout
             </button>
           </form>
@@ -88,11 +90,10 @@ export default async function KontakPelangganPage() {
         <div className="project-main">
           <header className="project-header">
             <h1 className="project-title">Kontak Pelanggan</h1>
-            <div className="project-user">
-              <span>{employee?.fullName ?? "Karyawan"}</span>
-              <span className="project-avatar" />
-              <span className="project-bell" />
-            </div>
+            <EmployeeProfileMenu
+              fullName={employee?.fullName ?? "Karyawan"}
+              employeeId={employee?.id ?? "-"}
+            />
           </header>
 
           <main className="project-content">

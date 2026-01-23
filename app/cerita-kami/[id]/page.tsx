@@ -2,8 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { findNewsById } from "@/lib/news-db";
 import { readSessionUserId } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import PdfRenderer from "@/components/pdf-renderer";
 import NewsViewTracker from "@/components/news-view-tracker";
+import { ProfileMenu } from "@/components/profile-menu";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +28,9 @@ export default async function StoryDetailPage({
   const normalizedId = decodeURIComponent(rawId).trim();
   const story = await findNewsById(normalizedId);
   const customerId = await readSessionUserId();
+  const user = customerId
+    ? await prisma.user.findUnique({ where: { id: customerId } })
+    : null;
 
   if (!story) {
     return (
@@ -101,13 +106,17 @@ export default async function StoryDetailPage({
               Cerita Kami
             </a>
           </nav>
-          <a
-            className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#524a4e] hover:bg-gray-100 transition-colors"
-            href="/login"
-          >
-            <span className="inline-block h-4 w-4 rounded-full border border-[#524a4e]" />
-            Login
-          </a>
+          {user ? (
+            <ProfileMenu fullName={user.fullName} />
+          ) : (
+            <a
+              className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#524a4e] hover:bg-gray-100 transition-colors"
+              href="/login"
+            >
+              <span className="inline-block h-4 w-4 rounded-full border border-[#524a4e]" />
+              Login
+            </a>
+          )}
         </div>
       </header>
 

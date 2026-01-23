@@ -3,6 +3,7 @@ import type { Prisma, Project } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { ProjectStatusSelect } from "@/components/project-status-select";
+import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 
 export const dynamic = "force-dynamic";
 
@@ -104,8 +105,9 @@ export default async function DaftarProjekPage({
             className="project-logout-form"
             method="post"
             action="/api/logout_karyawan"
+            suppressHydrationWarning
           >
-            <button className="project-logout" type="submit">
+            <button className="project-logout" type="submit" suppressHydrationWarning>
               Logout
             </button>
           </form>
@@ -114,11 +116,10 @@ export default async function DaftarProjekPage({
         <div className="project-main">
           <header className="project-header">
             <h1 className="project-title">Daftar Project</h1>
-            <div className="project-user">
-              <span>{employee?.fullName ?? "Karyawan"}</span>
-              <span className="project-avatar" />
-              <span className="project-bell" />
-            </div>
+            <EmployeeProfileMenu
+              fullName={employee?.fullName ?? "Karyawan"}
+              employeeId={employee?.id ?? "-"}
+            />
           </header>
 
           <main className="project-content">
@@ -152,6 +153,7 @@ export default async function DaftarProjekPage({
                   className="project-search"
                   method="get"
                   action="/dashboard_karyawan/daftar-projek"
+                  suppressHydrationWarning
                 >
                   {normalizedStatus ? (
                     <input type="hidden" name="status" value={normalizedStatus} />
@@ -160,8 +162,13 @@ export default async function DaftarProjekPage({
                     name="q"
                     placeholder="Search project"
                     defaultValue={query}
+                    suppressHydrationWarning
                   />
-                  <button className="project-search-icon" type="submit">
+                  <button
+                    className="project-search-icon"
+                    type="submit"
+                    suppressHydrationWarning
+                  >
                     <svg
                       aria-hidden="true"
                       viewBox="0 0 24 24"
@@ -218,7 +225,11 @@ export default async function DaftarProjekPage({
                             name="projectId"
                             value={project.id}
                           />
-                          <button className="btn-delete" type="submit">
+                          <button
+                            className="btn-delete"
+                            type="submit"
+                            suppressHydrationWarning
+                          >
                             Delete
                           </button>
                         </form>
@@ -237,7 +248,7 @@ export default async function DaftarProjekPage({
               <div className="project-footer">
                 <div className="project-showing">
                   <span>Showing</span>
-                  <button className="select" type="button">
+                  <button className="select" type="button" suppressHydrationWarning>
                     {projects.length} <span className="caret">v</span>
                   </button>
                   <span>of {totalProjects}</span>

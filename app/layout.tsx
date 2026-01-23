@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
+import { LogoutOnClose } from "@/components/logout-on-close";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -24,6 +25,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={`${poppins.variable}`}>
+        <LogoutOnClose />
         {children}
       </body>
     </html>

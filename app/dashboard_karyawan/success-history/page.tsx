@@ -1,12 +1,17 @@
 import Image from "next/image";
 import { readEmployeeSessionId } from "@/lib/auth";
 import ChipsInput from "@/components/chips-input";
+import { prisma } from "@/lib/prisma";
+import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 
 export const dynamic = "force-dynamic";
 
 export default async function SuccessHistoryPage() {
   const employeeId = await readEmployeeSessionId();
-  const employeeName = employeeId ? "Karyawan" : "Karyawan";
+  const employee = employeeId
+    ? await prisma.employee.findUnique({ where: { id: employeeId } })
+    : null;
+  const employeeName = employee?.fullName ?? "Karyawan";
 
   return (
     <div className="project-layout">
@@ -52,8 +57,9 @@ export default async function SuccessHistoryPage() {
             className="project-logout-form"
             method="post"
             action="/api/logout_karyawan"
+            suppressHydrationWarning
           >
-            <button className="project-logout" type="submit">
+            <button className="project-logout" type="submit" suppressHydrationWarning>
               Logout
             </button>
           </form>
@@ -62,11 +68,10 @@ export default async function SuccessHistoryPage() {
         <div className="project-main">
           <header className="project-header">
             <h1 className="project-title">Tambah Berita Baru</h1>
-            <div className="project-user">
-              <span>{employeeName}</span>
-              <span className="project-avatar" />
-              <span className="project-bell" />
-            </div>
+            <EmployeeProfileMenu
+              fullName={employeeName}
+              employeeId={employee?.id ?? "-"}
+            />
           </header>
 
           <main className="project-content">
@@ -76,6 +81,7 @@ export default async function SuccessHistoryPage() {
                 method="post"
                 action="/api/news"
                 encType="multipart/form-data"
+                suppressHydrationWarning
               >
                 <input
                   type="hidden"
@@ -102,6 +108,7 @@ export default async function SuccessHistoryPage() {
                     name="title"
                     placeholder="Masukkan Judul Berita..."
                     required
+                    suppressHydrationWarning
                   />
                 </div>
 
@@ -131,6 +138,7 @@ export default async function SuccessHistoryPage() {
                     name="category"
                     defaultValue=""
                     required
+                    suppressHydrationWarning
                   >
                     <option value="" disabled>
                       Pilih Kategori
@@ -269,19 +277,19 @@ export default async function SuccessHistoryPage() {
                       <div className="success-customer-grid">
                         <label>
                           Pelanggan
-                          <input name="customerName" />
+                          <input name="customerName" suppressHydrationWarning />
                         </label>
                         <label>
                           Industri
-                          <input name="customerIndustry" />
+                          <input name="customerIndustry" suppressHydrationWarning />
                         </label>
                         <label>
                           Ukuran Organisasi
-                          <input name="customerSize" />
+                          <input name="customerSize" suppressHydrationWarning />
                         </label>
                         <label>
                           Lokasi
-                          <input name="customerLocation" />
+                          <input name="customerLocation" suppressHydrationWarning />
                         </label>
                       </div>
                       <label className="success-customer-products">
@@ -299,7 +307,11 @@ export default async function SuccessHistoryPage() {
                 </div>
 
                 <div className="success-actions">
-                  <button className="success-submit" type="submit">
+                  <button
+                    className="success-submit"
+                    type="submit"
+                    suppressHydrationWarning
+                  >
                     Publikasikan
                   </button>
                 </div>

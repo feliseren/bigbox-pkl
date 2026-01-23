@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
+import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 
 const aiOrderColors = [
   { name: "Big Vision", color: "bg-[#5456ff]", hex: "#5456ff" },
@@ -167,12 +168,14 @@ export default async function DashboardKaryawanPage() {
     ...prevWeekRaw.map((item) => item.value),
   );
   const weeklyBars = currentWeekRaw.map((item, index) => {
-    const prevItem = prevWeekRaw[index];
-    const scale = (value: number) => Math.round((value / maxValue) * 70);
+    const scale = (value: number) => {
+      if (value <= 0) return 4;
+      return Math.max(8, Math.round((value / maxValue) * 90));
+    };
     return {
       day: getDatePartsInTimeZone(item.date).day,
       last6: scale(item.value),
-      lastWeek: scale(prevItem?.value ?? 0),
+      value: item.value,
     };
   });
   const currentWeekTotal = currentWeekRaw.reduce(
@@ -334,69 +337,39 @@ export default async function DashboardKaryawanPage() {
     return `conic-gradient(${slices.join(", ")})`;
   })();
   return (
-    <div className="min-h-screen bg-slate-100 text-[#24262d]">
-      <div className="flex min-h-screen">
-        <aside className="hidden w-[260px] flex-col bg-slate-100 px-6 py-6 md:flex">
-          <div className="mb-8 flex items-center gap-3">
+    <div className="project-layout">
+      <div className="project-shell">
+        <aside className="project-sidebar">
+          <div className="project-brand">
             <Image
               src="/bigbox_logo-removebg-preview.png"
               alt="BigBox logo"
-              width={150}
-              height={48}
-              className="h-8 w-auto"
+              width={160}
+              height={52}
+              className="project-logo"
             />
           </div>
-          <p className="mb-3 text-xs font-semibold uppercase text-[#9aa0b4]">
-            Menu
-          </p>
-          <nav className="space-y-2 text-sm font-medium text-[#6b7185]">
-            <a
-              className="flex items-center gap-2 rounded-lg bg-[#e6e9fb] px-3 py-2 text-[#2a3ad7]"
-              href="/dashboard_karyawan"
-            >
-              <span className="h-2 w-2 rounded-full bg-[#2a3ad7]" />
+          <p className="project-menu-label">Menu</p>
+          <nav className="project-nav">
+            <a className="project-link active" href="/dashboard_karyawan">
               Dashboard
             </a>
-            <a
-              className="flex items-center gap-2 rounded-lg px-3 py-2"
-              href="/dashboard_karyawan/daftar-produk"
-            >
-              <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
+            <a className="project-link" href="/dashboard_karyawan/daftar-produk">
               Daftar Produk
             </a>
-            <a
-              className="flex items-center gap-2 rounded-lg px-3 py-2"
-              href="/dashboard_karyawan/daftar-projek"
-            >
-              <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
+            <a className="project-link" href="/dashboard_karyawan/daftar-projek">
               Daftar Projek
             </a>
-            <a
-              className="flex items-center gap-2 rounded-lg px-3 py-2"
-              href="/dashboard_karyawan/success-history"
-            >
-              <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
+            <a className="project-link" href="/dashboard_karyawan/success-history">
               Success History
             </a>
-            <a
-              className="flex items-center gap-2 rounded-lg px-3 py-2"
-              href="/dashboard_karyawan/daftar-berita"
-            >
-              <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
+            <a className="project-link" href="/dashboard_karyawan/daftar-berita">
               Daftar Berita
             </a>
-            <a
-              className="flex items-center gap-2 rounded-lg px-3 py-2"
-              href="/dashboard_karyawan/daftar-pemesanan"
-            >
-              <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
+            <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
               Daftar Pemesanan
             </a>
-            <a
-              className="flex items-center gap-2 rounded-lg px-3 py-2"
-              href="/dashboard_karyawan/kontak-pelanggan"
-            >
-              <span className="h-2 w-2 rounded-full bg-[#cbd0e5]" />
+            <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
               Kontak Pelanggan
             </a>
           </nav>
@@ -404,27 +377,24 @@ export default async function DashboardKaryawanPage() {
             className="project-logout-form"
             method="post"
             action="/api/logout_karyawan"
+            suppressHydrationWarning
           >
-            <button className="project-logout" type="submit">
+            <button className="project-logout" type="submit" suppressHydrationWarning>
               Logout
             </button>
           </form>
         </aside>
 
-        <div className="flex-1">
-          <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-4">
-            <div className="text-lg font-semibold text-[#1f2430]">
-              Dashboard
-            </div>
-            <div className="flex items-center gap-3 text-sm text-[#4a4f60]">
-              <span className="rounded-full bg-indigo-100 px-3 py-1">
-                {employee?.fullName ?? "Karyawan"}
-              </span>
-              <span className="h-8 w-8 rounded-full bg-[#ffd9b3]" />
-            </div>
+        <div className="project-main">
+          <header className="project-header">
+            <h1 className="project-title">Dashboard</h1>
+            <EmployeeProfileMenu
+              fullName={employee?.fullName ?? "Karyawan"}
+              employeeId={employee?.id ?? "-"}
+            />
           </header>
 
-          <main className="px-6 py-6">
+          <main className="project-content">
             <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
               <section className="rounded-[20px] bg-white p-6 shadow-lg">
                 <div className="flex items-center justify-between">
@@ -444,8 +414,8 @@ export default async function DashboardKaryawanPage() {
                     View Report
                   </a>
                 </div>
-                <div className="relative mt-6">
-                  <div className="absolute inset-0 grid grid-rows-4 gap-6">
+                <div className="relative mt-6 rounded-2xl bg-slate-50/80 px-3 py-4">
+                  <div className="absolute inset-0 grid grid-rows-4 gap-6 px-3 py-4">
                     {Array.from({ length: 4 }).map((_, index) => (
                       <div
                         key={index}
@@ -453,18 +423,20 @@ export default async function DashboardKaryawanPage() {
                       />
                     ))}
                   </div>
-                  <div className="relative flex items-end gap-4">
+                  <div className="relative flex items-end justify-between px-3 py-4">
                     {weeklyBars.map((bar) => (
-                      <div key={bar.day} className="flex flex-col items-center">
-                        <div className="flex items-end gap-2">
+                      <div
+                        key={bar.day}
+                        className="flex flex-1 flex-col items-center"
+                      >
+                        <div className="group relative flex h-32 items-end">
                           <div
-                            className="w-2 rounded-full bg-[#5256ff]"
+                            className="w-3 rounded-full bg-gradient-to-t from-[#4249ff] to-[#7f86ff] shadow-[0_6px_14px_rgba(82,86,255,0.35)]"
                             style={{ height: `${bar.last6}px` }}
                           />
-                          <div
-                            className="w-2 rounded-full bg-slate-200"
-                            style={{ height: `${bar.lastWeek}px` }}
-                          />
+                          <span className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 rounded-full bg-[#1f2430] px-3 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                            {formatRupiah(bar.value)}
+                          </span>
                         </div>
                         <span className="mt-2 text-[10px] text-[#9aa0b4]">
                           {bar.day}
@@ -477,10 +449,6 @@ export default async function DashboardKaryawanPage() {
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-[#5256ff]" />
                     Last 7 days
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-slate-200" />
-                    Last Week
                   </span>
                 </div>
               </section>
@@ -500,24 +468,30 @@ export default async function DashboardKaryawanPage() {
                     Mingguan
                   </span>
                 </div>
-                <div className="mt-6 flex items-end justify-center gap-6">
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="flex h-28 items-end">
-                      <div
-                        className="w-8 rounded-full bg-[#5256ff]"
-                        style={{ height: `${viewerCurrentHeight}px` }}
-                      />
+                <div className="mt-6 rounded-2xl bg-slate-50/80 px-4 py-6">
+                  <div className="flex items-end justify-between">
+                    <div className="flex flex-1 flex-col items-center gap-3">
+                      <div className="flex h-32 items-end">
+                        <div
+                          className="w-10 rounded-full bg-gradient-to-t from-[#4249ff] to-[#7f86ff] shadow-[0_6px_14px_rgba(82,86,255,0.35)]"
+                          style={{ height: `${viewerCurrentHeight}px` }}
+                        />
+                      </div>
+                      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#4a4f60] shadow-sm">
+                        Minggu ini
+                      </span>
                     </div>
-                    <span className="text-[11px] text-[#7a8092]">Minggu ini</span>
-                  </div>
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="flex h-28 items-end">
-                      <div
-                        className="w-8 rounded-full bg-slate-200"
-                        style={{ height: `${viewerPrevHeight}px` }}
-                      />
+                    <div className="flex flex-1 flex-col items-center gap-3">
+                      <div className="flex h-32 items-end">
+                        <div
+                          className="w-10 rounded-full bg-gradient-to-t from-[#cfd5ff] to-[#eef1ff]"
+                          style={{ height: `${viewerPrevHeight}px` }}
+                        />
+                      </div>
+                      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#7a8092] shadow-sm">
+                        Minggu lalu
+                      </span>
                     </div>
-                    <span className="text-[11px] text-[#7a8092]">Minggu lalu</span>
                   </div>
                 </div>
               </section>
@@ -564,9 +538,12 @@ export default async function DashboardKaryawanPage() {
                       Total pesanan selesai: {totalOrders}
                     </p>
                   </div>
-                  <button className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-[#6b7185]">
+                  <a
+                    className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-[#6b7185]"
+                    href="/api/reports/ai-orders"
+                  >
                     View Report
-                  </button>
+                  </a>
                 </div>
                 <div className="mt-6 flex items-center justify-center">
                   <div className="relative h-40 w-40">

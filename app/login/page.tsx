@@ -31,7 +31,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               We are very happy to see you back!
             </p>
 
-            <form className="mt-8 space-y-5" method="post" action="/api/login">
+            <form
+              className="mt-8 space-y-5"
+              method="post"
+              action="/api/login"
+              suppressHydrationWarning
+            >
               <div>
                 <label
                   className="text-sm font-semibold text-[#3a3a3a]"
@@ -44,6 +49,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   id="email"
                   name="email"
                   placeholder="xxxxx@gmail.com"
+                  suppressHydrationWarning
                   type="email"
                 />
               </div>
@@ -60,6 +66,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   id="password"
                   name="password"
                   placeholder="************"
+                  suppressHydrationWarning
                   type="password"
                 />
               </div>
@@ -74,7 +81,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 <input
                   className="h-4 w-4 rounded border-[#cfcfcf]"
                   id="remember"
+                  name="remember"
                   type="checkbox"
+                  value="1"
                 />
                 <label htmlFor="remember">Remember me</label>
               </div>
@@ -85,6 +94,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
               <button
                 className="mt-2 w-full rounded-lg bg-[#151a5b] py-2 text-sm font-semibold text-white"
+                suppressHydrationWarning
                 type="submit"
               >
                 Login
@@ -98,6 +108,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
               <button
                 className="flex w-full items-center justify-center gap-3 rounded-lg border border-[#dedede] py-2 text-sm font-semibold text-[#4a4a4a]"
+                suppressHydrationWarning
                 type="button"
               >
                 <span className="grid h-6 w-6 place-items-center rounded-full bg-white text-[#ea4335]">

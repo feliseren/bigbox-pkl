@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
+import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 
 export const dynamic = "force-dynamic";
 
@@ -157,11 +158,10 @@ export default async function DaftarProdukPage() {
         <div className="project-main">
           <header className="project-header">
             <h1 className="project-title">Daftar Produk</h1>
-            <div className="project-user">
-              <span>{employee?.fullName ?? "Karyawan"}</span>
-              <span className="project-avatar" />
-              <span className="project-bell" />
-            </div>
+            <EmployeeProfileMenu
+              fullName={employee?.fullName ?? "Karyawan"}
+              employeeId={employee?.id ?? "-"}
+            />
           </header>
 
           <main className="project-content">

@@ -1,6 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { fetchNews } from "@/lib/news-db";
+import { readSessionUserId } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { ProfileMenu } from "@/components/profile-menu";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +33,10 @@ export default async function CeritaKamiPage({
 }: {
   searchParams?: Promise<{ q?: string | string[]; category?: string | string[] }>;
 }) {
+  const userId = await readSessionUserId();
+  const user = userId
+    ? await prisma.user.findUnique({ where: { id: userId } })
+    : null;
   const resolvedSearchParams = await searchParams;
   const rawQuery = resolvedSearchParams?.q;
   const rawCategory = resolvedSearchParams?.category;
@@ -79,13 +86,17 @@ export default async function CeritaKamiPage({
               Cerita Kami
             </a>
           </nav>
-          <a
-            className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#524a4e] hover:bg-gray-100 transition-colors"
-            href="/login"
-          >
-            <span className="inline-block h-4 w-4 rounded-full border border-[#524a4e]" />
-            Login
-          </a>
+          {user ? (
+            <ProfileMenu fullName={user.fullName} />
+          ) : (
+            <a
+              className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#524a4e] hover:bg-gray-100 transition-colors"
+              href="/login"
+            >
+              <span className="inline-block h-4 w-4 rounded-full border border-[#524a4e]" />
+              Login
+            </a>
+          )}
         </div>
       </header>
 

@@ -23,15 +23,24 @@ function sign(value: string) {
   return crypto.createHmac("sha256", getSecret()).update(value).digest("hex");
 }
 
-export function createSessionCookie(userId: string) {
-  const value = `${userId}.${sign(userId)}`;
-  return {
+export function createSessionCookie(userId: string, remember = false) {
+  const issuedAt = Date.now().toString(36);
+  const nonce = crypto.randomBytes(8).toString("hex");
+  const payload = `${userId}.${issuedAt}.${nonce}`;
+  const value = `${payload}.${sign(payload)}`;
+  const baseCookie = {
     name: SESSION_COOKIE,
     value,
     httpOnly: true,
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
+  };
+  if (!remember) {
+    return baseCookie;
+  }
+  return {
+    ...baseCookie,
     maxAge: SESSION_TTL_SECONDS,
   };
 }
@@ -52,9 +61,18 @@ export async function readSessionUserId() {
   const cookieStore = await cookies();
   const cookie = cookieStore.get(SESSION_COOKIE)?.value;
   if (!cookie) return null;
-  const [id, sig] = cookie.split(".");
-  if (!id || !sig) return null;
-  if (sign(id) !== sig) return null;
+  const parts = cookie.split(".");
+  if (parts.length === 2) {
+    const [id, sig] = parts;
+    if (!id || !sig) return null;
+    if (sign(id) !== sig) return null;
+    return id;
+  }
+  if (parts.length !== 4) return null;
+  const [id, issuedAt, nonce, sig] = parts;
+  if (!id || !issuedAt || !nonce || !sig) return null;
+  const payload = `${id}.${issuedAt}.${nonce}`;
+  if (sign(payload) !== sig) return null;
   return id;
 }
 

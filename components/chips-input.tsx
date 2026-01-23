@@ -60,6 +60,7 @@ export default function ChipsInput({ name, placeholder }: ChipsInputProps) {
           placeholder={placeholder}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
+          suppressHydrationWarning
         />
       </div>
       <input type="hidden" name={name} value={chips.join(",")} />

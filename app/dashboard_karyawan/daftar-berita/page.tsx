@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { fetchNewsWithReviews } from "@/lib/news-db";
 import { readEmployeeSessionId } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +33,10 @@ export default async function DaftarBeritaPage({
 }) {
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
-  const employeeName = employeeId ? "Karyawan" : "Karyawan";
+  const employee = employeeId
+    ? await prisma.employee.findUnique({ where: { id: employeeId } })
+    : null;
+  const employeeName = employee?.fullName ?? "Karyawan";
   const rawQuery = resolvedSearchParams?.q;
   const rawCategory = resolvedSearchParams?.category;
   const query =
@@ -73,14 +78,14 @@ export default async function DaftarBeritaPage({
             <a className="project-link" href="/dashboard_karyawan/success-history">
               Success History
             </a>
+            <a className="project-link active" href="/dashboard_karyawan/daftar-berita">
+              Daftar Berita
+            </a>
             <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
               Daftar Pemesanan
             </a>
             <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
               Kontak Pelanggan
-            </a>
-            <a className="project-link active" href="/dashboard_karyawan/daftar-berita">
-              Daftar Berita
             </a>
           </nav>
           <form
@@ -97,11 +102,10 @@ export default async function DaftarBeritaPage({
         <div className="project-main">
           <header className="project-header">
             <h1 className="project-title">Daftar Berita</h1>
-            <div className="project-user">
-              <span>{employeeName}</span>
-              <span className="project-avatar" />
-              <span className="project-bell" />
-            </div>
+            <EmployeeProfileMenu
+              fullName={employeeName}
+              employeeId={employee?.id ?? "-"}
+            />
           </header>
 
           <main className="project-content">

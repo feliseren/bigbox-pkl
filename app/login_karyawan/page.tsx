@@ -22,25 +22,39 @@ export default function LoginKaryawanPage() {
             Masukkan ID Karyawan dan Password
           </p>
 
-          <form className="mt-6 space-y-4" method="post" action="/api/login_karyawan">
+          <form
+            className="mt-6 space-y-4"
+            method="post"
+            action="/api/login_karyawan"
+            suppressHydrationWarning
+          >
             <input
               className="w-full rounded-lg border border-[#d9d9d9] px-4 py-3 text-sm text-[#1f1f1f] outline-none focus:border-[#2f2f6f] focus:ring-2 focus:ring-[#c3c5ff]"
               name="employeeId"
               placeholder="Id Karyawan"
+              suppressHydrationWarning
               type="text"
             />
             <input
               className="w-full rounded-lg border border-[#d9d9d9] px-4 py-3 text-sm text-[#1f1f1f] outline-none focus:border-[#2f2f6f] focus:ring-2 focus:ring-[#c3c5ff]"
               name="password"
               placeholder="Password"
+              suppressHydrationWarning
               type="password"
             />
             <button
               className="mt-2 w-full rounded-lg bg-[#151a5b] py-3 text-sm font-semibold text-white"
+              suppressHydrationWarning
               type="submit"
             >
               Log in
             </button>
+            <p className="text-center text-sm text-[#6b6b6b]">
+              Bukan Karyawan?{" "}
+              <a className="font-semibold text-[#3f4ce0]" href="/login">
+                login disini
+              </a>
+            </p>
           </form>
         </div>
       </div>

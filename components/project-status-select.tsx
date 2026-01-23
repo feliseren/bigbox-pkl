@@ -34,6 +34,7 @@ export function ProjectStatusSelect({
       value={status}
       onChange={(event) => handleChange(event.target.value as "Process" | "Done")}
       disabled={isPending}
+      suppressHydrationWarning
     >
       <option value="Process">Process</option>
       <option value="Done">Done</option>
