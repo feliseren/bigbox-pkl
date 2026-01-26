@@ -9,6 +9,8 @@ datasource db {
 
 model Test {
   id Int @id @default(autoincrement())
+
+  @@map("test")
 }
 
 model User {
@@ -16,9 +18,13 @@ model User {
   email     String   @unique
   password  String
   fullName  String
+  hasLocalPassword Boolean @default(true) @map("has_local_password")
   createdAt DateTime @default(now())
   orders    Order[]
   reviews   Review[]
+  resetTokens PasswordResetToken[]
+
+  @@map("user")
 }
 
 model Employee {
@@ -26,6 +32,8 @@ model Employee {
   fullName  String
   password  String
   createdAt DateTime @default(now())
+
+  @@map("employee")
 }
 
 model Project {
@@ -35,6 +43,8 @@ model Project {
   owner       String
   status      String
   createdAt   DateTime @default(now())
+
+  @@map("project")
 }
 
 model BigAssistant {
@@ -129,6 +139,8 @@ model Consultation {
   product   String   // BigAI atau BigVision
   message   String   @db.LongText
   createdAt DateTime @default(now())
+
+  @@map("consultation")
 }
 
 model NewsStory {
@@ -169,6 +181,19 @@ model Review {
   user      User      @relation(fields: [userId], references: [id])
 
   @@map("news_reviews")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("password_reset_tokens")
 }
 
 model NewsView {

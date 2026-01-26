@@ -1,12 +1,13 @@
 import Image from "next/image";
 
 type LoginPageProps = {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string; reset?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = (await searchParams) ?? {};
   const hasError = Boolean(params.error);
+  const reset = params.reset ?? "";
 
   return (
     <div className="min-h-screen bg-[#14121d] px-6 py-12">
@@ -76,6 +77,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   Email atau password salah.
                 </p>
               )}
+              {reset === "1" && (
+                <p className="text-sm font-semibold text-[#2d7a4f]">
+                  Link reset sudah dikirim ke email Anda.
+                </p>
+              )}
+              {reset === "2" && (
+                <p className="text-sm font-semibold text-[#2d7a4f]">
+                  Password berhasil diubah. Silakan login.
+                </p>
+              )}
 
               <div className="flex items-center gap-2 text-sm text-[#6b6b6b]">
                 <input
@@ -88,7 +99,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 <label htmlFor="remember">Remember me</label>
               </div>
 
-              <a className="text-sm font-semibold text-[#3f4ce0]" href="#">
+              <a className="text-sm font-semibold text-[#3f4ce0]" href="/forgot-password">
                 Forgot Password?
               </a>
 
@@ -97,7 +108,36 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 suppressHydrationWarning
                 type="submit"
               >
-                Login
+                <span className="inline-flex items-center justify-center gap-2">
+                  <svg
+                    aria-hidden="true"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="7"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                    />
+                    <path
+                      d="M16.5 17a4.5 4.5 0 0 0-9 0"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeWidth="1.6"
+                    />
+                    <circle
+                      cx="12"
+                      cy="10"
+                      r="2.3"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                    />
+                  </svg>
+                  Login
+                </span>
               </button>
 
               <div className="flex items-center gap-3 text-xs text-[#8a8a8a]">
@@ -106,16 +146,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 <div className="h-px w-full bg-[#dedede]" />
               </div>
 
-              <button
+              <a
                 className="flex w-full items-center justify-center gap-3 rounded-lg border border-[#dedede] py-2 text-sm font-semibold text-[#4a4a4a]"
-                suppressHydrationWarning
-                type="button"
+                href="/api/auth/google"
               >
                 <span className="grid h-6 w-6 place-items-center rounded-full bg-white text-[#ea4335]">
                   G
                 </span>
                 Login with Google
-              </button>
+              </a>
 
               <p className="text-center text-sm text-[#6b6b6b]">
                 Don't have account?{" "}

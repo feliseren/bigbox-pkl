@@ -23,6 +23,7 @@ export async function POST(request: Request) {
       email,
       fullName,
       password: hashed,
+      hasLocalPassword: true,
     },
   });
 
