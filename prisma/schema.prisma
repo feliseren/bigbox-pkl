@@ -25,7 +25,15 @@ model Employee {
   id        String   @id
   fullName  String
   password  String
+  role      EmployeeRole @default(STAFF)
   createdAt DateTime @default(now())
+}
+
+enum EmployeeRole {
+  ADMIN
+  MARKETING
+  PROJECT_MANAGEMENT
+  STAFF
 }
 
 model Project {

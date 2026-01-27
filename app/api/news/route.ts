@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { createNews } from "@/lib/news-db";
+import { prisma } from "@/lib/prisma";
 import pdfParse from "pdf-parse";
 import path from "path";
 import { mkdir, writeFile } from "fs/promises";
@@ -62,6 +63,18 @@ export async function POST(request: Request) {
   const imageFile = formData.get("image");
   const documentFile = formData.get("storyFile");
 
+  const employeeId = await readEmployeeSessionId();
+  if (!employeeId) {
+    return NextResponse.redirect(new URL("/login_karyawan", request.url), 303);
+  }
+  const employee = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: { role: true },
+  });
+  if (!employee || employee.role !== "PROJECT_MANAGEMENT") {
+    return NextResponse.redirect(new URL(`${redirectTo}?error=forbidden`, request.url), 303);
+  }
+
   if (!title || !category) {
     return NextResponse.redirect(new URL(redirectTo, request.url), 303);
   }
@@ -85,7 +98,6 @@ export async function POST(request: Request) {
     }
   }
 
-    const employeeId = await readEmployeeSessionId();
     const authorName = employeeId ? "Karyawan" : "Admin";
 
     await createNews({
