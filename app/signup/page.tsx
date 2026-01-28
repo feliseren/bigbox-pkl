@@ -114,15 +114,15 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 <div className="h-px w-full bg-[#cfcde2]" />
               </div>
 
-              <button
+              <a
                 className="flex w-full items-center justify-center gap-3 rounded-lg bg-[#151a5b] py-3 text-sm font-semibold text-white"
-                type="button"
+                href="/api/auth/google"
               >
                 <span className="grid h-6 w-6 place-items-center rounded-full bg-white text-[#ea4335]">
                   G
                 </span>
                 Register with Google
-              </button>
+              </a>
 
               <p className="text-sm text-[#5f5f7a]">
                 Already have an account?{" "}

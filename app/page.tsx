@@ -63,22 +63,28 @@ const awards = [
   {
     title: "ASEAN Federation of Engineering Organisations (AFEO) Awards 2018",
     desc: "ASEAN Outstanding Engineering Achievement Award",
+    image: "/AFEO.png",
+    logo: "/AFEO.png",
   },
   {
     title: "TOP 10 Big Data Solution Provider 2019",
     desc: "Top 10 Big Data Solution Provider 2019 in APAC versi CIO Outlook",
+    logo: "/outlook.png",
   },
   {
     title: "Cloudera Data Impact Awards Finalist 2019",
     desc: "Edge-to-AI Category (The Biggest data-in-motion implementator in APAC)",
+    logo: "/Cloudera.png",
   },
   {
     title: "TOP 3 Technology Breakthrough BUMN Summit 2020",
     desc: "TOP 3 Technology Breakthrough Innovation BUMN Summit 2020",
+    logo: "/bumn.png",
   },
   {
     title: "The Most Innovate in Analytics 2021",
     desc: "Most Innovative Analytics in Big Data Category",
+    logo: "/abdi.png",
   },
 ];
 
@@ -148,31 +154,31 @@ export default async function Home() {
           </p>
         </section>
 
-        <section className="mx-auto max-w-[1237px] px-6 py-8">
-          <div className="mb-10 text-center">
-            <h2 className="text-[26px] font-bold text-[var(--ink)]">TUJUAN</h2>
-            <div className="mx-auto mt-3 h-[3px] w-[120px] bg-[var(--ink)]" />
+        <section className="mx-auto max-w-[1237px] px-6 py-10">
+          <div className="mb-12 text-center">
+            <h2 className="tujuan-title">TUJUAN</h2>
+            <div className="tujuan-divider" />
           </div>
-          <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-4">
+          <div className="tujuan-grid">
             {tujuanItems.map((item) => (
               <div
                 key={item.title}
-                className="min-h-[320px] rounded-[25px] bg-[var(--panel)] p-5 text-center shadow-[0_6px_12px_rgba(0,0,0,0.15)] hover:shadow-[0_8px_16px_rgba(0,0,0,0.2)] transition-shadow"
+                className="tujuan-card"
               >
-                <h3 className="mb-5 text-[14px] font-bold text-[var(--ink)] leading-[1.5]">
-                  {item.title}
-                </h3>
-                <ul className="space-y-3 text-[12px] text-black">
+                <h3 className="tujuan-card-title">{item.title}</h3>
+                <ul className="tujuan-list">
                   {item.points.map((point) => (
-                    <li key={point.text} className="flex items-center gap-2.5 px-1">
-                      <Image
-                        src={point.icon}
-                        alt={point.text}
-                        width={38}
-                        height={38}
-                        className="h-9 w-9 flex-shrink-0"
-                      />
-                      <span className="text-left font-medium">{point.text}</span>
+                    <li key={point.text} className="tujuan-item">
+                      <span className="tujuan-icon">
+                        <Image
+                          src={point.icon}
+                          alt=""
+                          width={28}
+                          height={28}
+                          className="tujuan-icon-image"
+                        />
+                      </span>
+                      <span className="tujuan-text">{point.text}</span>
                     </li>
                   ))}
                 </ul>
@@ -218,30 +224,45 @@ export default async function Home() {
             <h2 className="text-[36px] font-bold text-[var(--ink)]">AWARD</h2>
             <div className="mx-auto mt-3 h-[4px] w-[147px] bg-[var(--ink)]" />
           </div>
-          <div className="rounded-[40px] bg-gradient-to-br from-[#251f6d] to-[#282626] px-10 py-12">
-            <div className="grid gap-6 md:grid-cols-2">
+          <div className="award-surface">
+            <div className="award-grid md:grid-cols-2">
               {awards.slice(0, 4).map((award) => (
-                <div
-                  key={award.title}
-                  className="min-h-[328px] rounded-[20px] bg-[#d9d9d9] p-6 text-center"
-                >
-                  <p className="text-[24px] font-bold text-black">
-                    {award.title}
-                  </p>
-                  <p className="mt-3 text-[20px] font-normal text-black">
-                    {award.desc}
-                  </p>
+                <div key={award.title} className="award-card">
+                  <div className="award-card-header">
+                    {award.logo ? (
+                      <div className="award-logo">
+                        <Image
+                          src={award.logo}
+                          alt={`${award.title} logo`}
+                          width={52}
+                          height={52}
+                          className="award-logo-image"
+                        />
+                      </div>
+                    ) : null}
+                    <p className="award-title">{award.title}</p>
+                  </div>
+                  <p className="award-desc">{award.desc}</p>
                 </div>
               ))}
             </div>
-            <div className="mt-8 flex justify-center">
-              <div className="min-h-[328px] w-full max-w-[392px] rounded-[20px] bg-[#d9d9d9] p-6 text-center">
-                <p className="text-[24px] font-bold text-black">
-                  {awards[4].title}
-                </p>
-                <p className="mt-3 text-[20px] font-normal text-black">
-                  {awards[4].desc}
-                </p>
+            <div className="award-single">
+              <div className="award-card award-card-single">
+                <div className="award-card-header">
+                  {awards[4].logo ? (
+                    <div className="award-logo">
+                      <Image
+                        src={awards[4].logo}
+                        alt={`${awards[4].title} logo`}
+                        width={52}
+                        height={52}
+                        className="award-logo-image"
+                      />
+                    </div>
+                  ) : null}
+                  <p className="award-title">{awards[4].title}</p>
+                </div>
+                <p className="award-desc">{awards[4].desc}</p>
               </div>
             </div>
           </div>

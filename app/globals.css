@@ -48,6 +48,168 @@ body {
   border-bottom: 2px solid var(--accent);
 }
 
+.tujuan-title {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #2b2740;
+}
+
+.tujuan-divider {
+  width: 150px;
+  height: 4px;
+  background: linear-gradient(90deg, #2b2740 0%, #3a2f73 45%, #1f6cab 100%);
+  margin: 12px auto 0;
+  border-radius: 999px;
+}
+
+.tujuan-grid {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.tujuan-card {
+  min-height: 0;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f1f8 100%);
+  padding: 26px 24px;
+  box-shadow: 0 18px 36px rgba(35, 31, 70, 0.12);
+  border: 1px solid rgba(52, 41, 97, 0.08);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.tujuan-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(24, 24, 24, 0.16);
+}
+
+.tujuan-card-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #241f33;
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.tujuan-list {
+  display: grid;
+  gap: 14px;
+  font-size: 15px;
+  color: #2b2640;
+}
+
+.tujuan-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.tujuan-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f8f4ff 0%, #e7f0ff 100%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 18px rgba(33, 40, 88, 0.18);
+  border: 1px solid rgba(56, 78, 148, 0.18);
+  flex-shrink: 0;
+}
+
+.tujuan-icon-image {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.tujuan-text {
+  flex: 1;
+}
+
+.award-surface {
+  border-radius: 40px;
+  background: linear-gradient(135deg, #251f6d 0%, #282626 100%);
+  padding: 56px 44px;
+}
+
+.award-grid {
+  display: grid;
+  gap: 28px;
+  justify-items: center;
+}
+
+.award-card {
+  min-height: 220px;
+  max-width: 420px;
+  width: 100%;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ededed 0%, #d9d9d9 100%);
+  padding: 14px 16px 16px;
+  text-align: center;
+  box-shadow: 0 12px 24px rgba(14, 12, 34, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.award-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 30px rgba(14, 12, 34, 0.24);
+}
+
+.award-card-single {
+  width: 100%;
+  max-width: 340px;
+}
+
+.award-card-header {
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+
+.award-logo {
+  width: 68px;
+  height: 68px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.award-logo-image {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+
+.award-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #111111;
+  line-height: 1.35;
+}
+
+.award-desc {
+  margin-top: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  color: #2b2b2b;
+  line-height: 1.45;
+}
+
+.award-single {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+}
+
 .flip-card {
   perspective: 1200px;
 }

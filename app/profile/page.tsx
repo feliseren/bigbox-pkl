@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { readSessionUserId } from "@/lib/auth";
+import { readEmployeeSessionId, readSessionUserId } from "@/lib/auth";
 
 type ProfileSearchParams = {
   error?: string | string[];
@@ -82,6 +82,10 @@ export default async function ProfilePage({
 }) {
   const userId = await readSessionUserId();
   if (!userId) {
+    const employeeId = await readEmployeeSessionId();
+    if (employeeId) {
+      redirect("/dashboard_karyawan/profile");
+    }
     redirect("/login");
   }
 
@@ -93,13 +97,15 @@ export default async function ProfilePage({
   const error = normalizeParam(resolvedSearchParams?.error);
   const success = normalizeParam(resolvedSearchParams?.success);
   const message =
-    success === "1"
-      ? "Password berhasil diubah."
+    success === "2"
+      ? "Password berhasil dibuat."
+      : success === "1"
+        ? "Password berhasil diubah."
       : error === "1"
         ? "Lengkapi semua field password."
         : error === "2"
           ? "Konfirmasi password tidak sama."
-          : error === "3"
+        : error === "3"
             ? "Password lama salah."
             : null;
   const [orders, bigAssistant, bigLegal, bigSocial, bigVision] = await Promise.all(
@@ -185,12 +191,19 @@ export default async function ProfilePage({
             action="/api/profile/password"
           >
             <h2 className="text-sm font-semibold text-[#1f1f1f]">
-              Ubah Password
+              {user.hasLocalPassword ? "Ubah Password" : "Set Password"}
             </h2>
-            <label>
-              Password Lama
-              <input name="currentPassword" type="password" required />
-            </label>
+            {user.hasLocalPassword ? (
+              <label>
+                Password Lama
+                <input name="currentPassword" type="password" required />
+              </label>
+            ) : (
+              <p className="text-xs text-[#6b6b6b]">
+                Akun Google belum memiliki password lokal. Silakan set password
+                baru di bawah ini.
+              </p>
+            )}
             <label>
               Password Baru
               <input name="newPassword" type="password" required />
