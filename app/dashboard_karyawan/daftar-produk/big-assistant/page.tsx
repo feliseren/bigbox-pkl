@@ -1,6 +1,8 @@
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
+import { ProductActionButtons } from "@/components/product-action-buttons";
+import { EmployeeSidebar } from "@/components/employee-sidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +22,8 @@ export default async function BigAssistantPage() {
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
+  const canManageProducts =
+    employee?.role === "ADMIN" || employee?.role === "MARKETING";
   const [products, orders] = await Promise.all([
     prisma.bigAssistant.findMany({ orderBy: { id: "desc" } }),
     prisma.order.findMany({
@@ -42,53 +46,7 @@ export default async function BigAssistantPage() {
   return (
     <div className="project-layout">
       <div className="project-shell">
-        <aside className="project-sidebar">
-          <div className="project-brand">
-            <Image
-              src="/bigbox_logo-removebg-preview.png"
-              alt="BigBox logo"
-              width={160}
-              height={52}
-              className="project-logo"
-            />
-          </div>
-          <p className="project-menu-label">Menu</p>
-          <nav className="project-nav">
-            <a className="project-link" href="/dashboard_karyawan">
-              Dashboard
-            </a>
-            <a
-              className="project-link active"
-              href="/dashboard_karyawan/daftar-produk"
-            >
-              Daftar Produk
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-projek">
-              Daftar Projek
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/success-history">
-              Success History
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-berita">
-              Daftar Berita
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
-              Daftar Pemesanan
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
-              Kontak Pelanggan
-            </a>
-          </nav>
-          <form
-            className="project-logout-form"
-            method="post"
-            action="/api/logout_karyawan"
-          >
-            <button className="project-logout" type="submit">
-              Logout
-            </button>
-          </form>
-        </aside>
+        <EmployeeSidebar active="produk" />
 
         <div className="project-main">
           <header className="project-header product-detail-header">
@@ -107,9 +65,11 @@ export default async function BigAssistantPage() {
 
           <main className="project-content">
             <section className="product-detail-card">
-              <a className="product-new-btn" href="#new-product">
-                New Product
-              </a>
+              {canManageProducts ? (
+                <a className="product-new-btn" href="#new-product">
+                  New Product
+                </a>
+              ) : null}
               <div className="product-detail-table">
                 <div className="product-detail-header-row">
                   <span>NAMA PRODUK</span>
@@ -129,60 +89,57 @@ export default async function BigAssistantPage() {
                       >
                         Detail
                       </a>
-                      <a
-                        className="btn-edit"
-                        href={`#edit-product-${sanitizeId(row.id)}`}
-                      >
-                        Edit
-                      </a>
-                      <button className="btn-delete" type="button">
-                        Delete
-                      </button>
+                      <ProductActionButtons
+                        canManage={canManageProducts}
+                        editHref={`#edit-product-${sanitizeId(row.id)}`}
+                      />
                     </span>
                   </div>
                 ))}
               </div>
             </section>
 
-            <div id="new-product" className="project-modal">
-              <div className="product-form-card">
-                <div className="product-form-header">
-                  <a className="product-back" href="#">
-                    &lt; Back
-                  </a>
-                  <h2>BIG ASSISTANT</h2>
+            {canManageProducts ? (
+              <div id="new-product" className="project-modal">
+                <div className="product-form-card">
+                  <div className="product-form-header">
+                    <a className="product-back" href="#">
+                      &lt; Back
+                    </a>
+                    <h2>BIG ASSISTANT</h2>
+                  </div>
+                  <form className="product-form" method="post" action="/api/products">
+                    <input type="hidden" name="productType" value="big-assistant" />
+                    <input
+                      type="hidden"
+                      name="redirect"
+                      value="/dashboard_karyawan/daftar-produk/big-assistant"
+                    />
+                    <div className="product-form-row">
+                      <label>
+                        Nama Produk
+                        <input name="name" placeholder="Nama produk" required />
+                      </label>
+                      <label>
+                        Harga Produk
+                        <input name="price" placeholder="Harga produk" required />
+                      </label>
+                      <label>
+                        Durasi
+                        <input name="duration" placeholder="per bulan" required />
+                      </label>
+                    </div>
+                    <label className="product-form-full">
+                      Deskripsi Produk
+                      <textarea name="description" rows={4} required />
+                    </label>
+                    <div className="product-form-actions">
+                      <button type="submit">Tambahkan</button>
+                    </div>
+                  </form>
                 </div>
-                <form className="product-form" method="post" action="/api/products">
-                  <input type="hidden" name="productType" value="big-assistant" />
-                  <input
-                    type="hidden"
-                    name="redirect"
-                    value="/dashboard_karyawan/daftar-produk/big-assistant"
-                  />
-                  <div className="product-form-row">
-                    <label>
-                      Nama Produk
-                      <input name="name" placeholder="Nama produk" required />
-                    </label>
-                    <label>
-                      Harga Produk
-                      <input name="price" placeholder="Harga produk" required />
-                    </label>
-                    <label>
-                      Durasi
-                      <input name="duration" placeholder="per bulan" required />
-                    </label>
-                  </div>
-                  <label className="product-form-full">
-                    Deskripsi Produk
-                    <textarea name="description" rows={4} required />
-                  </label>
-                  <div className="product-form-actions">
-                    <button type="submit">Tambahkan</button>
-                  </div>
-                </form>
               </div>
-            </div>
+            ) : null}
 
             {rows.map((row) => (
               <div
@@ -223,65 +180,75 @@ export default async function BigAssistantPage() {
                 </div>
               </div>
             ))}
-            {rows.map((row) => (
-              <div
-                key={`edit-${row.id}`}
-                id={`edit-product-${sanitizeId(row.id)}`}
-                className="project-modal"
-              >
-                <div className="product-form-card">
-                  <div className="product-form-header">
-                    <a className="product-back" href="#">
-                      &lt; Back
-                    </a>
-                    <h2>BIG ASSISTANT</h2>
-                  </div>
-                  <form className="product-form" method="post" action="/api/products/update">
-                    <input type="hidden" name="productType" value="big-assistant" />
-                    <input type="hidden" name="productId" value={row.id} />
-                    <input
-                      type="hidden"
-                      name="redirect"
-                      value="/dashboard_karyawan/daftar-produk/big-assistant"
-                    />
-                    <div className="product-form-row">
-                      <label>
-                        Nama Produk
-                        <input name="name" defaultValue={row.name} required />
-                      </label>
-                      <label>
-                        Harga Produk
-                        <input name="price" defaultValue={row.price} required />
-                      </label>
-                      <label>
-                        Durasi
-                        <input name="duration" defaultValue={row.duration} required />
-                      </label>
-                    </div>
-                    <label className="product-form-full">
-                      Deskripsi Produk
-                      <textarea
-                        name="description"
-                        rows={4}
-                        defaultValue={row.description}
-                      />
-                    </label>
-                    <div className="product-form-actions">
-                      <button
-                        className="btn-delete"
-                        type="submit"
-                        formAction="/api/products/delete"
+            {canManageProducts
+              ? rows.map((row) => (
+                  <div
+                    key={`edit-${row.id}`}
+                    id={`edit-product-${sanitizeId(row.id)}`}
+                    className="project-modal"
+                  >
+                    <div className="product-form-card">
+                      <div className="product-form-header">
+                        <a className="product-back" href="#">
+                          &lt; Back
+                        </a>
+                        <h2>BIG ASSISTANT</h2>
+                      </div>
+                      <form
+                        className="product-form"
+                        method="post"
+                        action="/api/products/update"
                       >
-                        Delete
-                      </button>
-                      <button className="btn-update" type="submit">
-                        Update
-                      </button>
+                        <input type="hidden" name="productType" value="big-assistant" />
+                        <input type="hidden" name="productId" value={row.id} />
+                        <input
+                          type="hidden"
+                          name="redirect"
+                          value="/dashboard_karyawan/daftar-produk/big-assistant"
+                        />
+                        <div className="product-form-row">
+                          <label>
+                            Nama Produk
+                            <input name="name" defaultValue={row.name} required />
+                          </label>
+                          <label>
+                            Harga Produk
+                            <input name="price" defaultValue={row.price} required />
+                          </label>
+                          <label>
+                            Durasi
+                            <input
+                              name="duration"
+                              defaultValue={row.duration}
+                              required
+                            />
+                          </label>
+                        </div>
+                        <label className="product-form-full">
+                          Deskripsi Produk
+                          <textarea
+                            name="description"
+                            rows={4}
+                            defaultValue={row.description}
+                          />
+                        </label>
+                        <div className="product-form-actions">
+                          <button
+                            className="btn-delete"
+                            type="submit"
+                            formAction="/api/products/delete"
+                          >
+                            Delete
+                          </button>
+                          <button className="btn-update" type="submit">
+                            Update
+                          </button>
+                        </div>
+                      </form>
                     </div>
-                  </form>
-                </div>
-              </div>
-            ))}
+                  </div>
+                ))
+              : null}
           </main>
         </div>
       </div>

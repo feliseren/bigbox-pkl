@@ -3,6 +3,8 @@ import { fetchNewsWithReviews } from "@/lib/news-db";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
+import { EmployeeSidebar } from "@/components/employee-sidebar";
+import { NewsActionButtons } from "@/components/news-action-buttons";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +39,7 @@ export default async function DaftarBeritaPage({
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
+  const canManageNews = employee?.role === "PROJECT_MANAGEMENT";
   const rawQuery = resolvedSearchParams?.q;
   const rawCategory = resolvedSearchParams?.category;
   const query =
@@ -54,54 +57,14 @@ export default async function DaftarBeritaPage({
   return (
     <div className="project-layout">
       <div className="project-shell">
-        <aside className="project-sidebar">
-          <div className="project-brand">
-            <Image
-              src="/bigbox_logo-removebg-preview.png"
-              alt="BigBox logo"
-              width={160}
-              height={52}
-              className="project-logo"
-            />
-          </div>
-          <p className="project-menu-label">Menu</p>
-          <nav className="project-nav">
-            <a className="project-link" href="/dashboard_karyawan">
-              Dashboard
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-produk">
-              Daftar Produk
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-projek">
-              Daftar Projek
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/success-history">
-              Success History
-            </a>
-            <a className="project-link active" href="/dashboard_karyawan/daftar-berita">
-              Daftar Berita
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
-              Daftar Pemesanan
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
-              Kontak Pelanggan
-            </a>
-          </nav>
-          <form
-            className="project-logout-form"
-            method="post"
-            action="/api/logout_karyawan"
-          >
-            <button className="project-logout" type="submit">
-              Logout
-            </button>
-          </form>
-        </aside>
+        <EmployeeSidebar active="berita" />
 
         <div className="project-main">
           <header className="project-header">
-            <h1 className="project-title">Daftar Berita</h1>
+            <div>
+              <h1 className="project-title">Daftar Berita</h1>
+              <p className="project-subtitle">Kelola berita, ringkasan, dan ulasan.</p>
+            </div>
             <EmployeeProfileMenu
               fullName={employeeName}
               employeeId={employee?.id ?? "-"}
@@ -209,23 +172,11 @@ export default async function DaftarBeritaPage({
                       >
                         Lihat Review
                       </a>
-                      <a
-                        className="btn-edit"
-                        href={`#edit-${sanitizeId(item.id)}`}
-                      >
-                        Edit
-                      </a>
-                      <form method="post" action="/api/news/delete">
-                        <input type="hidden" name="newsId" value={item.id} />
-                        <input
-                          type="hidden"
-                          name="redirect"
-                          value="/dashboard_karyawan/daftar-berita"
+                        <NewsActionButtons
+                          canManage={canManageNews}
+                          editHref={`#edit-${sanitizeId(item.id)}`}
+                          newsId={item.id}
                         />
-                        <button className="btn-delete" type="submit">
-                          Delete
-                        </button>
-                      </form>
                     </div>
                   </div>
                 ))}
@@ -235,7 +186,7 @@ export default async function DaftarBeritaPage({
               </div>
             </section>
 
-            {newsItems.map((item) => (
+            {canManageNews ? newsItems.map((item) => (
               <div
                 key={`edit-${item.id}`}
                 id={`edit-${sanitizeId(item.id)}`}
@@ -350,7 +301,7 @@ export default async function DaftarBeritaPage({
                   </form>
                 </div>
               </div>
-            ))}
+            )) : null}
 
             {newsItems.map((item) => (
               <div

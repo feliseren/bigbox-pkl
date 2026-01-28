@@ -6,17 +6,20 @@ import { useRouter } from "next/navigation";
 type ProjectStatusSelectProps = {
   projectId: string;
   initialStatus: "Process" | "Done";
+  canManage?: boolean;
 };
 
 export function ProjectStatusSelect({
   projectId,
   initialStatus,
+  canManage = true,
 }: ProjectStatusSelectProps) {
   const [status, setStatus] = useState<"Process" | "Done">(initialStatus);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   function handleChange(nextStatus: "Process" | "Done") {
+    if (!canManage) return;
     setStatus(nextStatus);
     startTransition(async () => {
       await fetch("/api/projects/status", {
@@ -33,7 +36,7 @@ export function ProjectStatusSelect({
       className={`status-select ${status === "Done" ? "done" : "process"}`}
       value={status}
       onChange={(event) => handleChange(event.target.value as "Process" | "Done")}
-      disabled={isPending}
+      disabled={!canManage || isPending}
       suppressHydrationWarning
     >
       <option value="Process">Process</option>

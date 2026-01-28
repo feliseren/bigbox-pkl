@@ -1,0 +1,74 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+
+type NotificationItem = {
+  id: string;
+  title: string;
+  message: string;
+};
+
+type NotificationBellProps = {
+  items: NotificationItem[];
+};
+
+export function NotificationBell({ items }: NotificationBellProps) {
+  const [open, setOpen] = useState(false);
+  const count = items.length;
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(event: MouseEvent) {
+      if (!containerRef.current) return;
+      if (containerRef.current.contains(event.target as Node)) return;
+      setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  return (
+    <div className="notification-bell" ref={containerRef}>
+      <button
+        className="notification-bell-button"
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        aria-label="Notifikasi"
+      >
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M15.5 18a3.5 3.5 0 0 1-7 0"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M18 10a6 6 0 1 0-12 0c0 3.1-.7 4.8-1.7 6h15.4C18.7 14.8 18 13.1 18 10Z"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+        </svg>
+        {count > 0 ? <span className="notification-badge">{count}</span> : null}
+      </button>
+      {open ? (
+        <div className="notification-dropdown">
+          <div className="notification-header">Notifikasi</div>
+          <div className="notification-list">
+            {count === 0 ? (
+              <div className="notification-empty">Tidak ada notifikasi.</div>
+            ) : (
+              items.map((item) => (
+                <div key={item.id} className="notification-item">
+                  <div className="notification-title">{item.title}</div>
+                  <div className="notification-message">{item.message}</div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}

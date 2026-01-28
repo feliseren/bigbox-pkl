@@ -2,6 +2,8 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
+import { EmployeeSidebar } from "@/components/employee-sidebar";
+import { ProductActionButtons } from "@/components/product-action-buttons";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +42,8 @@ export default async function DaftarProdukPage() {
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
+  const canManageProducts =
+    employee?.role === "ADMIN" || employee?.role === "MARKETING";
   const [bigAssistant, bigLegal, bigSocial, bigVision, orders] = await Promise.all([
     prisma.bigAssistant.findMany({ orderBy: { id: "desc" } }),
     prisma.bigLegal.findMany({ orderBy: { id: "desc" } }),
@@ -107,57 +111,14 @@ export default async function DaftarProdukPage() {
   return (
     <div className="project-layout">
       <div className="project-shell">
-        <aside className="project-sidebar">
-          <div className="project-brand">
-            <Image
-              src="/bigbox_logo-removebg-preview.png"
-              alt="BigBox logo"
-              width={160}
-              height={52}
-              className="project-logo"
-            />
-          </div>
-          <p className="project-menu-label">Menu</p>
-          <nav className="project-nav">
-            <a className="project-link" href="/dashboard_karyawan">
-              Dashboard
-            </a>
-            <a
-              className="project-link active"
-              href="/dashboard_karyawan/daftar-produk"
-            >
-              Daftar Produk
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-projek">
-              Daftar Projek
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/success-history">
-              Success History
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-berita">
-              Daftar Berita
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
-              Daftar Pemesanan
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
-              Kontak Pelanggan
-            </a>
-          </nav>
-          <form
-            className="project-logout-form"
-            method="post"
-            action="/api/logout_karyawan"
-          >
-            <button className="project-logout" type="submit">
-              Logout
-            </button>
-          </form>
-        </aside>
+        <EmployeeSidebar active="produk" />
 
         <div className="project-main">
           <header className="project-header">
-            <h1 className="project-title">Daftar Produk</h1>
+            <div>
+              <h1 className="project-title">Daftar Produk</h1>
+              <p className="project-subtitle">Kelola katalog, harga, dan detail produk.</p>
+            </div>
             <EmployeeProfileMenu
               fullName={employee?.fullName ?? "Karyawan"}
               employeeId={employee?.id ?? "-"}
@@ -202,17 +163,12 @@ export default async function DaftarProdukPage() {
                           >
                             Detail
                           </a>
-                          <a
-                            className="btn-edit"
-                            href={`#edit-${productSlugByTitle[section.title]}-${sanitizeId(
+                          <ProductActionButtons
+                            canManage={canManageProducts}
+                            editHref={`#edit-${productSlugByTitle[section.title]}-${sanitizeId(
                               item.id
                             )}`}
-                          >
-                            Edit
-                          </a>
-                          <button className="btn-delete" type="button">
-                            Delete
-                          </button>
+                          />
                         </span>
                       </div>
                     ))}
@@ -272,12 +228,92 @@ export default async function DaftarProdukPage() {
                       </div>
                     </div>
                   ))}
-                  {section.items.map((item) => (
+                  {canManageProducts
+                    ? section.items.map((item) => (
+                        <div
+                          key={`edit-${section.title}-${item.id}`}
+                          id={`edit-${productSlugByTitle[section.title]}-${sanitizeId(
+                            item.id
+                          )}`}
+                          className="project-modal"
+                        >
+                          <div className="product-form-card">
+                            <div className="product-form-header">
+                              <a className="product-back" href="#">
+                                &lt; Back
+                              </a>
+                              <h2>{toUpperTitle(section.title)}</h2>
+                            </div>
+                            <form
+                              className="product-form"
+                              method="post"
+                              action="/api/products/update"
+                            >
+                              <input
+                                type="hidden"
+                                name="productType"
+                                value={productSlugByTitle[section.title]}
+                              />
+                              <input type="hidden" name="productId" value={item.id} />
+                              <input
+                                type="hidden"
+                                name="redirect"
+                                value="/dashboard_karyawan/daftar-produk"
+                              />
+                              <div className="product-form-row">
+                                <label>
+                                  Nama Produk
+                                  <input
+                                    name="name"
+                                    defaultValue={item.name}
+                                    required
+                                  />
+                                </label>
+                                <label>
+                                  Harga Produk
+                                  <input
+                                    name="price"
+                                    defaultValue={item.price}
+                                    required
+                                  />
+                                </label>
+                                <label>
+                                  Durasi
+                                  <input
+                                    name="duration"
+                                    defaultValue={item.duration}
+                                    required
+                                  />
+                                </label>
+                              </div>
+                              <label className="product-form-full">
+                                Deskripsi Produk
+                                <textarea
+                                  name="description"
+                                  rows={4}
+                                  defaultValue={item.description}
+                                />
+                              </label>
+                              <div className="product-form-actions">
+                                <button
+                                  className="btn-delete"
+                                  type="submit"
+                                  formAction="/api/products/delete"
+                                >
+                                  Delete
+                                </button>
+                                <button className="btn-update" type="submit">
+                                  Update
+                                </button>
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      ))
+                    : null}
+                  {canManageProducts ? (
                     <div
-                      key={`edit-${section.title}-${item.id}`}
-                      id={`edit-${productSlugByTitle[section.title]}-${sanitizeId(
-                        item.id
-                      )}`}
+                      id={`new-${productSlugByTitle[section.title]}`}
                       className="project-modal"
                     >
                       <div className="product-form-card">
@@ -290,14 +326,13 @@ export default async function DaftarProdukPage() {
                         <form
                           className="product-form"
                           method="post"
-                          action="/api/products/update"
+                          action="/api/products"
                         >
                           <input
                             type="hidden"
                             name="productType"
                             value={productSlugByTitle[section.title]}
                           />
-                          <input type="hidden" name="productId" value={item.id} />
                           <input
                             type="hidden"
                             name="redirect"
@@ -306,109 +341,35 @@ export default async function DaftarProdukPage() {
                           <div className="product-form-row">
                             <label>
                               Nama Produk
-                              <input
-                                name="name"
-                                defaultValue={item.name}
-                                required
-                              />
+                              <input name="name" placeholder="Nama produk" required />
                             </label>
                             <label>
                               Harga Produk
-                              <input
-                                name="price"
-                                defaultValue={item.price}
-                                required
-                              />
+                              <input name="price" placeholder="Harga produk" required />
                             </label>
                             <label>
                               Durasi
                               <input
                                 name="duration"
-                                defaultValue={item.duration}
+                                placeholder={
+                                  durationPlaceholderByTitle[section.title] ||
+                                  "per bulan"
+                                }
                                 required
                               />
                             </label>
                           </div>
                           <label className="product-form-full">
                             Deskripsi Produk
-                            <textarea
-                              name="description"
-                              rows={4}
-                              defaultValue={item.description}
-                            />
+                            <textarea name="description" rows={4} required />
                           </label>
                           <div className="product-form-actions">
-                            <button
-                              className="btn-delete"
-                              type="submit"
-                              formAction="/api/products/delete"
-                            >
-                              Delete
-                            </button>
-                            <button className="btn-update" type="submit">
-                              Update
-                            </button>
+                            <button type="submit">Tambahkan</button>
                           </div>
                         </form>
                       </div>
                     </div>
-                  ))}
-                  <div
-                    id={`new-${productSlugByTitle[section.title]}`}
-                    className="project-modal"
-                  >
-                    <div className="product-form-card">
-                      <div className="product-form-header">
-                        <a className="product-back" href="#">
-                          &lt; Back
-                        </a>
-                        <h2>{toUpperTitle(section.title)}</h2>
-                      </div>
-                      <form
-                        className="product-form"
-                        method="post"
-                        action="/api/products"
-                      >
-                        <input
-                          type="hidden"
-                          name="productType"
-                          value={productSlugByTitle[section.title]}
-                        />
-                        <input
-                          type="hidden"
-                          name="redirect"
-                          value="/dashboard_karyawan/daftar-produk"
-                        />
-                        <div className="product-form-row">
-                          <label>
-                            Nama Produk
-                            <input name="name" placeholder="Nama produk" required />
-                          </label>
-                          <label>
-                            Harga Produk
-                            <input name="price" placeholder="Harga produk" required />
-                          </label>
-                          <label>
-                            Durasi
-                            <input
-                              name="duration"
-                              placeholder={
-                                durationPlaceholderByTitle[section.title] || "per bulan"
-                              }
-                              required
-                            />
-                          </label>
-                        </div>
-                        <label className="product-form-full">
-                          Deskripsi Produk
-                          <textarea name="description" rows={4} required />
-                        </label>
-                        <div className="product-form-actions">
-                          <button type="submit">Tambahkan</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
+                  ) : null}
                 </section>
               ))}
             </div>

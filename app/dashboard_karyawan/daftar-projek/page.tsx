@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { ProjectStatusSelect } from "@/components/project-status-select";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
+import { ProjectActionButtons } from "@/components/project-action-buttons";
+import { ProjectCreateButton } from "@/components/project-create-button";
+import { EmployeeSidebar } from "@/components/employee-sidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +20,7 @@ export default async function DaftarProjekPage({
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
+  const canManageProjects = employee?.role === "PROJECT_MANAGEMENT";
   const rawQuery = resolvedSearchParams?.q;
   const rawStatus = resolvedSearchParams?.status;
   const query =
@@ -67,55 +71,14 @@ export default async function DaftarProjekPage({
   return (
     <div className="project-layout">
       <div className="project-shell">
-        <aside className="project-sidebar">
-          <div className="project-brand">
-            <Image
-              src="/bigbox_logo-removebg-preview.png"
-              alt="BigBox logo"
-              width={160}
-              height={52}
-              className="project-logo"
-            />
-          </div>
-          <p className="project-menu-label">Menu</p>
-          <nav className="project-nav">
-            <a className="project-link" href="/dashboard_karyawan">
-              Dashboard
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-produk">
-              Daftar Produk
-            </a>
-            <a className="project-link active" href="/dashboard_karyawan/daftar-projek">
-              Daftar Projek
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/success-history">
-              Success History
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-berita">
-              Daftar Berita
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
-              Daftar Pemesanan
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
-              Kontak Pelanggan
-            </a>
-          </nav>
-          <form
-            className="project-logout-form"
-            method="post"
-            action="/api/logout_karyawan"
-            suppressHydrationWarning
-          >
-            <button className="project-logout" type="submit" suppressHydrationWarning>
-              Logout
-            </button>
-          </form>
-        </aside>
+        <EmployeeSidebar active="projek" />
 
         <div className="project-main">
           <header className="project-header">
-            <h1 className="project-title">Daftar Project</h1>
+            <div>
+              <h1 className="project-title">Daftar Project</h1>
+              <p className="project-subtitle">Pantau status dan progres proyek berjalan.</p>
+            </div>
             <EmployeeProfileMenu
               fullName={employee?.fullName ?? "Karyawan"}
               employeeId={employee?.id ?? "-"}
@@ -210,29 +173,15 @@ export default async function DaftarProjekPage({
                           initialStatus={
                             project.status === "Done" ? "Done" : "Process"
                           }
+                          canManage={canManageProjects}
                         />
                       </span>
                       <span className="align-right actions">
-                        <a
-                          className="btn-edit"
-                          href={`#edit-${sanitizeId(project.id)}`}
-                        >
-                          Edit
-                        </a>
-                        <form method="post" action="/api/projects/delete">
-                          <input
-                            type="hidden"
-                            name="projectId"
-                            value={project.id}
-                          />
-                          <button
-                            className="btn-delete"
-                            type="submit"
-                            suppressHydrationWarning
-                          >
-                            Delete
-                          </button>
-                        </form>
+                        <ProjectActionButtons
+                          canManage={canManageProjects}
+                          editHref={`#edit-${sanitizeId(project.id)}`}
+                          projectId={project.id}
+                        />
                       </span>
                     </div>
                   ))
@@ -256,119 +205,125 @@ export default async function DaftarProjekPage({
               </div>
 
               <div className="project-new">
-                <a className="project-new-button" href="#new-project">
-                  New Project
-                </a>
+                <ProjectCreateButton canManage={canManageProjects} />
               </div>
             </section>
 
-            <div id="new-project" className="project-modal">
-              <div className="project-modal-card">
-                <div className="project-modal-header">
-                  <h2>Tambah Project</h2>
-                  <a className="project-modal-close" href="#">
-                    x
-                  </a>
-                </div>
-                <form className="project-form" method="post" action="/api/projects">
-                  <label>
-                    Project ID
-                    <input name="projectId" placeholder="#6548" required />
-                  </label>
-                  <label>
-                    Tanggal Mulai
-                    <input name="startLabel" type="date" required />
-                  </label>
-                  <label>
-                    Target Selesai
-                    <input name="targetLabel" type="date" required />
-                  </label>
-                  <label>
-                    Penanggung Jawab
-                    <input name="owner" placeholder="Joseph Wheeler" required />
-                  </label>
-                  <label>
-                    Status
-                    <select name="status" defaultValue="Process" required>
-                      <option value="Process">Process</option>
-                      <option value="Done">Done</option>
-                    </select>
-                  </label>
-                  <div className="project-form-actions">
-                    <button type="submit">Simpan</button>
-                    <a href="#" className="ghost">
-                      Batal
+            {canManageProjects ? (
+              <div id="new-project" className="project-modal">
+                <div className="project-modal-card">
+                  <div className="project-modal-header">
+                    <h2>Tambah Project</h2>
+                    <a className="project-modal-close" href="#">
+                      x
                     </a>
                   </div>
-                </form>
-              </div>
-            </div>
-
-            {projects.map((project) => {
-              const modalId = `edit-${sanitizeId(project.id)}`;
-              return (
-                <div key={`${project.id}-modal`} id={modalId} className="project-modal">
-                  <div className="project-modal-card">
-                    <div className="project-modal-header">
-                      <h2>Edit Project</h2>
-                      <a className="project-modal-close" href="#">
-                        x
+                  <form className="project-form" method="post" action="/api/projects">
+                    <label>
+                      Project ID
+                      <input name="projectId" placeholder="#6548" required />
+                    </label>
+                    <label>
+                      Tanggal Mulai
+                      <input name="startLabel" type="date" required />
+                    </label>
+                    <label>
+                      Target Selesai
+                      <input name="targetLabel" type="date" required />
+                    </label>
+                    <label>
+                      Penanggung Jawab
+                      <input name="owner" placeholder="Joseph Wheeler" required />
+                    </label>
+                    <label>
+                      Status
+                      <select name="status" defaultValue="Process" required>
+                        <option value="Process">Process</option>
+                        <option value="Done">Done</option>
+                      </select>
+                    </label>
+                    <div className="project-form-actions">
+                      <button type="submit">Simpan</button>
+                      <a href="#" className="ghost">
+                        Batal
                       </a>
                     </div>
-                    <form
-                      className="project-form"
-                      method="post"
-                      action="/api/projects/update"
-                    >
-                      <input type="hidden" name="projectId" value={project.id} />
-                      <label>
-                        Project ID
-                        <input value={project.id} disabled />
-                      </label>
-                      <label>
-                        Tanggal Mulai
-                        <input
-                          name="startLabel"
-                          type="date"
-                          defaultValue={project.startLabel}
-                          required
-                        />
-                      </label>
-                      <label>
-                        Target Selesai
-                        <input
-                          name="targetLabel"
-                          type="date"
-                          defaultValue={project.targetLabel}
-                          required
-                        />
-                      </label>
-                      <label>
-                        Penanggung Jawab
-                        <input
-                          name="owner"
-                          defaultValue={project.owner}
-                          required
-                        />
-                      </label>
-                      <label>
-                        Status
-                        <select name="status" defaultValue={project.status}>
-                          <option value="Process">Process</option>
-                          <option value="Done">Done</option>
-                        </select>
-                      </label>
-                      <div className="project-form-actions">
-                        <button type="submit">Simpan</button>
-                        <a href="#" className="ghost">
-                          Batal
-                        </a>
-                      </div>
-                    </form>
-                  </div>
+                  </form>
                 </div>
-              );
-            })}
+              </div>
+            ) : null}
+
+            {canManageProjects
+              ? projects.map((project) => {
+                  const modalId = `edit-${sanitizeId(project.id)}`;
+                  return (
+                    <div
+                      key={`${project.id}-modal`}
+                      id={modalId}
+                      className="project-modal"
+                    >
+                      <div className="project-modal-card">
+                        <div className="project-modal-header">
+                          <h2>Edit Project</h2>
+                          <a className="project-modal-close" href="#">
+                            x
+                          </a>
+                        </div>
+                        <form
+                          className="project-form"
+                          method="post"
+                          action="/api/projects/update"
+                        >
+                          <input type="hidden" name="projectId" value={project.id} />
+                          <label>
+                            Project ID
+                            <input value={project.id} disabled />
+                          </label>
+                          <label>
+                            Tanggal Mulai
+                            <input
+                              name="startLabel"
+                              type="date"
+                              defaultValue={project.startLabel}
+                              required
+                            />
+                          </label>
+                          <label>
+                            Target Selesai
+                            <input
+                              name="targetLabel"
+                              type="date"
+                              defaultValue={project.targetLabel}
+                              required
+                            />
+                          </label>
+                          <label>
+                            Penanggung Jawab
+                            <input
+                              name="owner"
+                              defaultValue={project.owner}
+                              required
+                            />
+                          </label>
+                          <label>
+                            Status
+                            <select name="status" defaultValue={project.status}>
+                              <option value="Process">Process</option>
+                              <option value="Done">Done</option>
+                            </select>
+                          </label>
+                          <div className="project-form-actions">
+                            <button type="submit">Simpan</button>
+                            <a href="#" className="ghost">
+                              Batal
+                            </a>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  );
+                })
+              : null}
           </main>
         </div>
       </div>

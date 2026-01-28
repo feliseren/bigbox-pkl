@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { readSessionUserId } from "@/lib/auth";
 import { ProfileMenu } from "@/components/profile-menu";
 import { FeatureSlider } from "@/components/feature-slider";
+import { NotificationBell } from "@/components/notification-bell";
+import { getUserNotifications } from "@/lib/notifications";
 
 const features = [
   {
@@ -51,6 +53,7 @@ export default async function BigAssistantPage() {
   const user = userId
     ? await prisma.user.findUnique({ where: { id: userId } })
     : null;
+  const notifications = userId ? await getUserNotifications(userId) : [];
   const formatPrice = (value: string) =>
     value.startsWith("Rp") ? value : `Rp ${value}`;
   const pricing = (await prisma.bigAssistant.findMany({ orderBy: { id: "desc" } })).map(
@@ -88,7 +91,10 @@ export default async function BigAssistantPage() {
             </a>
           </nav>
           {user ? (
-            <ProfileMenu fullName={user.fullName} />
+            <div className="flex items-center gap-3">
+              <NotificationBell items={notifications} />
+              <ProfileMenu fullName={user.fullName} />
+            </div>
           ) : (
             <a
               className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#524a4e]"

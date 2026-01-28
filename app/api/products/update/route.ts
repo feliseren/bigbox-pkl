@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { readEmployeeSessionId } from "@/lib/auth";
 
 type ProductType = "big-assistant" | "big-legal" | "big-social" | "big-vision";
 
@@ -40,6 +41,18 @@ export async function POST(request: Request) {
   const price = String(formData.get("price") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const duration = String(formData.get("duration") || "").trim();
+
+  const employeeId = await readEmployeeSessionId();
+  if (!employeeId) {
+    return NextResponse.redirect(new URL("/login_karyawan", request.url));
+  }
+  const employee = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: { role: true },
+  });
+  if (!employee || (employee.role !== "ADMIN" && employee.role !== "MARKETING")) {
+    return NextResponse.redirect(new URL(`${redirectTo}?error=forbidden`, request.url));
+  }
 
   if (!productType || !productId) {
     return NextResponse.redirect(new URL(redirectTo, request.url));

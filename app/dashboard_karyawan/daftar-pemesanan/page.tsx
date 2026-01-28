@@ -2,6 +2,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
+import { EmployeeSidebar } from "@/components/employee-sidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -105,57 +106,14 @@ export default async function DaftarPemesananPage({
   return (
     <div className="project-layout">
       <div className="project-shell">
-        <aside className="project-sidebar">
-          <div className="project-brand">
-            <Image
-              src="/bigbox_logo-removebg-preview.png"
-              alt="BigBox logo"
-              width={160}
-              height={52}
-              className="project-logo"
-            />
-          </div>
-          <p className="project-menu-label">Menu</p>
-          <nav className="project-nav">
-            <a className="project-link" href="/dashboard_karyawan">
-              Dashboard
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-produk">
-              Daftar Produk
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-projek">
-              Daftar Projek
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/success-history">
-              Success History
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-berita">
-              Daftar Berita
-            </a>
-            <a
-              className="project-link active"
-              href="/dashboard_karyawan/daftar-pemesanan"
-            >
-              Daftar Pemesanan
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
-              Kontak Pelanggan
-            </a>
-          </nav>
-          <form
-            className="project-logout-form"
-            method="post"
-            action="/api/logout_karyawan"
-          >
-            <button className="project-logout" type="submit">
-              Logout
-            </button>
-          </form>
-        </aside>
+        <EmployeeSidebar active="pemesanan" />
 
         <div className="project-main">
           <header className="project-header">
-            <h1 className="project-title">Daftar Pemesanan</h1>
+            <div>
+              <h1 className="project-title">Daftar Pemesanan</h1>
+              <p className="project-subtitle">Pantau status dan verifikasi pesanan.</p>
+            </div>
             <EmployeeProfileMenu
               fullName={employee?.fullName ?? "Karyawan"}
               employeeId={employee?.id ?? "-"}

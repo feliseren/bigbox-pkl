@@ -3,6 +3,7 @@ import { readEmployeeSessionId } from "@/lib/auth";
 import ChipsInput from "@/components/chips-input";
 import { prisma } from "@/lib/prisma";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
+import { EmployeeSidebar } from "@/components/employee-sidebar";
 
 export const dynamic = "force-dynamic";
 
@@ -12,62 +13,19 @@ export default async function SuccessHistoryPage() {
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
+  const canManageNews = employee?.role === "PROJECT_MANAGEMENT";
 
   return (
     <div className="project-layout">
       <div className="project-shell">
-        <aside className="project-sidebar">
-          <div className="project-brand">
-            <Image
-              src="/bigbox_logo-removebg-preview.png"
-              alt="BigBox logo"
-              width={160}
-              height={52}
-              className="project-logo"
-            />
-          </div>
-          <p className="project-menu-label">Menu</p>
-          <nav className="project-nav">
-            <a className="project-link" href="/dashboard_karyawan">
-              Dashboard
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-produk">
-              Daftar Produk
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-projek">
-              Daftar Projek
-            </a>
-            <a
-              className="project-link active"
-              href="/dashboard_karyawan/success-history"
-            >
-              Success History
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-berita">
-              Daftar Berita
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/daftar-pemesanan">
-              Daftar Pemesanan
-            </a>
-            <a className="project-link" href="/dashboard_karyawan/kontak-pelanggan">
-              Kontak Pelanggan
-            </a>
-          </nav>
-          <form
-            className="project-logout-form"
-            method="post"
-            action="/api/logout_karyawan"
-            suppressHydrationWarning
-          >
-            <button className="project-logout" type="submit" suppressHydrationWarning>
-              Logout
-            </button>
-          </form>
-        </aside>
+        <EmployeeSidebar active="success" />
 
         <div className="project-main">
           <header className="project-header">
-            <h1 className="project-title">Tambah Berita Baru</h1>
+            <div>
+              <h1 className="project-title">Tambah Berita Baru</h1>
+              <p className="project-subtitle">Publikasikan success story pelanggan.</p>
+            </div>
             <EmployeeProfileMenu
               fullName={employeeName}
               employeeId={employee?.id ?? "-"}
@@ -76,41 +34,42 @@ export default async function SuccessHistoryPage() {
 
           <main className="project-content">
             <section className="project-card success-card">
-              <form
-                className="success-form"
-                method="post"
-                action="/api/news"
-                encType="multipart/form-data"
-                suppressHydrationWarning
-              >
-                <input
-                  type="hidden"
-                  name="redirect"
-                  value="/dashboard_karyawan/daftar-berita"
-                />
-                <div className="success-row">
-                  <div className="success-label">
-                    <span className="success-icon" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-                        <path
-                          d="M4 6h16M4 12h10M4 18h8"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                    </span>
-                    <span>Judul Berita</span>
-                  </div>
+              {canManageNews ? (
+                <form
+                  className="success-form"
+                  method="post"
+                  action="/api/news"
+                  encType="multipart/form-data"
+                  suppressHydrationWarning
+                >
                   <input
-                    className="success-input"
-                    type="text"
-                    name="title"
-                    placeholder="Masukkan Judul Berita..."
-                    required
-                    suppressHydrationWarning
+                    type="hidden"
+                    name="redirect"
+                    value="/dashboard_karyawan/daftar-berita"
                   />
-                </div>
+                  <div className="success-row">
+                    <div className="success-label">
+                      <span className="success-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+                          <path
+                            d="M4 6h16M4 12h10M4 18h8"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </span>
+                      <span>Judul Berita</span>
+                    </div>
+                    <input
+                      className="success-input"
+                      type="text"
+                      name="title"
+                      placeholder="Masukkan Judul Berita..."
+                      required
+                      suppressHydrationWarning
+                    />
+                  </div>
 
                 <div className="success-row">
                   <div className="success-label">
@@ -306,16 +265,21 @@ export default async function SuccessHistoryPage() {
                   </div>
                 </div>
 
-                <div className="success-actions">
-                  <button
-                    className="success-submit"
-                    type="submit"
-                    suppressHydrationWarning
-                  >
-                    Publikasikan
-                  </button>
+                  <div className="success-actions">
+                    <button
+                      className="success-submit"
+                      type="submit"
+                      suppressHydrationWarning
+                    >
+                      Publikasikan
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="project-table-empty">
+                  Yang dapat menambahkan berita baru hanya role project management.
                 </div>
-              </form>
+              )}
             </section>
           </main>
         </div>

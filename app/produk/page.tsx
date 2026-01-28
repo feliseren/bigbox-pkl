@@ -2,6 +2,8 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readSessionUserId } from "@/lib/auth";
 import { ProfileMenu } from "@/components/profile-menu";
+import { NotificationBell } from "@/components/notification-bell";
+import { getUserNotifications } from "@/lib/notifications";
 
 const products = [
   {
@@ -35,6 +37,7 @@ export default async function ProdukPage() {
   const user = userId
     ? await prisma.user.findUnique({ where: { id: userId } })
     : null;
+  const notifications = userId ? await getUserNotifications(userId) : [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -62,7 +65,10 @@ export default async function ProdukPage() {
             </a>
           </nav>
           {user ? (
-            <ProfileMenu fullName={user.fullName} />
+            <div className="flex items-center gap-3">
+              <NotificationBell items={notifications} />
+              <ProfileMenu fullName={user.fullName} />
+            </div>
           ) : (
             <a
               className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#524a4e]"

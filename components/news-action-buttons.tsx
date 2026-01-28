@@ -1,0 +1,74 @@
+"use client";
+
+import { useState } from "react";
+
+type NewsActionButtonsProps = {
+  canManage: boolean;
+  editHref: string;
+  newsId: string;
+};
+
+const cannotEditMessage = "yang dapat mengedit berita hanya project management";
+const cannotDeleteMessage = "yang dapat menghapus berita hanya project management";
+
+export function NewsActionButtons({
+  canManage,
+  editHref,
+  newsId,
+}: NewsActionButtonsProps) {
+  const [message, setMessage] = useState<string | null>(null);
+
+  return (
+    <>
+      <a
+        className="btn-edit"
+        href={canManage ? editHref : "#"}
+        onClick={(event) => {
+          if (canManage) return;
+          event.preventDefault();
+          setMessage(cannotEditMessage);
+        }}
+      >
+        Edit
+      </a>
+      {canManage ? (
+        <form method="post" action="/api/news/delete">
+          <input type="hidden" name="newsId" value={newsId} />
+          <input type="hidden" name="redirect" value="/dashboard_karyawan/daftar-berita" />
+          <button className="btn-delete" type="submit">
+            Delete
+          </button>
+        </form>
+      ) : (
+        <button
+          className="btn-delete"
+          type="button"
+          onClick={() => setMessage(cannotDeleteMessage)}
+        >
+          Delete
+        </button>
+      )}
+      {message ? (
+        <div className="product-alert-overlay" onClick={() => setMessage(null)}>
+          <div
+            className="product-alert-card"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="product-alert-icon">!</div>
+            <h3 className="product-alert-title">Peringatan</h3>
+            <p className="product-alert-body">{message}</p>
+            <div className="product-alert-actions">
+              <button
+                className="product-alert-button"
+                type="button"
+                onClick={() => setMessage(null)}
+              >
+                Oke
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
