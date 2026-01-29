@@ -49,6 +49,7 @@ export async function POST(request: Request) {
   const summaryPart1 = String(formData.get("summaryPart1") || "").trim();
   const summaryPart2 = String(formData.get("summaryPart2") || "").trim();
   const summaryPart3 = String(formData.get("summaryPart3") || "").trim();
+  const manualContent = String(formData.get("contentText") || "").trim();
   const customerName = String(formData.get("customerName") || "").trim();
   const customerIndustry = String(formData.get("customerIndustry") || "").trim();
   const customerSize = String(formData.get("customerSize") || "").trim();
@@ -86,8 +87,8 @@ export async function POST(request: Request) {
     documentFile && typeof documentFile !== "string" ? documentFile : null;
   const imageUrl = await saveUpload(imageUpload, "news-images");
   let documentUrl: string | null = null;
-  let contentText: string | null = null;
-  if (documentUpload) {
+  let contentText: string | null = manualContent || null;
+  if (!contentText && documentUpload) {
     const docBuffer = Buffer.from(await documentUpload.arrayBuffer());
     documentUrl = await saveUpload(documentUpload, "news-docs");
     try {

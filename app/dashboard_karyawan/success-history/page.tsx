@@ -4,6 +4,8 @@ import ChipsInput from "@/components/chips-input";
 import { prisma } from "@/lib/prisma";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
+import SuccessHistoryEditor from "@/components/success-history-editor";
+import { SuccessImageUpload } from "@/components/success-image-upload";
 
 export const dynamic = "force-dynamic";
 
@@ -130,39 +132,7 @@ export default async function SuccessHistoryPage() {
                     </span>
                     <span>Upload Gambar</span>
                   </div>
-                  <label className="success-upload">
-                    <input
-                      className="success-upload-input"
-                      type="file"
-                      name="image"
-                      accept="image/*"
-                    />
-                    <div className="success-upload-body">
-                      <div className="success-upload-icon" aria-hidden="true">
-                        <svg
-                          viewBox="0 0 24 24"
-                          width="22"
-                          height="22"
-                          fill="none"
-                        >
-                          <path
-                            d="M12 16V6m0 0 4 4m-4-4-4 4"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                          <path
-                            d="M4 18v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                      </div>
-                      <p>Klik atau drag untuk upload gambar</p>
-                    </div>
-                  </label>
+                  <SuccessImageUpload />
                 </div>
 
                 <div className="success-row align-top">
@@ -196,6 +166,10 @@ export default async function SuccessHistoryPage() {
                         accept="application/pdf"
                       />
                     </label>
+                    <div className="success-summary">
+                      <p className="success-summary-title">Tulis Manual</p>
+                      <SuccessHistoryEditor name="contentText" />
+                    </div>
                     <div className="success-summary">
                       <p className="success-summary-title">Ringkasan Berita</p>
                       <div className="success-summary-grid">

@@ -32,7 +32,7 @@ const stories = [
 
 export function StoriesSection() {
   const router = useRouter();
-  const whatsappLink = "https://wa.me/628111720231";
+  const contactLink = "/hubungi-kami";
 
   return (
     <>
@@ -137,9 +137,7 @@ export function StoriesSection() {
             {/* Product Selection */}
             <div className="mt-8 grid gap-6 md:grid-cols-2">
               <a
-                href={whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={contactLink}
                 className="group rounded-[20px] border-2 border-[#ff6b3d] bg-transparent p-8 transition-all hover:bg-[#ff6b3d]/10"
               >
                 <h3 className="text-[24px] font-bold text-white">BIG AI</h3>
@@ -150,9 +148,7 @@ export function StoriesSection() {
               </a>
 
               <a
-                href={whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={contactLink}
                 className="group rounded-[20px] border-2 border-[#ff6b3d] bg-transparent p-8 transition-all hover:bg-[#ff6b3d]/10"
               >
                 <h3 className="text-[24px] font-bold text-white">BIG VISION</h3>
@@ -165,9 +161,7 @@ export function StoriesSection() {
 
             {/* Main CTA Button */}
             <a
-              href={whatsappLink}
-              target="_blank"
-              rel="noopener noreferrer"
+              href={contactLink}
               className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#ff6b3d] px-8 py-3 font-semibold text-white transition-colors hover:bg-[#ff5722]"
             >
               <span>Konsultasi Sekarang</span>

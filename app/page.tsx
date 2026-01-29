@@ -90,6 +90,29 @@ const awards = [
   },
 ];
 
+const partnerLogos = [
+  { src: "/kementriansekre.png", alt: "Kementerian Sekretariat Negara" },
+  { src: "/sinjai.png", alt: "Kabupaten Sinjai" },
+  { src: "/telkomidn.png", alt: "Telkom Indonesia" },
+  { src: "/ugm.png", alt: "UGM" },
+  { src: "/kimia%20farma.png", alt: "Kimia Farma" },
+  { src: "/kominfo.jpg", alt: "Kominfo" },
+  { src: "/ntb.png", alt: "NTB" },
+  { src: "/papuabarat.png", alt: "Papua Barat" },
+  { src: "/pegadaian.jpg", alt: "Pegadaian" },
+  { src: "/pemkot.png", alt: "Pemerintah Kota" },
+  { src: "/perhubungan.png", alt: "Kementerian Perhubungan" },
+  { src: "/pertamina.png", alt: "Pertamina" },
+  { src: "/g20.jpg", alt: "G20" },
+  { src: "/jasamarga.png", alt: "Jasa Marga" },
+  { src: "/kaur.JPG", alt: "Kabupaten Kaur" },
+  { src: "/kelautan.png", alt: "Kementerian Kelautan" },
+  { src: "/luwutimur.jpg", alt: "Kabupaten Luwu Timur" },
+  { src: "/bimasakti.jpg", alt: "Bimasakti" },
+  { src: "/bpjs.png", alt: "BPJS" },
+  { src: "/bri.png", alt: "BRI" },
+];
+
 export default async function Home() {
   const userId = await readSessionUserId();
   const user = userId
@@ -120,6 +143,9 @@ export default async function Home() {
             </a>
             <a className="nav-link" href="/cerita-kami">
               Cerita Kami
+            </a>
+            <a className="nav-link" href="/whats-new">
+              Daftar Pembaruan
             </a>
           </nav>
           {user ? (
@@ -206,12 +232,12 @@ export default async function Home() {
                 key={item.stat}
                 className="overflow-hidden rounded-[20px] bg-white shadow-[0_4px_4px_rgba(0,0,0,0.25)]"
               >
-                <div className="relative h-[275px] bg-gradient-to-br from-slate-200 via-slate-100 to-white overflow-hidden group">
+                <div className="zoom-card relative h-[275px] bg-gradient-to-br from-slate-200 via-slate-100 to-white overflow-hidden group">
                   <Image
                     src={item.image}
                     alt={item.stat}
                     fill
-                    className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="zoom-image object-cover group-hover:scale-110 transition-transform duration-300"
                   />
                   <div className="absolute inset-x-0 top-6 text-center text-[24px] font-bold text-white drop-shadow">
                     {item.stat}
@@ -270,6 +296,34 @@ export default async function Home() {
                 </div>
                 <p className="award-desc">{awards[4].desc}</p>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="partnership-section">
+          <div className="mx-auto max-w-[1237px] px-6 py-12 text-center text-[var(--ink)]">
+            <h2 className="text-[28px] font-bold md:text-[32px]">
+              Lebih dari <span className="text-[#f59e0b]">100 Perusahaan</span>{" "}
+              Telah Mempercayakan Kami
+            </h2>
+            <p className="mx-auto mt-2 max-w-[720px] text-[14px] text-[#4a4f60]">
+              Hadirkan solusi inovatif berbasis AI dan big data untuk dorong
+              pertumbuhan bisnis.
+            </p>
+          </div>
+          <div className="partnership-marquee">
+            <div className="partnership-track">
+              {[...partnerLogos, ...partnerLogos].map((logo, index) => (
+                <div className="partnership-logo" key={`${logo.src}-${index}`}>
+                  <Image
+                    src={logo.src}
+                    alt={logo.alt}
+                    width={140}
+                    height={48}
+                    className="partnership-logo-image"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </section>

@@ -76,18 +76,64 @@ function buildSimplePdf(content: string) {
   return Buffer.from(output, "ascii");
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const rawPeriod = searchParams.get("period") || "weekly";
+  const period =
+    rawPeriod === "monthly" || rawPeriod === "yearly" || rawPeriod === "range"
+      ? rawPeriod
+      : "weekly";
+  const fromParam = searchParams.get("from") || "";
+  const toParam = searchParams.get("to") || "";
   const today = startOfDayInTimeZone(new Date());
   const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-  const startPrevWeek = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() - 13,
+  const parseDateInput = (value?: string) => {
+    if (!value) return null;
+    const [year, month, day] = value.split("-").map((part) => Number(part));
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
+  };
+  const rangeStart = (() => {
+    if (period === "monthly") {
+      return new Date(today.getFullYear(), today.getMonth(), 1);
+    }
+    if (period === "yearly") {
+      return new Date(today.getFullYear(), 0, 1);
+    }
+    if (period === "range") {
+      const parsed = parseDateInput(fromParam);
+      return parsed ?? new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+    }
+    return new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+  })();
+  const rangeEnd = (() => {
+    if (period === "range") {
+      const parsed = parseDateInput(toParam);
+      if (parsed) {
+        return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate() + 1);
+      }
+    }
+    return endOfToday;
+  })();
+  const hasCustomRange = period === "range" && fromParam && toParam;
+  const noDataRange =
+    hasCustomRange &&
+    (rangeStart >= rangeEnd || rangeStart >= endOfToday || rangeEnd > endOfToday);
+  const safeRangeEnd = noDataRange ? rangeStart : rangeEnd;
+  const rangeLengthDays = Math.max(
+    1,
+    Math.round((safeRangeEnd.getTime() - rangeStart.getTime()) / 86400000),
+  );
+  const prevRangeEnd = new Date(rangeStart);
+  const prevRangeStart = new Date(
+    prevRangeEnd.getFullYear(),
+    prevRangeEnd.getMonth(),
+    prevRangeEnd.getDate() - rangeLengthDays,
   );
   const doneOrdersRange = await prisma.order.findMany({
     where: {
       statusPesanan: "Done",
-      createdAt: { gte: startPrevWeek, lt: endOfToday },
+      createdAt: { gte: prevRangeStart, lt: safeRangeEnd },
     },
   });
   const [bigAssistant, bigLegal, bigSocial, bigVision] = await Promise.all([
@@ -115,33 +161,35 @@ export async function GET() {
     const key = dateKeyInTimeZone(order.createdAt);
     const amount = parseCurrency(order.totalPesanan);
     dailyTotals.set(key, (dailyTotals.get(key) ?? 0) + amount);
-    const productName =
-      productByKey.get(`${order.productType}:${order.productId}`) ?? order.productId;
-    const rowKey = `${key}|${productName}`;
-    const row = tableMap.get(rowKey) ?? {
-      date: key,
-      product: productName,
-      qty: 0,
-      total: 0,
-    };
-    row.qty += 1;
-    row.total += amount;
-    tableMap.set(rowKey, row);
+    if (order.createdAt >= rangeStart && order.createdAt < safeRangeEnd) {
+      const productName =
+        productByKey.get(`${order.productType}:${order.productId}`) ?? order.productId;
+      const rowKey = `${key}|${productName}`;
+      const row = tableMap.get(rowKey) ?? {
+        date: key,
+        product: productName,
+        qty: 0,
+        total: 0,
+      };
+      row.qty += 1;
+      row.total += amount;
+      tableMap.set(rowKey, row);
+    }
   });
-  const currentWeekRaw = Array.from({ length: 7 }).map((_, index) => {
+  const currentWeekRaw = Array.from({ length: rangeLengthDays }).map((_, index) => {
     const date = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - (6 - index),
+      rangeStart.getFullYear(),
+      rangeStart.getMonth(),
+      rangeStart.getDate() + index,
     );
     const key = dateKeyInTimeZone(date);
     return { date, value: dailyTotals.get(key) ?? 0 };
   });
-  const prevWeekRaw = Array.from({ length: 7 }).map((_, index) => {
+  const prevWeekRaw = Array.from({ length: rangeLengthDays }).map((_, index) => {
     const date = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - (13 - index),
+      prevRangeStart.getFullYear(),
+      prevRangeStart.getMonth(),
+      prevRangeStart.getDate() + index,
     );
     const key = dateKeyInTimeZone(date);
     return { date, value: dailyTotals.get(key) ?? 0 };
@@ -194,7 +242,15 @@ export async function GET() {
     `${x1} ${y1} m\n${x2} ${y2} l\nS`;
   const contentParts: string[] = [];
   contentParts.push("0.5 w");
-  contentParts.push(textAt(startX, pageHeight - 60, "Weekly Revenue Report", 14));
+  const reportTitle =
+    period === "monthly"
+      ? "Monthly Revenue Report"
+      : period === "yearly"
+        ? "Yearly Revenue Report"
+        : period === "range"
+          ? "Range Revenue Report"
+          : "Weekly Revenue Report";
+  contentParts.push(textAt(startX, pageHeight - 60, reportTitle, 14));
   contentParts.push(
     textAt(
       startX,
@@ -207,9 +263,11 @@ export async function GET() {
     textAt(
       startX,
       pageHeight - 96,
-      `Periode: ${dateKeyInTimeZone(startPrevWeek)} - ${dateKeyInTimeZone(
-        new Date(endOfToday.getTime() - 1),
-      )}`,
+      noDataRange
+        ? "Periode: Data tidak tersedia"
+        : `Periode: ${dateKeyInTimeZone(rangeStart)} - ${dateKeyInTimeZone(
+            new Date(safeRangeEnd.getTime() - 1),
+          )}`,
       9,
     ),
   );
@@ -249,19 +307,41 @@ export async function GET() {
   });
   const footerY = tableBottom - 26;
   contentParts.push(
-    textAt(startX, footerY, `Total Pendapatan Mingguan: ${formatRupiah(currentWeekTotal)}`, 11),
+    textAt(
+      startX,
+      footerY,
+      noDataRange
+        ? "Total Pendapatan: Data tidak tersedia"
+        : `Total Pendapatan: ${formatRupiah(currentWeekTotal)}`,
+      11,
+    ),
   );
-  contentParts.push(textAt(startX, footerY - 16, `Perubahan vs minggu lalu: ${percentLabel}`, 9));
+  contentParts.push(
+    textAt(
+      startX,
+      footerY - 16,
+      noDataRange ? "" : `Perubahan vs periode sebelumnya: ${percentLabel}`,
+      9,
+    ),
+  );
   if (hiddenCount > 0) {
     contentParts.push(
       textAt(startX, footerY - 32, `Catatan: ${hiddenCount} baris tidak ditampilkan.`, 9),
     );
   }
   const pdfBuffer = buildSimplePdf(contentParts.join("\n"));
+  const fileName =
+    period === "monthly"
+      ? "monthly-revenue-report.pdf"
+      : period === "yearly"
+        ? "yearly-revenue-report.pdf"
+        : period === "range"
+          ? "range-revenue-report.pdf"
+          : "weekly-revenue-report.pdf";
   return new Response(pdfBuffer, {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": 'attachment; filename="weekly-revenue-report.pdf"',
+      "Content-Disposition": `attachment; filename="${fileName}"`,
       "Content-Length": String(pdfBuffer.length),
     },
   });

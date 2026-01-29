@@ -1,7 +1,15 @@
 import Image from "next/image";
 
 type EmployeeSidebarProps = {
-  active?: "dashboard" | "produk" | "projek" | "success" | "berita" | "pemesanan" | "kontak";
+  active?:
+    | "dashboard"
+    | "produk"
+    | "projek"
+    | "success"
+    | "berita"
+    | "whats-new"
+    | "pemesanan"
+    | "kontak";
 };
 
 const menuItems = [
@@ -29,6 +37,11 @@ const menuItems = [
     key: "berita",
     label: "Daftar Berita",
     href: "/dashboard_karyawan/daftar-berita",
+  },
+  {
+    key: "whats-new",
+    label: "Daftar Pembaruan",
+    href: "/dashboard_karyawan/whats-new",
   },
   {
     key: "pemesanan",

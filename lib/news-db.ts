@@ -7,11 +7,26 @@ export async function fetchNews({
   query?: string;
   category?: string;
 }) {
+  const normalizedQuery = query?.trim();
+  const queryFilters = normalizedQuery
+    ? [
+        { title: { contains: normalizedQuery } },
+        { authorName: { contains: normalizedQuery } },
+        { customerName: { contains: normalizedQuery } },
+        { customerIndustry: { contains: normalizedQuery } },
+        { customerLocation: { contains: normalizedQuery } },
+        { customerProducts: { contains: normalizedQuery } },
+        { contentText: { contains: normalizedQuery } },
+        { summaryPart1: { contains: normalizedQuery } },
+        { summaryPart2: { contains: normalizedQuery } },
+        { summaryPart3: { contains: normalizedQuery } },
+      ]
+    : [];
   const where =
-    query || category
+    normalizedQuery || category
       ? {
           AND: [
-            ...(query ? [{ title: { contains: query } }] : []),
+            ...(queryFilters.length ? [{ OR: queryFilters }] : []),
             ...(category ? [{ category }] : []),
           ],
         }
@@ -30,11 +45,26 @@ export async function fetchNewsWithReviews({
   query?: string;
   category?: string;
 }) {
+  const normalizedQuery = query?.trim();
+  const queryFilters = normalizedQuery
+    ? [
+        { title: { contains: normalizedQuery } },
+        { authorName: { contains: normalizedQuery } },
+        { customerName: { contains: normalizedQuery } },
+        { customerIndustry: { contains: normalizedQuery } },
+        { customerLocation: { contains: normalizedQuery } },
+        { customerProducts: { contains: normalizedQuery } },
+        { contentText: { contains: normalizedQuery } },
+        { summaryPart1: { contains: normalizedQuery } },
+        { summaryPart2: { contains: normalizedQuery } },
+        { summaryPart3: { contains: normalizedQuery } },
+      ]
+    : [];
   const where =
-    query || category
+    normalizedQuery || category
       ? {
           AND: [
-            ...(query ? [{ title: { contains: query } }] : []),
+            ...(queryFilters.length ? [{ OR: queryFilters }] : []),
             ...(category ? [{ category }] : []),
           ],
         }

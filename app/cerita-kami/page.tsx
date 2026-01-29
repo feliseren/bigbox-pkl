@@ -88,6 +88,9 @@ export default async function CeritaKamiPage({
             <a className="nav-link active hover:text-gray-200" href="/cerita-kami">
               Cerita Kami
             </a>
+            <a className="nav-link hover:text-gray-200" href="/whats-new">
+              Daftar Pembaruan
+            </a>
           </nav>
           {user ? (
             <div className="flex items-center gap-3">
@@ -108,37 +111,37 @@ export default async function CeritaKamiPage({
 
       <main>
         {/* Hero Section with Search */}
-        <section className="relative overflow-hidden bg-gradient-to-br from-[#1a0f2e] via-[#2d1b3d] to-[#4a2d5d] py-20">
+        <section className="relative overflow-hidden bg-gradient-to-br from-[#1a0f2e] via-[#2d1b3d] to-[#4a2d5d] py-12">
           <div className="mx-auto max-w-[1237px] px-6">
             <div className="text-center text-white">
               <h1 className="mb-2 text-5xl font-bold">
                 CERITA <span className="text-[#ff6b3d]">BIGBOX</span>.AI
               </h1>
-              <div className="mx-auto mb-6 h-1 w-40 bg-white" />
-              <p className="mb-8 text-lg">
+              <div className="mx-auto mb-4 h-1 w-36 bg-white" />
+              <p className="mb-4 text-lg">
                 Pelajari cara organisasi mencapai lebih banyak hal dengan BigBox
               </p>
-              <p className="mb-8 text-sm text-gray-300">
+              <p className="mb-5 text-sm text-gray-300">
                 Berinovasi lebih cepat dan buat keputusan lebih cerdas bersama
                 teknologi AI dan big data milik BigBox.
               </p>
 
               {/* Search Bar */}
-              <form className="mx-auto max-w-3xl" method="get">
+              <form className="mx-auto max-w-xl" method="get">
                 <div className="relative">
                   <input
                     type="text"
                     name="q"
                     defaultValue={searchQuery}
                     placeholder="PELUANG BISNIS. Cari kisah pelanggan berdasarkan kata kunci, nama perusahaan, nama produk, atau solusi."
-                    className="w-full rounded-full border-2 border-white bg-white px-6 py-4 pr-12 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#ff6b3d]"
+                    className="w-full rounded-full border-2 border-white bg-white px-4 py-2.5 pr-10 text-sm text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#ff6b3d]"
                   />
                   <button
                     className="absolute right-4 top-1/2 -translate-y-1/2"
                     type="submit"
                   >
                     <svg
-                      className="h-5 w-5 text-gray-600"
+                      className="h-4 w-4 text-gray-600"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -158,9 +161,9 @@ export default async function CeritaKamiPage({
         </section>
 
         {/* Category Filter */}
-        <section className="border-b bg-gray-50 py-6">
+        <section className="border-b bg-gray-50 py-3">
           <div className="mx-auto max-w-[1237px] px-6">
-            <div className="flex flex-wrap justify-center gap-3">
+            <div className="flex flex-wrap justify-center gap-2">
               {categories.map((category) => {
                 const params = new URLSearchParams();
                 if (searchQuery) {
@@ -174,7 +177,7 @@ export default async function CeritaKamiPage({
                   <Link
                     key={category}
                     href={href}
-                    className={`rounded-full px-6 py-2 text-sm font-semibold transition-all ${
+                    className={`rounded-full px-5 py-1.5 text-sm font-semibold transition-all ${
                       selectedCategory === category
                         ? "bg-[#2d1b3d] text-white shadow-lg"
                         : "bg-white text-gray-700 hover:bg-gray-100"
@@ -199,16 +202,17 @@ export default async function CeritaKamiPage({
         <section className="mx-auto max-w-[1237px] px-6 pb-16">
           <div className="grid gap-8 md:grid-cols-3">
             {filteredStories.map((story) => (
-              <div
+              <Link
                 key={story.id}
-                className="group overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-2xl"
+                href={`/cerita-kami/${story.id}`}
+                className="zoom-parent group block overflow-hidden rounded-lg bg-white shadow-md transition-all hover:shadow-2xl"
               >
                 {/* Image with Zoom Effect */}
-                <div className="relative h-[220px] w-full overflow-hidden">
+                <div className="zoom-card relative h-[220px] w-full overflow-hidden">
                   <img
                     src={story.image}
                     alt={story.client}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    className="zoom-image h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 </div>
 
@@ -237,11 +241,8 @@ export default async function CeritaKamiPage({
                     ))}
                   </div>
 
-                  {/* Read More Link */}
-                  <Link
-                    href={`/cerita-kami/${story.id}`}
-                    className="mt-4 inline-flex items-center gap-2 font-semibold text-[#ff6b3d] transition-colors hover:text-[#ff5722]"
-                  >
+                  {/* Read More */}
+                  <span className="mt-4 inline-flex items-center gap-2 font-semibold text-[#ff6b3d] transition-colors group-hover:text-[#ff5722]">
                     Baca Selengkapnya
                     <svg
                       className="h-5 w-5"
@@ -256,7 +257,7 @@ export default async function CeritaKamiPage({
                         d="M13 7l5 5m0 0l-5 5m5-5H6"
                       />
                     </svg>
-                  </Link>
+                  </span>
 
                   {/* Rating */}
                   <div className="mt-6 flex items-center justify-between border-t pt-4">
@@ -277,7 +278,7 @@ export default async function CeritaKamiPage({
                     </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
@@ -292,28 +293,26 @@ export default async function CeritaKamiPage({
         </section>
 
         {/* CTA Section */}
-        <section className="relative overflow-hidden bg-gradient-to-r from-[#2d1b3d] via-[#3d2a4d] to-[#2d1b3d] py-12">
+        <section className="relative overflow-hidden bg-gradient-to-r from-[#2d1b3d] via-[#3d2a4d] to-[#2d1b3d] py-8">
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute -left-24 top-10 h-28 w-28 rounded-full bg-[#ff6b3d] blur-2xl opacity-60" />
             <div className="absolute right-20 top-6 h-32 w-32 rounded-full bg-[#ff8a5b] blur-3xl opacity-55" />
           </div>
           <div className="mx-auto max-w-[1237px] px-6">
-            <div className="rounded-[18px] bg-gradient-to-r from-[#2a1740] via-[#3f2451] to-[#6a2f4b] px-8 py-10 text-center text-white md:px-12">
-              <h2 className="text-2xl font-bold md:text-3xl">
+            <div className="rounded-[18px] bg-gradient-to-r from-[#2a1740] via-[#3f2451] to-[#6a2f4b] px-6 py-7 text-center text-white md:px-10">
+              <h2 className="text-xl font-bold md:text-2xl">
                 Siap Wujudkan{" "}
                 <span className="text-[#ff6b3d]">Keputusan Cerdas</span> Bersama
                 BigBox?
               </h2>
-              <p className="mt-3 text-sm text-gray-200 md:text-base">
+              <p className="mt-2 text-sm text-gray-200">
                 Konsultasikan kebutuhan bisnis Anda bersama kami untuk temukan
                 solusi AI dan big data yang tepat.
               </p>
 
               <a
-                href="https://wa.me/628111720231"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#1f1f1f] shadow-md transition-transform hover:scale-[1.02]"
+                href="/hubungi-kami"
+                className="mt-4 inline-flex items-center gap-3 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-[#1f1f1f] shadow-md transition-transform hover:scale-[1.02]"
               >
                 Konsultasi Sekarang
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1f1f1f] text-white">

@@ -8,6 +8,7 @@ import NewsViewTracker from "@/components/news-view-tracker";
 import { ProfileMenu } from "@/components/profile-menu";
 import { NotificationBell } from "@/components/notification-bell";
 import { getUserNotifications } from "@/lib/notifications";
+import ReviewForm from "@/components/review-form";
 
 export const dynamic = "force-dynamic";
 
@@ -57,7 +58,7 @@ export default async function StoryDetailPage({
     story.summaryPart1?.trim() || "",
     story.summaryPart2?.trim() || "",
     story.summaryPart3?.trim() || "",
-  ];
+  ].filter((item) => item.length > 0);
   const storedContent = story.contentText?.trim() || null;
   const heroDescription =
     summaries[0] ??
@@ -107,6 +108,9 @@ export default async function StoryDetailPage({
             </a>
             <a className="nav-link hover:text-gray-200" href="/cerita-kami">
               Cerita Kami
+            </a>
+            <a className="nav-link hover:text-gray-200" href="/whats-new">
+              Daftar Pembaruan
             </a>
           </nav>
           {user ? (
@@ -158,7 +162,11 @@ export default async function StoryDetailPage({
           <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-gray-900">
             Ringkasan Dampak Bigbox
           </h2>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
+          <div
+            className={`mt-4 grid gap-4 md:grid-cols-3 ${
+              impactItems.length === 2 ? "md:justify-center" : ""
+            }`}
+          >
             {impactItems.map((impact, index) => (
               <div
                 key={`impact-${index}`}
@@ -346,40 +354,11 @@ export default async function StoryDetailPage({
               </button>
             </div>
             {customerId ? (
-              <form
-                className="review-form"
-                method="post"
-                action="/api/news/review"
-              >
-                <input type="hidden" name="newsId" value={story.id} />
-                <input
-                  type="hidden"
-                  name="redirect"
-                  value={`/cerita-kami/${story.id}`}
-                />
-                <div className="review-input-row">
-                  <span className="review-avatar">
-                    {story.customerName?.trim()?.[0]?.toUpperCase() || "U"}
-                  </span>
-                  <textarea
-                    name="comment"
-                    rows={2}
-                    placeholder="Tambahkan komentar..."
-                    required
-                  />
-                </div>
-                <div className="review-actions">
-                  <select name="rating" required>
-                    <option value="">Rating</option>
-                    <option value="5">5 - Sangat puas</option>
-                    <option value="4">4 - Puas</option>
-                    <option value="3">3 - Cukup</option>
-                    <option value="2">2 - Kurang</option>
-                    <option value="1">1 - Tidak puas</option>
-                  </select>
-                  <button type="submit">Kirim</button>
-                </div>
-              </form>
+              <ReviewForm
+                newsId={story.id}
+                redirect={`/cerita-kami/${story.id}`}
+                avatarLetter={story.customerName?.trim()?.[0]?.toUpperCase() || "U"}
+              />
             ) : (
               <p className="review-login">
                 Silakan{" "}
@@ -403,24 +382,50 @@ export default async function StoryDetailPage({
                           {formatReviewDate(review.createdAt)}
                         </span>
                       </div>
-                      <p className="review-item-text">{review.comment}</p>
+                      {review.comment?.trim().length ? (
+                        <p className="review-item-text">{review.comment}</p>
+                      ) : (
+                        <p className="review-item-text text-gray-400">
+                          (Tanpa komentar)
+                        </p>
+                      )}
                       <div className="review-meta">
-                        <span className="review-stars">
-                          {Array.from({ length: review.rating }).map((_, i) => (
-                            <svg
-                              key={i}
-                              viewBox="0 0 24 24"
-                              width="14"
-                              height="14"
-                              aria-hidden="true"
-                            >
-                              <path
-                                d="M12 3.5 14.8 9l6 .9-4.4 4.1 1 6-5.4-2.9-5.4 2.9 1-6L3.2 9.9l6-.9L12 3.5Z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          ))}
-                        </span>
+                        {review.rating > 0 ? (
+                          <span className="review-stars">
+                            {Array.from({ length: review.rating }).map((_, i) => (
+                              <svg
+                                key={i}
+                                viewBox="0 0 24 24"
+                                width="14"
+                                height="14"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M12 3.5 14.8 9l6 .9-4.4 4.1 1 6-5.4-2.9-5.4 2.9 1-6L3.2 9.9l6-.9L12 3.5Z"
+                                  fill="currentColor"
+                                />
+                              </svg>
+                            ))}
+                          </span>
+                        ) : null}
+                        {customerId === review.userId ? (
+                          <form
+                            method="post"
+                            action="/api/news/review/delete"
+                            className="review-delete"
+                          >
+                            <input type="hidden" name="reviewId" value={review.id} />
+                            <input type="hidden" name="newsId" value={story.id} />
+                            <input
+                              type="hidden"
+                              name="redirect"
+                              value={`/cerita-kami/${story.id}`}
+                            />
+                            <button type="submit" suppressHydrationWarning>
+                              Hapus
+                            </button>
+                          </form>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -451,9 +456,7 @@ export default async function StoryDetailPage({
               </p>
 
               <a
-                href="https://wa.me/628111720231"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/hubungi-kami"
                 className="mt-6 inline-flex items-center gap-3 rounded-full bg-white px-6 py-3 text-sm font-semibold text-[#1f1f1f] shadow-md transition-transform hover:scale-[1.02]"
               >
                 Konsultasi Sekarang

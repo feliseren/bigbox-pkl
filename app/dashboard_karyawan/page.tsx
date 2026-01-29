@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
+import { DashboardPeriodFilter } from "@/components/dashboard-period-filter";
 
 const aiOrderColors = [
   { name: "Big Vision", color: "bg-[#5456ff]", hex: "#5456ff" },
@@ -71,26 +72,112 @@ function formatPrice(value: string) {
   return value.startsWith("Rp") ? value : `Rp ${value}`;
 }
 
-export default async function DashboardKaryawanPage() {
+export default async function DashboardKaryawanPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ period?: string | string[]; from?: string | string[]; to?: string | string[] }>;
+}) {
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
+  const resolvedSearchParams = await searchParams;
+  const rawPeriod = resolvedSearchParams?.period;
+  const rawFrom = resolvedSearchParams?.from;
+  const rawTo = resolvedSearchParams?.to;
+  const selectedPeriod = Array.isArray(rawPeriod) ? rawPeriod[0] : rawPeriod;
+  const fromParam = Array.isArray(rawFrom) ? rawFrom[0] : rawFrom;
+  const toParam = Array.isArray(rawTo) ? rawTo[0] : rawTo;
+  const period = ["weekly", "monthly", "yearly", "range"].includes(
+    selectedPeriod || "",
+  )
+    ? (selectedPeriod as "weekly" | "monthly" | "yearly" | "range")
+    : "weekly";
   const today = startOfDayInTimeZone(new Date());
-  const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-  const startPrevWeek = new Date(
+  const endOfToday = new Date(
     today.getFullYear(),
     today.getMonth(),
-    today.getDate() - 13,
+    today.getDate() + 1,
   );
+  const parseDateInput = (value?: string) => {
+    if (!value) return null;
+    const [year, month, day] = value.split("-").map((part) => Number(part));
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
+  };
+  const rangeStart = (() => {
+    if (period === "monthly") {
+      return new Date(today.getFullYear(), today.getMonth(), 1);
+    }
+    if (period === "yearly") {
+      return new Date(today.getFullYear(), 0, 1);
+    }
+    if (period === "range") {
+      const parsed = parseDateInput(fromParam);
+      return parsed ?? new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+    }
+    return new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+  })();
+  const rangeEnd = (() => {
+    if (period === "range") {
+      const parsed = parseDateInput(toParam);
+      if (parsed) {
+        return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate() + 1);
+      }
+    }
+    return endOfToday;
+  })();
+  const hasCustomRange = period === "range" && fromParam && toParam;
+  const noDataRange =
+    hasCustomRange &&
+    (rangeStart >= rangeEnd || rangeStart >= endOfToday || rangeEnd > endOfToday);
+  const safeRangeEnd = noDataRange ? rangeStart : rangeEnd;
+  const rangeLengthDays = Math.max(
+    1,
+    Math.round((safeRangeEnd.getTime() - rangeStart.getTime()) / 86400000),
+  );
+  const prevRangeEnd = new Date(rangeStart);
+  const prevRangeStart = new Date(
+    prevRangeEnd.getFullYear(),
+    prevRangeEnd.getMonth(),
+    prevRangeEnd.getDate() - rangeLengthDays,
+  );
+  const periodLabel =
+    period === "monthly"
+      ? "Bulanan"
+      : period === "yearly"
+        ? "Tahunan"
+        : period === "range"
+          ? "Range"
+          : "Mingguan";
+  const rangeLabel =
+    period === "range" && fromParam && toParam
+      ? `${fromParam} - ${toParam}`
+      : period === "range"
+        ? "Pilih rentang tanggal"
+      : period === "monthly"
+        ? `Bulan ${MONTH_LABELS[today.getMonth()]} ${today.getFullYear()}`
+        : period === "yearly"
+          ? `Tahun ${today.getFullYear()}`
+          : "Last 7 days";
+  const rangeLabelDisplay = noDataRange ? "Data tidak tersedia" : rangeLabel;
+  const reportParams = new URLSearchParams();
+  if (period) {
+    reportParams.set("period", period);
+  }
+  if (period === "range" && fromParam && toParam) {
+    reportParams.set("from", fromParam);
+    reportParams.set("to", toParam);
+  }
+  const reportHref = `/api/reports/weekly-revenue${reportParams.toString() ? `?${reportParams}` : ""}`;
   const doneOrdersRange = await prisma.order.findMany({
     where: {
       statusPesanan: "Done",
-      createdAt: { gte: startPrevWeek, lt: endOfToday },
+      createdAt: { gte: prevRangeStart, lt: safeRangeEnd },
     },
   });
   const doneOrdersAll = await prisma.order.findMany({
-    where: { statusPesanan: "Done" },
+    where: { statusPesanan: "Done", createdAt: { gte: rangeStart, lt: safeRangeEnd } },
   });
   const dailyTotals = new Map<string, number>();
   const dailyCounts = new Map<string, number>();
@@ -102,7 +189,7 @@ export default async function DashboardKaryawanPage() {
   });
   const viewLogs = await prisma.newsView.findMany({
     where: {
-      createdAt: { gte: startPrevWeek, lt: endOfToday },
+      createdAt: { gte: prevRangeStart, lt: safeRangeEnd },
     },
     select: { createdAt: true },
   });
@@ -111,79 +198,72 @@ export default async function DashboardKaryawanPage() {
     const key = dateKeyInTimeZone(view.createdAt);
     viewCountsByDay.set(key, (viewCountsByDay.get(key) ?? 0) + 1);
   });
-  const currentWeekRaw = Array.from({ length: 7 }).map((_, index) => {
+  const currentViewerRangeRaw = Array.from({ length: rangeLengthDays }).map(
+    (_, index) => {
+      const date = new Date(
+        rangeStart.getFullYear(),
+        rangeStart.getMonth(),
+        rangeStart.getDate() + index,
+      );
+      const key = dateKeyInTimeZone(date);
+      return { date, value: viewCountsByDay.get(key) ?? 0 };
+    },
+  );
+  const currentRangeRaw = Array.from({ length: rangeLengthDays }).map((_, index) => {
     const date = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - (6 - index),
+      rangeStart.getFullYear(),
+      rangeStart.getMonth(),
+      rangeStart.getDate() + index,
     );
     const key = dateKeyInTimeZone(date);
     return { date, value: dailyTotals.get(key) ?? 0 };
   });
-  const prevWeekRaw = Array.from({ length: 7 }).map((_, index) => {
+  const prevRangeRaw = Array.from({ length: rangeLengthDays }).map((_, index) => {
     const date = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - (13 - index),
+      prevRangeStart.getFullYear(),
+      prevRangeStart.getMonth(),
+      prevRangeStart.getDate() + index,
     );
     const key = dateKeyInTimeZone(date);
     return { date, value: dailyTotals.get(key) ?? 0 };
   });
-  const currentWeekViewerTotal = Array.from({ length: 7 }).reduce(
-    (sum, _, index) => {
-      const date = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate() - (6 - index),
-      );
-      const key = dateKeyInTimeZone(date);
-      return sum + (viewCountsByDay.get(key) ?? 0);
-    },
-    0,
-  );
-  const prevWeekViewerTotal = Array.from({ length: 7 }).reduce(
-    (sum, _, index) => {
-      const date = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate() - (13 - index),
-      );
-      const key = dateKeyInTimeZone(date);
-      return sum + (viewCountsByDay.get(key) ?? 0);
-    },
-    0,
-  );
-  const viewerPercentChange =
-    prevWeekViewerTotal > 0
-      ? ((currentWeekViewerTotal - prevWeekViewerTotal) / prevWeekViewerTotal) * 100
-      : 0;
-  const viewerPercentLabel = `${viewerPercentChange >= 0 ? "+" : ""}${viewerPercentChange.toFixed(1)}%`;
-  const viewerPercentColor =
-    viewerPercentChange >= 0 ? "text-[#36a56d]" : "text-[#e32626]";
-  const viewerBarScale = Math.max(currentWeekViewerTotal, prevWeekViewerTotal, 1);
-  const viewerCurrentHeight = Math.round((currentWeekViewerTotal / viewerBarScale) * 100);
-  const viewerPrevHeight = Math.round((prevWeekViewerTotal / viewerBarScale) * 100);
-  const maxValue = Math.max(
-    1,
-    ...currentWeekRaw.map((item) => item.value),
-    ...prevWeekRaw.map((item) => item.value),
-  );
-  const weeklyBars = currentWeekRaw.map((item, index) => {
+  const monthlyRevenueTotals = Array.from({ length: 12 }, () => 0);
+  if (period === "yearly") {
+    currentRangeRaw.forEach((item) => {
+      const { month } = getDatePartsInTimeZone(item.date);
+      const index = month - 1;
+      if (index >= 0 && index < 12) {
+        monthlyRevenueTotals[index] += item.value;
+      }
+    });
+  }
+  const revenueSeries =
+    period === "yearly"
+      ? monthlyRevenueTotals.map((value, index) => ({
+          label: MONTH_LABELS[index],
+          value,
+        }))
+      : currentRangeRaw.map((item) => ({
+          label: String(getDatePartsInTimeZone(item.date).day),
+          value: item.value,
+        }));
+  const maxValue = Math.max(1, ...revenueSeries.map((item) => item.value));
+  const weeklyBars = revenueSeries.map((item) => {
     const scale = (value: number) => {
       if (value <= 0) return 4;
       return Math.max(8, Math.round((value / maxValue) * 90));
     };
     return {
-      day: getDatePartsInTimeZone(item.date).day,
+      label: item.label,
       last6: scale(item.value),
       value: item.value,
     };
   });
-  const currentWeekTotal = currentWeekRaw.reduce(
+  const currentWeekTotal = currentRangeRaw.reduce(
     (sum, item) => sum + item.value,
     0,
   );
-  const prevWeekTotal = prevWeekRaw.reduce((sum, item) => sum + item.value, 0);
+  const prevWeekTotal = prevRangeRaw.reduce((sum, item) => sum + item.value, 0);
   const percentChange =
     prevWeekTotal > 0 ? ((currentWeekTotal - prevWeekTotal) / prevWeekTotal) * 100 : 0;
   const percentLabel = `${percentChange >= 0 ? "+" : ""}${percentChange.toFixed(1)}%`;
@@ -197,24 +277,31 @@ export default async function DashboardKaryawanPage() {
     1,
     ...popularNews.map((item) => item.viewCount),
   );
-  const yearStart = new Date(today.getFullYear(), 0, 1);
-  const yearEnd = new Date(today.getFullYear() + 1, 0, 1);
-  const yearViews = await prisma.newsView.findMany({
-    where: { createdAt: { gte: yearStart, lt: yearEnd } },
-    select: { createdAt: true },
-  });
-  const monthlyCounts = Array.from({ length: 12 }, () => 0);
-  yearViews.forEach((view) => {
-    const { month } = getDatePartsInTimeZone(view.createdAt);
-    const index = month - 1;
-    if (index >= 0 && index < 12) {
-      monthlyCounts[index] += 1;
-    }
-  });
-  const maxMonthlyViews = Math.max(1, ...monthlyCounts);
+  const monthlyViewerTotals = Array.from({ length: 12 }, () => 0);
+  if (period === "yearly") {
+    currentViewerRangeRaw.forEach((item) => {
+      const { month } = getDatePartsInTimeZone(item.date);
+      const index = month - 1;
+      if (index >= 0 && index < 12) {
+        monthlyViewerTotals[index] += item.value;
+      }
+    });
+  }
+  const viewerSeries =
+    period === "yearly"
+      ? monthlyViewerTotals.map((value, index) => ({
+          label: MONTH_LABELS[index],
+          value,
+        }))
+      : currentViewerRangeRaw.map((item) => ({
+          label: String(getDatePartsInTimeZone(item.date).day),
+          value: item.value,
+        }));
+  const maxViewerValue = Math.max(1, ...viewerSeries.map((item) => item.value));
   const reviewCounts = await prisma.review.groupBy({
     by: ["rating"],
     _count: { rating: true },
+    where: { createdAt: { gte: rangeStart, lt: safeRangeEnd } },
   });
   const totalReviews = reviewCounts.reduce(
     (sum, item) => sum + item._count.rating,
@@ -355,21 +442,36 @@ export default async function DashboardKaryawanPage() {
           </header>
 
           <main className="project-content">
-            <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+            <div className="grid gap-6">
               <section className="rounded-[20px] bg-white p-6 shadow-lg">
-                <div className="flex items-center justify-between">
+                <DashboardPeriodFilter
+                  period={period}
+                  from={fromParam}
+                  to={toParam}
+                  rangeLabel={rangeLabelDisplay}
+                  variant="inline"
+                  maxDate={dateKeyInTimeZone(today)}
+                />
+                <div className="mt-4 flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm text-[#7a8092]">Pendapatan Mingguan</p>
+                    <p className="text-sm text-[#7a8092]">
+                      Pendapatan {periodLabel}
+                    </p>
                     <p className="mt-2 text-xl font-semibold">
                       {formatRupiah(currentWeekTotal)}
                     </p>
-                    <p className={`mt-1 text-xs ${percentColor}`}>
-                      {percentLabel} vs last week
+                  <p className={`mt-1 text-xs ${percentColor}`}>
+                    {percentLabel} vs periode sebelumnya
+                  </p>
+                  {noDataRange ? (
+                    <p className="mt-2 text-xs text-[#e32626]">
+                      Data tidak tersedia untuk tanggal tersebut.
                     </p>
-                  </div>
+                  ) : null}
+                </div>
                   <a
                     className="rounded-lg border border-[#e6e9f5] px-3 py-1 text-xs text-[#4a4f60]"
-                    href="/api/reports/weekly-revenue"
+                    href={reportHref}
                   >
                     View Report
                   </a>
@@ -386,7 +488,7 @@ export default async function DashboardKaryawanPage() {
                   <div className="relative flex items-end justify-between px-3 py-4">
                     {weeklyBars.map((bar) => (
                       <div
-                        key={bar.day}
+                        key={bar.label}
                         className="flex flex-1 flex-col items-center"
                       >
                         <div className="group relative flex h-32 items-end">
@@ -399,7 +501,7 @@ export default async function DashboardKaryawanPage() {
                           </span>
                         </div>
                         <span className="mt-2 text-[10px] text-[#9aa0b4]">
-                          {bar.day}
+                          {bar.label}
                         </span>
                       </div>
                     ))}
@@ -408,7 +510,7 @@ export default async function DashboardKaryawanPage() {
                 <div className="mt-3 flex items-center gap-4 text-xs text-[#8f95a8]">
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-[#5256ff]" />
-                    Last 7 days
+                    {rangeLabelDisplay}
                   </span>
                 </div>
               </section>
@@ -416,43 +518,54 @@ export default async function DashboardKaryawanPage() {
               <section className="rounded-[20px] bg-white p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-[#7a8092]">Total Viewers Mingguan</p>
-                    <p className="mt-2 text-xl font-semibold">
-                      {currentWeekViewerTotal}
-                    </p>
-                    <p className={`mt-1 text-xs ${viewerPercentColor}`}>
-                      {viewerPercentLabel} vs minggu lalu
-                    </p>
+                    <h3 className="text-base font-semibold">Grafik Viewers</h3>
+                    <p className="text-xs text-[#7a8092]">Monthly Earning</p>
                   </div>
-                  <span className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-[#6b7185]">
-                    Mingguan
+                  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-xs text-[#6b7185]">
+                    Quarterly
+                    <svg
+                      className="h-3 w-3"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.937a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" />
+                    </svg>
                   </span>
                 </div>
-                <div className="mt-6 rounded-2xl bg-slate-50/80 px-4 py-6">
-                  <div className="flex items-end justify-between">
-                    <div className="flex flex-1 flex-col items-center gap-3">
-                      <div className="flex h-32 items-end">
-                        <div
-                          className="w-10 rounded-full bg-gradient-to-t from-[#4249ff] to-[#7f86ff] shadow-[0_6px_14px_rgba(82,86,255,0.35)]"
-                          style={{ height: `${viewerCurrentHeight}px` }}
-                        />
-                      </div>
-                      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#4a4f60] shadow-sm">
-                        Minggu ini
-                      </span>
-                    </div>
-                    <div className="flex flex-1 flex-col items-center gap-3">
-                      <div className="flex h-32 items-end">
-                        <div
-                          className="w-10 rounded-full bg-gradient-to-t from-[#cfd5ff] to-[#eef1ff]"
-                          style={{ height: `${viewerPrevHeight}px` }}
-                        />
-                      </div>
-                      <span className="rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-[#7a8092] shadow-sm">
-                        Minggu lalu
-                      </span>
-                    </div>
+                <div className="relative mt-6 rounded-2xl bg-slate-50/80 px-3 py-4">
+                  <div className="absolute inset-0 grid grid-rows-4 gap-6 px-3 py-4">
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <div
+                        key={index}
+                        className="border-b border-dashed border-slate-200"
+                      />
+                    ))}
                   </div>
+                    <div className="relative flex items-end justify-between px-3 py-4">
+                      {viewerSeries.map((item) => {
+                        const height = Math.round((item.value / maxViewerValue) * 90);
+                        return (
+                          <div
+                            key={item.label}
+                            className="flex flex-1 flex-col items-center"
+                          >
+                            <div className="group relative flex h-32 items-end">
+                              <div
+                                className="w-3 rounded-full bg-gradient-to-t from-[#4249ff] to-[#7f86ff] shadow-[0_6px_14px_rgba(82,86,255,0.35)]"
+                                style={{ height: `${height}px` }}
+                              />
+                              <span className="pointer-events-none absolute -top-9 left-1/2 -translate-x-1/2 rounded-full bg-[#1f2430] px-3 py-1 text-[10px] font-semibold text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+                                {item.value} views
+                              </span>
+                            </div>
+                            <span className="mt-2 text-[10px] text-[#9aa0b4]">
+                              {item.label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
                 </div>
               </section>
             </div>
@@ -461,7 +574,7 @@ export default async function DashboardKaryawanPage() {
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-semibold">Top 5 Products</h3>
                 <div className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-[#6b7185]">
-                  Last 5 weeks
+                  {rangeLabelDisplay}
                 </div>
               </div>
               <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
@@ -558,34 +671,7 @@ export default async function DashboardKaryawanPage() {
               </section>
             </div>
 
-            <div className="mt-6 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-              <section className="rounded-[20px] bg-white p-6 shadow-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-base font-semibold">Grafik Viewers</h3>
-                    <p className="text-xs text-[#7a8092]">Monthly Earning</p>
-                  </div>
-                  <span className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-[#6b7185]">
-                    Quarterly
-                  </span>
-                </div>
-                <div className="mt-6 flex items-end gap-2">
-                  {monthlyCounts.map((value, index) => (
-                    <div key={index} className="flex flex-col items-center">
-                      <div
-                        className="w-5 rounded-full bg-[#5a3df0]"
-                        style={{
-                          height: `${Math.round((value / maxMonthlyViews) * 120)}px`,
-                        }}
-                      />
-                      <span className="mt-2 text-[10px] text-[#9aa0b4]">
-                        {MONTH_LABELS[index]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </section>
-
+            <div className="mt-6 grid gap-6">
               <section className="rounded-[20px] bg-white p-6 shadow-lg">
                 <h3 className="text-base font-semibold">User Feedbacks</h3>
                 <p className="text-xs text-[#7a8092]">

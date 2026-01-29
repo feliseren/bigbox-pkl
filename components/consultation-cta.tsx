@@ -1,7 +1,5 @@
 import Image from "next/image";
 
-const WHATSAPP_LINK = "https://wa.me/628111720231";
-
 export function ConsultationCTA() {
   return (
     <section className="mx-auto max-w-[1237px] px-6 py-16">
@@ -34,12 +32,10 @@ export function ConsultationCTA() {
               Solusi AI untuk keputusan bisnis yang lebih cerdas dengan insight berbasis data real-time
             </p>
             <a
-              href={WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/hubungi-kami"
               className="block w-full rounded-[8px] bg-[#ff6b3d] py-2 text-center font-semibold text-white transition-colors hover:bg-[#ff5722]"
             >
-              Konsultasi Sekarang
+              Hubungi Tim BigBox
             </a>
           </div>
 
@@ -60,12 +56,10 @@ export function ConsultationCTA() {
               Platform analitik visual dengan dashboard real-time dan laporan cerdas untuk pemahaman mendalam
             </p>
             <a
-              href={WHATSAPP_LINK}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/hubungi-kami"
               className="block w-full rounded-[8px] bg-[#ff6b3d] py-2 text-center font-semibold text-white transition-colors hover:bg-[#ff5722]"
             >
-              Konsultasi Sekarang
+              Hubungi Tim BigBox
             </a>
           </div>
         </div>

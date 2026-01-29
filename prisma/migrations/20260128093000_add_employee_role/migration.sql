@@ -1,0 +1,1 @@
+-- No-op: role column already added in earlier migration.

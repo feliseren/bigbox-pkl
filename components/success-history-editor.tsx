@@ -321,7 +321,39 @@ const listActions: ListOption["id"][] = [
   "list-roman-upper",
 ];
 
-export default function SuccessHistoryEditor() {
+type SuccessHistoryEditorProps = {
+  name?: string;
+  placeholder?: string;
+};
+
+const fontOptions = [
+  "Calibri",
+  "Arial",
+  "Times New Roman",
+  "Georgia",
+  "Verdana",
+];
+
+const fontSizeOptions = [
+  { label: "8", value: "1" },
+  { label: "9", value: "1" },
+  { label: "10", value: "2" },
+  { label: "11", value: "2" },
+  { label: "12", value: "3" },
+  { label: "14", value: "4" },
+  { label: "16", value: "4" },
+  { label: "18", value: "5" },
+  { label: "20", value: "5" },
+  { label: "22", value: "6" },
+  { label: "24", value: "6" },
+  { label: "28", value: "7" },
+  { label: "32", value: "7" },
+];
+
+export default function SuccessHistoryEditor({
+  name = "contentText",
+  placeholder = "Tuliskan isi berita disini...",
+}: SuccessHistoryEditorProps) {
   const editorRef = useRef<HTMLDivElement | null>(null);
   const savedSelection = useRef<Range | null>(null);
   const [activeActions, setActiveActions] = useState<Set<ToolbarAction["id"]>>(
@@ -329,6 +361,9 @@ export default function SuccessHistoryEditor() {
   );
   const [activeList, setActiveList] = useState<ListOption["id"] | null>(null);
   const [isListMenuOpen, setIsListMenuOpen] = useState(false);
+  const [contentValue, setContentValue] = useState("");
+  const [textColor, setTextColor] = useState("#000000");
+  const colorInputRef = useRef<HTMLInputElement | null>(null);
 
   const storeSelection = useCallback(() => {
     const selection = window.getSelection();
@@ -464,6 +499,67 @@ export default function SuccessHistoryEditor() {
   return (
     <div className="success-editor">
       <div className="success-toolbar">
+        <div className="success-tool-group">
+          <select
+            className="success-select"
+            defaultValue={fontOptions[0]}
+            onChange={(event) => {
+              editorRef.current?.focus();
+              ensureSelection();
+              restoreSelection();
+              document.execCommand("fontName", false, event.target.value);
+            }}
+          >
+            {fontOptions.map((font) => (
+              <option key={font} value={font}>
+                {font}
+              </option>
+            ))}
+          </select>
+          <select
+            className="success-select"
+            defaultValue={fontSizeOptions[1].value}
+            onChange={(event) => {
+              editorRef.current?.focus();
+              ensureSelection();
+              restoreSelection();
+              document.execCommand("fontSize", false, event.target.value);
+            }}
+          >
+            {fontSizeOptions.map((option) => (
+              <option key={option.label} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <div className="success-color">
+            <button
+              type="button"
+              className="success-color-button"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => colorInputRef.current?.click()}
+            >
+              A
+              <span
+                className="success-color-indicator"
+                style={{ background: textColor }}
+              />
+            </button>
+            <input
+              ref={colorInputRef}
+              type="color"
+              value={textColor}
+              onChange={(event) => {
+                const next = event.target.value;
+                setTextColor(next);
+                editorRef.current?.focus();
+                ensureSelection();
+                restoreSelection();
+                document.execCommand("foreColor", false, next);
+              }}
+            />
+          </div>
+        </div>
         {toolbarActions.map((action) => (
           <button
             key={action.id}
@@ -521,13 +617,18 @@ export default function SuccessHistoryEditor() {
         contentEditable
         role="textbox"
         aria-multiline="true"
-        data-placeholder="Tuliskan isi berita disini..."
+        data-placeholder={placeholder}
         onFocus={storeSelection}
         onKeyUp={storeSelection}
         onMouseUp={storeSelection}
-        onInput={storeSelection}
+        onInput={(event) => {
+          storeSelection();
+          const text = (event.currentTarget.textContent || "").trim();
+          setContentValue(text);
+        }}
         suppressContentEditableWarning
       />
+      <input type="hidden" name={name} value={contentValue} />
     </div>
   );
 }
