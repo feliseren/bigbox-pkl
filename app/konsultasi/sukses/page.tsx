@@ -9,7 +9,7 @@ export default function SuksesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#2d1b3d] to-[#1a0f2e] text-white">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#93898f]">
+      <header className="sticky top-0 z-30 site-header">
         <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <Image
@@ -69,3 +69,5 @@ export default function SuksesPage() {
     </div>
   );
 }
+
+

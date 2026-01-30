@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
 import { fetchWhatsNew } from "@/lib/whats-new-db";
+import WhatsNewForm from "@/components/whats-new-form";
 
 export const dynamic = "force-dynamic";
 
@@ -100,77 +101,7 @@ export default async function WhatsNewDashboardPage({
           </header>
 
           <main className="project-content">
-            {canManage ? (
-              <section className="project-card">
-                <form
-                  className="project-form"
-                  method="post"
-                  action="/api/whats-new"
-                  encType="multipart/form-data"
-                  suppressHydrationWarning
-                >
-                  <input
-                    type="hidden"
-                    name="redirect"
-                    value="/dashboard_karyawan/whats-new"
-                  />
-                  <label>
-                    Judul Update
-                    <input name="title" placeholder="Judul update..." required />
-                  </label>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <label>
-                      Kategori
-                      <select name="category" defaultValue="" required>
-                        <option value="" disabled>
-                          Pilih kategori
-                        </option>
-                        {categories.map((category) => (
-                          <option key={category} value={category}>
-                            {category}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label>
-                      Tanggal Publikasi
-                      <input type="date" name="publishDate" required />
-                    </label>
-                  </div>
-                  <label>
-                    Ringkasan Singkat
-                    <textarea
-                      name="summary"
-                      rows={4}
-                      placeholder="Ringkasan singkat update..."
-                      required
-                    />
-                  </label>
-                  <label>
-                    Detail (opsional)
-                    <textarea
-                      name="contentText"
-                      rows={4}
-                      placeholder="Detail update..."
-                    />
-                  </label>
-                  <label>
-                    Upload Gambar (opsional)
-                    <input type="file" name="image" accept="image/*" />
-                  </label>
-                  <label>
-                    Jadikan Highlight
-                    <select name="isHighlight" defaultValue="0">
-                      <option value="0">Tidak</option>
-                      <option value="1">Ya</option>
-                    </select>
-                  </label>
-                  <div className="project-form-actions">
-                    <button type="submit">Simpan</button>
-                  </div>
-                </form>
-              </section>
-            ) : null}
+            {canManage ? <WhatsNewForm categories={categories} /> : null}
 
             <section className="project-card">
               <div className="project-toolbar">

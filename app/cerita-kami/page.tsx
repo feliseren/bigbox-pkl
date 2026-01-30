@@ -66,7 +66,7 @@ export default async function CeritaKamiPage({
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-[#93898f]">
+      <header className="sticky top-0 z-30 site-header">
         <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <Image
@@ -337,7 +337,7 @@ export default async function CeritaKamiPage({
       </main>
 
             {/* Footer */}
-      <footer className="bg-[#9a9a9a] py-10 text-sm text-white">
+      <footer className="site-footer py-10 text-sm text-white">
         <div className="mx-auto grid max-w-[1237px] gap-6 px-6 md:grid-cols-[1.6fr_1fr]">
           <div className="space-y-4">
             <Image
@@ -394,3 +394,5 @@ export default async function CeritaKamiPage({
     </div>
   );
 }
+
+

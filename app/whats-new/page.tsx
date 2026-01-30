@@ -56,7 +56,7 @@ export default async function WhatsNewPage({
 
   return (
     <div className="min-h-screen bg-[#f5f6fb] text-[#1f2430]">
-      <header className="sticky top-0 z-30 bg-[#93898f]">
+      <header className="sticky top-0 z-30 site-header">
         <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
           <Image
             src="/bigbox_logo-removebg-preview.png"
@@ -209,9 +209,6 @@ export default async function WhatsNewPage({
                   <span>
                     {formatDate(item.publishDate)} | {item.category}
                   </span>
-                  <button className="rounded-full bg-[#2563eb] px-4 py-1.5 text-xs font-semibold text-white">
-                    Baca
-                  </button>
                 </div>
               </article>
             ))}
@@ -221,3 +218,5 @@ export default async function WhatsNewPage({
     </div>
   );
 }
+
+

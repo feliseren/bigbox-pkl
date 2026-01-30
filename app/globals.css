@@ -2381,6 +2381,13 @@ input[type="file"]::-webkit-file-upload-button:hover {
   color: #dc2626;
 }
 
+.site-header,
+.site-footer {
+  background-color: #3f4fa1;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.22) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
 .review-item-text {
   margin: 0;
   font-size: 14px;
