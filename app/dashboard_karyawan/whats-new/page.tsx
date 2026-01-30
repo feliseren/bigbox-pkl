@@ -8,7 +8,7 @@ import WhatsNewForm from "@/components/whats-new-form";
 
 export const dynamic = "force-dynamic";
 
-const categories = ["Produk", "Fitur", "Update Sistem", "Event"];
+const categories = ["Produk", "Fitur", "Update Sistem"];
 
 const sanitizeId = (value: string) => value.replace(/[^a-zA-Z0-9_-]/g, "");
 const formatDate = (value: Date) =>
@@ -101,22 +101,23 @@ export default async function WhatsNewDashboardPage({
           </header>
 
           <main className="project-content">
-            {canManage ? <WhatsNewForm categories={categories} /> : null}
-
             <section className="project-card">
-              <div className="project-toolbar">
-                <div className="project-tabs">
-                  {["Semua", ...categories].map((category) => (
-                    <a
-                      key={category}
-                      className={`project-tab${
-                        selectedCategory === category ? " active" : ""
-                      }`}
-                      href={buildTabHref(category)}
-                    >
-                      {category}
-                    </a>
-                  ))}
+              <div className="project-toolbar whats-new-toolbar dashboard-toolbar">
+                <div className="whats-new-left">
+                  {canManage ? <WhatsNewForm categories={categories} /> : null}
+                  <div className="project-tabs">
+                    {["Semua", ...categories].map((category) => (
+                      <a
+                        key={category}
+                        className={`project-tab${
+                          selectedCategory === category ? " active" : ""
+                        }`}
+                        href={buildTabHref(category)}
+                      >
+                        {category}
+                      </a>
+                    ))}
+                  </div>
                 </div>
                 <form
                   className="project-search"

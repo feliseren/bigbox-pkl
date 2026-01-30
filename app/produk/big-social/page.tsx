@@ -95,6 +95,9 @@ export default async function BigSocialPage() {
             <a className="nav-link" href="/cerita-kami">
               Cerita Kami
             </a>
+            <a className="nav-link" href="/whats-new">
+              Daftar Pembaruan
+            </a>
           </nav>
           {user ? (
             <div className="flex items-center gap-3">
