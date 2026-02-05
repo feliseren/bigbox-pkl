@@ -1,6 +1,22 @@
 import Image from "next/image";
 
-export default function LoginKaryawanPage() {
+type LoginKaryawanSearchParams = {
+  error?: string | string[];
+};
+
+function normalizeParam(value?: string | string[]) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+export default async function LoginKaryawanPage({
+  searchParams,
+}: {
+  searchParams?: Promise<LoginKaryawanSearchParams>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  const error = normalizeParam(resolvedSearchParams?.error);
+  const message = error === "1" ? "ID karyawan atau password salah." : null;
+
   return (
     <div className="min-h-screen bg-[url('/bg-karyawan.jpeg')] bg-cover bg-center px-4 py-4 flex items-center justify-center">
       <div className="mx-auto flex items-center justify-center">
@@ -21,6 +37,9 @@ export default function LoginKaryawanPage() {
           <p className="mt-1 text-xs text-[#6b6b6b] sm:text-sm">
             Masukkan ID Karyawan dan Password
           </p>
+          {message ? (
+            <p className="profile-message error">{message}</p>
+          ) : null}
 
           <form
             className="mt-5 space-y-3"

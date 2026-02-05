@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 type NewsActionButtonsProps = {
   canManage: boolean;
@@ -35,9 +36,7 @@ export function NewsActionButtons({
         <form method="post" action="/api/news/delete">
           <input type="hidden" name="newsId" value={newsId} />
           <input type="hidden" name="redirect" value="/dashboard_karyawan/daftar-berita" />
-          <button className="btn-delete" type="submit">
-            Delete
-          </button>
+          <ConfirmDeleteButton className="btn-delete" />
         </form>
       ) : (
         <button

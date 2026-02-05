@@ -171,6 +171,7 @@ model NewsStory {
   commentCount     Int      @default(0) @map("comment_count")
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @updatedAt @map("updated_at")
+  deletedAt        DateTime? @map("deleted_at")
   reviews          Review[]
   views            NewsView[]
 
@@ -184,6 +185,7 @@ model Review {
   rating      Int
   comment     String   @db.LongText
   createdAt   DateTime @default(now()) @map("created_at")
+  deletedAt   DateTime? @map("deleted_at")
 
   newsStory NewsStory @relation(fields: [newsStoryId], references: [id])
   user      User      @relation(fields: [userId], references: [id])
@@ -228,4 +230,52 @@ model WhatsNew {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   @@map("whats_new")
+}
+
+model ArchivedProduct {
+  id              String      @id @default(cuid())
+  originalId      String      @map("original_id")
+  productType     ProductType @map("product_type")
+  namaProduk      String      @map("nama_produk")
+  hargaProduk     String      @map("harga_produk")
+  deskripsiProduk String      @map("deskripsi_produk")
+  durasiProduk    String      @map("durasi_produk")
+  terjual         String
+  deletedAt       DateTime    @default(now()) @map("deleted_at")
+  deletedBy       String?     @map("deleted_by")
+
+  @@map("archived_products")
+}
+
+model ArchivedProject {
+  id          String   @id @default(cuid())
+  originalId  String   @map("original_id")
+  startLabel  String   @map("start_label")
+  targetLabel String   @map("target_label")
+  owner       String
+  status      String
+  createdAt   DateTime @map("created_at")
+  deletedAt   DateTime @default(now()) @map("deleted_at")
+  deletedBy   String?  @map("deleted_by")
+
+  @@map("archived_projects")
+}
+
+model ArchivedWhatsNew {
+  id           String   @id @default(cuid())
+  originalId   String   @map("original_id")
+  title        String
+  category     String
+  summary      String   @db.LongText
+  contentText  String?  @db.LongText @map("content_text")
+  imageUrl     String?  @map("image_url")
+  isHighlight  Boolean  @map("is_highlight")
+  publishDate  DateTime @map("publish_date")
+  authorName   String   @map("author_name")
+  createdAt    DateTime @map("created_at")
+  updatedAt    DateTime @map("updated_at")
+  deletedAt    DateTime @default(now()) @map("deleted_at")
+  deletedBy    String?  @map("deleted_by")
+
+  @@map("archived_whats_new")
 }

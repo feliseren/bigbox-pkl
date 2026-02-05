@@ -17,6 +17,13 @@ export async function POST(request: Request) {
   }
 
   try {
+    const existingNews = await prisma.newsStory.findFirst({
+      where: { id: newsId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!existingNews) {
+      return NextResponse.json({ ok: false }, { status: 404 });
+    }
     await prisma.$transaction([
       prisma.newsView.create({
         data: {

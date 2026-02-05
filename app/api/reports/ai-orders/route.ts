@@ -75,12 +75,21 @@ export async function GET() {
   const doneOrdersAll = await prisma.order.findMany({
     where: { statusPesanan: "Done" },
   });
-  const [bigAssistant, bigLegal, bigSocial, bigVision] = await Promise.all([
+  const [bigAssistant, bigLegal, bigSocial, bigVision, archivedProducts] =
+    await Promise.all([
     prisma.bigAssistant.findMany(),
     prisma.bigLegal.findMany(),
     prisma.bigSocial.findMany(),
     prisma.bigVision.findMany(),
+    prisma.archivedProduct.findMany(),
   ]);
+
+  const productTypeLabel: Record<string, string> = {
+    BIG_ASSISTANT: "Big Assistant",
+    BIG_LEGAL: "Big Legal",
+    BIG_SOCIAL: "Big Social",
+    BIG_VISION: "Big Vision",
+  };
 
   const productByKey = new Map<string, { name: string; price: string; type: string }>();
   bigAssistant.forEach((item) => {
@@ -109,6 +118,15 @@ export async function GET() {
       name: item.namaProduk,
       price: item.hargaProduk,
       type: "Big Vision",
+    });
+  });
+  archivedProducts.forEach((item) => {
+    const key = `${item.productType}:${item.originalId}`;
+    if (productByKey.has(key)) return;
+    productByKey.set(key, {
+      name: item.namaProduk,
+      price: item.hargaProduk,
+      type: productTypeLabel[item.productType] ?? String(item.productType),
     });
   });
 

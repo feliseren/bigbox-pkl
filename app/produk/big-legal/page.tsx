@@ -81,11 +81,11 @@ export default async function BigLegalPage() {
     value.startsWith("Rp") ? value : `Rp ${value}`;
   const pricing = (await prisma.bigLegal.findMany({ orderBy: { id: "desc" } })).map(
     (item) => ({
-      id: item.id,
-      name: item.namaProduk,
-      price: item.hargaProduk,
-      note: item.durasiProduk || "per tahun",
-    }),
+    id: item.id,
+    name: item.namaProduk,
+    price: item.hargaProduk,
+    note: item.durasiProduk || "per tahun",
+  }),
   );
 
   return (

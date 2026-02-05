@@ -5,6 +5,7 @@ import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
 import { fetchWhatsNew } from "@/lib/whats-new-db";
 import WhatsNewForm from "@/components/whats-new-form";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export const dynamic = "force-dynamic";
 
@@ -197,9 +198,10 @@ export default async function WhatsNewDashboardPage({
                                 name="redirect"
                                 value="/dashboard_karyawan/whats-new"
                               />
-                              <button className="btn-delete" type="submit">
-                                Hapus
-                              </button>
+                              <ConfirmDeleteButton
+                                className="btn-delete"
+                                label="Hapus"
+                              />
                             </form>
                           </div>
                         ) : null}

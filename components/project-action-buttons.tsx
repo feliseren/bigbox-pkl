@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 type ProjectActionButtonsProps = {
   canManage: boolean;
@@ -34,9 +35,7 @@ export function ProjectActionButtons({
       {canManage ? (
         <form method="post" action="/api/projects/delete">
           <input type="hidden" name="projectId" value={projectId} />
-          <button className="btn-delete" type="submit">
-            Delete
-          </button>
+          <ConfirmDeleteButton className="btn-delete" />
         </form>
       ) : (
         <button

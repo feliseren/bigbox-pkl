@@ -24,8 +24,8 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL(redirectTo, request.url), 303);
   }
 
-  const review = await prisma.review.findUnique({
-    where: { id: reviewId },
+  const review = await prisma.review.findFirst({
+    where: { id: reviewId, deletedAt: null },
     select: { userId: true, newsStoryId: true, comment: true },
   });
   if (!review || review.userId !== userId || review.newsStoryId !== newsId) {
@@ -35,14 +35,20 @@ export async function POST(request: Request) {
   try {
     if (review.comment) {
       await prisma.$transaction([
-        prisma.review.delete({ where: { id: reviewId } }),
-        prisma.newsStory.update({
-          where: { id: newsId },
+        prisma.review.update({
+          where: { id: reviewId },
+          data: { deletedAt: new Date() },
+        }),
+        prisma.newsStory.updateMany({
+          where: { id: newsId, deletedAt: null },
           data: { commentCount: { decrement: 1 } },
         }),
       ]);
     } else {
-      await prisma.review.delete({ where: { id: reviewId } });
+      await prisma.review.update({
+        where: { id: reviewId },
+        data: { deletedAt: new Date() },
+      });
     }
   } catch (error) {
     console.error("Failed to delete review:", error);

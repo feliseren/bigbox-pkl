@@ -58,11 +58,11 @@ export default async function BigAssistantPage() {
     value.startsWith("Rp") ? value : `Rp ${value}`;
   const pricing = (await prisma.bigAssistant.findMany({ orderBy: { id: "desc" } })).map(
     (item) => ({
-      id: item.id,
-      name: item.namaProduk,
-      price: item.hargaProduk,
-      note: item.durasiProduk || "per bulan",
-    }),
+    id: item.id,
+    name: item.namaProduk,
+    price: item.hargaProduk,
+    note: item.durasiProduk || "per bulan",
+  }),
   );
 
   return (

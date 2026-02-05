@@ -68,6 +68,27 @@ export async function updateWhatsNew(data: {
   return prisma.whatsNew.update({ where: { id }, data: rest });
 }
 
-export async function deleteWhatsNew(id: string) {
-  return prisma.whatsNew.delete({ where: { id } });
+export async function deleteWhatsNew(id: string, deletedBy?: string | null) {
+  const existing = await prisma.whatsNew.findUnique({ where: { id } });
+  if (!existing) return null;
+  return prisma.$transaction([
+    prisma.archivedWhatsNew.create({
+      data: {
+        originalId: existing.id,
+        title: existing.title,
+        category: existing.category,
+        summary: existing.summary,
+        contentText: existing.contentText,
+        imageUrl: existing.imageUrl,
+        isHighlight: existing.isHighlight,
+        publishDate: existing.publishDate,
+        authorName: existing.authorName,
+        createdAt: existing.createdAt,
+        updatedAt: existing.updatedAt,
+        deletedAt: new Date(),
+        deletedBy: deletedBy ?? null,
+      },
+    }),
+    prisma.whatsNew.delete({ where: { id } }),
+  ]);
 }

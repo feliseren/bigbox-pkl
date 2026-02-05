@@ -38,6 +38,13 @@ export async function POST(request: Request) {
   }
 
   try {
+    const existingNews = await prisma.newsStory.findFirst({
+      where: { id: newsId, deletedAt: null },
+      select: { id: true },
+    });
+    if (!existingNews) {
+      return NextResponse.redirect(new URL(redirectTo, request.url), 303);
+    }
     const rating = ratingFromInput ?? 0;
     const safeComment = comment || "";
 
@@ -49,10 +56,11 @@ export async function POST(request: Request) {
             userId,
             rating,
             comment: safeComment,
+            deletedAt: null,
           },
         }),
-        prisma.newsStory.update({
-          where: { id: newsId },
+        prisma.newsStory.updateMany({
+          where: { id: newsId, deletedAt: null },
           data: {
             commentCount: {
               increment: 1,
@@ -66,6 +74,7 @@ export async function POST(request: Request) {
           newsStoryId: newsId,
           userId,
           comment: "",
+          deletedAt: null,
         },
         orderBy: { createdAt: "desc" },
       });
@@ -81,6 +90,7 @@ export async function POST(request: Request) {
             userId,
             rating,
             comment: "",
+            deletedAt: null,
           },
         });
       }

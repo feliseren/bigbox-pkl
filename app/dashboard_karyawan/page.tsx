@@ -190,6 +190,7 @@ export default async function DashboardKaryawanPage({
   const viewLogs = await prisma.newsView.findMany({
     where: {
       createdAt: { gte: prevRangeStart, lt: safeRangeEnd },
+      newsStory: { deletedAt: null },
     },
     select: { createdAt: true },
   });
@@ -269,6 +270,7 @@ export default async function DashboardKaryawanPage({
   const percentLabel = `${percentChange >= 0 ? "+" : ""}${percentChange.toFixed(1)}%`;
   const percentColor = percentChange >= 0 ? "text-[#36a56d]" : "text-[#e32626]";
   const popularNews = await prisma.newsStory.findMany({
+    where: { deletedAt: null },
     orderBy: { viewCount: "desc" },
     take: 5,
     select: { id: true, title: true, viewCount: true },
@@ -301,7 +303,11 @@ export default async function DashboardKaryawanPage({
   const reviewCounts = await prisma.review.groupBy({
     by: ["rating"],
     _count: { rating: true },
-    where: { createdAt: { gte: rangeStart, lt: safeRangeEnd } },
+    where: {
+      createdAt: { gte: rangeStart, lt: safeRangeEnd },
+      deletedAt: null,
+      newsStory: { deletedAt: null },
+    },
   });
   const totalReviews = reviewCounts.reduce(
     (sum, item) => sum + item._count.rating,

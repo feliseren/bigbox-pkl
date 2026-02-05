@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    await deleteWhatsNew(id);
+    await deleteWhatsNew(id, employeeId);
   } catch (error) {
     console.error("Failed to delete whats new:", error);
     return NextResponse.redirect(

@@ -5,6 +5,14 @@ import { readEmployeeSessionId } from "@/lib/auth";
 type ProductType = "big-assistant" | "big-legal" | "big-social" | "big-vision";
 
 type ProductModel = {
+  findUnique: (args: { where: { id: string } }) => Promise<{
+    id: string;
+    namaProduk: string;
+    hargaProduk: string;
+    deskripsiProduk: string;
+    durasiProduk: string;
+    terjual: string;
+  } | null>;
   delete: (args: { where: { id: string } }) => Promise<unknown>;
 };
 
@@ -46,7 +54,34 @@ export async function POST(request: Request) {
   }
 
   const model = getModel(productType);
-  await model.delete({ where: { id: productId } });
+  const existing = await model.findUnique({ where: { id: productId } });
+  if (!existing) {
+    return NextResponse.redirect(new URL(`${redirectTo}?error=1`, request.url));
+  }
+  const now = new Date();
+  await prisma.$transaction([
+    prisma.archivedProduct.create({
+      data: {
+        originalId: existing.id,
+        productType:
+          productType === "big-assistant"
+            ? "BIG_ASSISTANT"
+            : productType === "big-legal"
+              ? "BIG_LEGAL"
+              : productType === "big-social"
+                ? "BIG_SOCIAL"
+                : "BIG_VISION",
+        namaProduk: existing.namaProduk,
+        hargaProduk: existing.hargaProduk,
+        deskripsiProduk: existing.deskripsiProduk,
+        durasiProduk: existing.durasiProduk,
+        terjual: existing.terjual,
+        deletedAt: now,
+        deletedBy: employeeId,
+      },
+    }),
+    model.delete({ where: { id: productId } }),
+  ]);
 
   return NextResponse.redirect(new URL(redirectTo, request.url));
 }

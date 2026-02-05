@@ -99,7 +99,7 @@ export async function POST(request: Request) {
     }
   }
 
-  await updateNews({
+  const result = await updateNews({
     id,
     title,
     category,
@@ -115,6 +115,9 @@ export async function POST(request: Request) {
     customerLocation: keepIfEmpty(customerLocation, existing.customerLocation),
     customerProducts: keepIfEmpty(customerProducts, existing.customerProducts),
   });
+  if (result.count === 0) {
+    return NextResponse.redirect(new URL(`${redirectTo}?error=1`, request.url), 303);
+  }
 
   return NextResponse.redirect(new URL(redirectTo, request.url), 303);
 }

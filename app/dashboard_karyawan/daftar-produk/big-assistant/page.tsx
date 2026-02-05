@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { ProductActionButtons } from "@/components/product-action-buttons";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export const dynamic = "force-dynamic";
 
@@ -233,13 +234,10 @@ export default async function BigAssistantPage() {
                           />
                         </label>
                         <div className="product-form-actions">
-                          <button
+                          <ConfirmDeleteButton
                             className="btn-delete"
-                            type="submit"
                             formAction="/api/products/delete"
-                          >
-                            Delete
-                          </button>
+                          />
                           <button className="btn-update" type="submit">
                             Update
                           </button>

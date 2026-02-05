@@ -9,6 +9,7 @@ import { ProfileMenu } from "@/components/profile-menu";
 import { NotificationBell } from "@/components/notification-bell";
 import { getUserNotifications } from "@/lib/notifications";
 import ReviewForm from "@/components/review-form";
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export const dynamic = "force-dynamic";
 
@@ -421,9 +422,7 @@ export default async function StoryDetailPage({
                               name="redirect"
                               value={`/cerita-kami/${story.id}`}
                             />
-                            <button type="submit" suppressHydrationWarning>
-                              Hapus
-                            </button>
+                            <ConfirmDeleteButton label="Hapus" />
                           </form>
                         ) : null}
                       </div>

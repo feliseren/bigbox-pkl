@@ -26,11 +26,12 @@ export async function fetchNews({
     normalizedQuery || category
       ? {
           AND: [
+            { deletedAt: null },
             ...(queryFilters.length ? [{ OR: queryFilters }] : []),
             ...(category ? [{ category }] : []),
           ],
         }
-      : undefined;
+      : { deletedAt: null };
 
   return prisma.newsStory.findMany({
     where,
@@ -64,17 +65,19 @@ export async function fetchNewsWithReviews({
     normalizedQuery || category
       ? {
           AND: [
+            { deletedAt: null },
             ...(queryFilters.length ? [{ OR: queryFilters }] : []),
             ...(category ? [{ category }] : []),
           ],
         }
-      : undefined;
+      : { deletedAt: null };
 
   return prisma.newsStory.findMany({
     where,
     orderBy: { createdAt: "desc" },
     include: {
       reviews: {
+        where: { deletedAt: null },
         include: {
           user: true,
         },
@@ -85,10 +88,11 @@ export async function fetchNewsWithReviews({
 }
 
 export async function findNewsById(id: string) {
-  return prisma.newsStory.findUnique({
-    where: { id },
+  return prisma.newsStory.findFirst({
+    where: { id, deletedAt: null },
     include: {
       reviews: {
+        where: { deletedAt: null },
         include: { user: true },
         orderBy: { createdAt: "desc" },
       },
@@ -134,12 +138,15 @@ export async function updateNews(data: {
   customerProducts: string | null;
 }) {
   const { id, ...rest } = data;
-  return prisma.newsStory.update({
-    where: { id },
+  return prisma.newsStory.updateMany({
+    where: { id, deletedAt: null },
     data: rest,
   });
 }
 
 export async function deleteNews(id: string) {
-  return prisma.newsStory.delete({ where: { id } });
+  return prisma.newsStory.update({
+    where: { id },
+    data: { deletedAt: new Date() },
+  });
 }

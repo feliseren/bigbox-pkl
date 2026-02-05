@@ -136,11 +136,13 @@ export async function GET(request: Request) {
       createdAt: { gte: prevRangeStart, lt: safeRangeEnd },
     },
   });
-  const [bigAssistant, bigLegal, bigSocial, bigVision] = await Promise.all([
+  const [bigAssistant, bigLegal, bigSocial, bigVision, archivedProducts] =
+    await Promise.all([
     prisma.bigAssistant.findMany(),
     prisma.bigLegal.findMany(),
     prisma.bigSocial.findMany(),
     prisma.bigVision.findMany(),
+    prisma.archivedProduct.findMany(),
   ]);
   const productByKey = new Map<string, string>();
   bigAssistant.forEach((item) => {
@@ -154,6 +156,11 @@ export async function GET(request: Request) {
   });
   bigVision.forEach((item) => {
     productByKey.set(`BIG_VISION:${item.id}`, item.namaProduk);
+  });
+  archivedProducts.forEach((item) => {
+    const key = `${item.productType}:${item.originalId}`;
+    if (productByKey.has(key)) return;
+    productByKey.set(key, item.namaProduk);
   });
   const dailyTotals = new Map<string, number>();
   const tableMap = new Map<string, { date: string; product: string; qty: number; total: number }>();
