@@ -208,18 +208,18 @@ export default async function WhatsNewPage({
                 </article>
               </div>
             )
-          ) : (
-            <div className="rounded-[24px] bg-white p-8 text-center text-sm text-[#6b7185] shadow-[0_22px_50px_rgba(15,23,42,0.12)]">
-              Belum ada update untuk ditampilkan.
-            </div>
-          )}
+          ) : null}
 
-          <div
-            className="mt-8 whats-new-grid"
-            style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "16px" }}
-          >
-            {updatesList.length ? (
-              updatesList.map((item) => (
+          {updatesList.length ? (
+            <div
+              className="mt-8 whats-new-grid"
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                gap: "16px",
+              }}
+            >
+              {updatesList.map((item) => (
                 <article
                   key={item.id}
                   className="whats-new-card rounded-[16px] border border-[#e6e9f5] bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.08)]"
@@ -242,13 +242,9 @@ export default async function WhatsNewPage({
                     </span>
                   </div>
                 </article>
-              ))
-            ) : (
-              <div className="rounded-[20px] border border-[#e6e9f5] bg-white p-6 text-sm text-[#6b7185]">
-                Belum ada update untuk ditampilkan.
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          ) : null}
         </section>
       </main>
     </div>
