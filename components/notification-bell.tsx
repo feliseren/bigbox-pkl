@@ -14,8 +14,34 @@ type NotificationBellProps = {
 
 export function NotificationBell({ items }: NotificationBellProps) {
   const [open, setOpen] = useState(false);
-  const count = items.length;
+  const [readIds, setReadIds] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") {
+      return new Set();
+    }
+    try {
+      const raw = window.localStorage.getItem("bb_read_notifications");
+      if (!raw) return new Set();
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) return new Set();
+      return new Set(parsed.filter((value) => typeof value === "string"));
+    } catch {
+      return new Set();
+    }
+  });
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const unreadItems = items.filter((item) => !readIds.has(item.id));
+  const count = unreadItems.length;
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        "bb_read_notifications",
+        JSON.stringify(Array.from(readIds)),
+      );
+    } catch {
+      // Ignore local storage write errors.
+    }
+  }, [readIds]);
 
   useEffect(() => {
     if (!open) return;
@@ -28,12 +54,26 @@ export function NotificationBell({ items }: NotificationBellProps) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open]);
 
+  function handleToggle() {
+    setOpen((value) => {
+      const next = !value;
+      if (next && items.length > 0) {
+        setReadIds((prev) => {
+          const nextSet = new Set(prev);
+          items.forEach((item) => nextSet.add(item.id));
+          return nextSet;
+        });
+      }
+      return next;
+    });
+  }
+
   return (
     <div className="notification-bell" ref={containerRef}>
       <button
         className="notification-bell-button"
         type="button"
-        onClick={() => setOpen((value) => !value)}
+        onClick={handleToggle}
         aria-label="Notifikasi"
       >
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
@@ -56,7 +96,7 @@ export function NotificationBell({ items }: NotificationBellProps) {
         <div className="notification-dropdown">
           <div className="notification-header">Notifikasi</div>
           <div className="notification-list">
-            {count === 0 ? (
+            {items.length === 0 ? (
               <div className="notification-empty">Tidak ada notifikasi.</div>
             ) : (
               items.map((item) => (

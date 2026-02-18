@@ -43,7 +43,10 @@ export default async function WhatsNewPage({
   const updates = await fetchWhatsNew({
     category: normalizedCategory === "Semua" ? undefined : normalizedCategory,
   });
-  const highlight = (await fetchWhatsNewHighlight()) ?? updates[0] ?? null;
+  const highlight =
+    normalizedCategory === "Semua"
+      ? (await fetchWhatsNewHighlight()) ?? updates[0] ?? null
+      : updates.find((item) => item.isHighlight) ?? null;
   const highlightId = highlight?.id ?? null;
   const updatesList = highlightId
     ? updates.filter((item) => item.id !== highlightId)
