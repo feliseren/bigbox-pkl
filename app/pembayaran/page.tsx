@@ -34,50 +34,17 @@ async function loadProduct(
   productType: PaymentProductType,
   productId: string,
 ): Promise<PaymentProduct | null> {
-  switch (productType) {
-    case "big-assistant": {
-      const item = await prisma.bigAssistant.findUnique({ where: { id: productId } });
-      if (!item) return null;
-      return {
-        id: item.id,
-        name: item.namaProduk,
-        description: item.deskripsiProduk,
-        price: item.hargaProduk,
-      };
-    }
-    case "big-legal": {
-      const item = await prisma.bigLegal.findUnique({ where: { id: productId } });
-      if (!item) return null;
-      return {
-        id: item.id,
-        name: item.namaProduk,
-        description: item.deskripsiProduk,
-        price: item.hargaProduk,
-      };
-    }
-    case "big-social": {
-      const item = await prisma.bigSocial.findUnique({ where: { id: productId } });
-      if (!item) return null;
-      return {
-        id: item.id,
-        name: item.namaProduk,
-        description: item.deskripsiProduk,
-        price: item.hargaProduk,
-      };
-    }
-    case "big-vision": {
-      const item = await prisma.bigVision.findUnique({ where: { id: productId } });
-      if (!item) return null;
-      return {
-        id: item.id,
-        name: item.namaProduk,
-        description: item.deskripsiProduk,
-        price: item.hargaProduk,
-      };
-    }
-    default:
-      return null;
-  }
+  const categoryName = PRODUCT_TITLE[productType];
+  const item = await prisma.product.findFirst({
+    where: { id: productId, category: { categoryName } },
+  });
+  if (!item) return null;
+  return {
+    id: item.id,
+    name: item.namaProduk,
+    description: item.deskripsiProduk,
+    price: item.hargaProduk,
+  };
 }
 
 export default async function PembayaranPage({

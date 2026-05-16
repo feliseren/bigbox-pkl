@@ -4,32 +4,12 @@ import { readEmployeeSessionId } from "@/lib/auth";
 
 type ProductType = "big-assistant" | "big-legal" | "big-social" | "big-vision";
 
-type ProductModel = {
-  findUnique: (args: { where: { id: string } }) => Promise<{
-    id: string;
-    namaProduk: string;
-    hargaProduk: string;
-    deskripsiProduk: string;
-    durasiProduk: string;
-    terjual: string;
-  } | null>;
-  delete: (args: { where: { id: string } }) => Promise<unknown>;
+const productCategoryByType: Record<ProductType, string> = {
+  "big-assistant": "Big Assistant",
+  "big-legal": "Big Legal",
+  "big-social": "Big Social",
+  "big-vision": "Big Vision",
 };
-
-function getModel(productType: ProductType) {
-  switch (productType) {
-    case "big-assistant":
-      return prisma.bigAssistant as unknown as ProductModel;
-    case "big-legal":
-      return prisma.bigLegal as unknown as ProductModel;
-    case "big-social":
-      return prisma.bigSocial as unknown as ProductModel;
-    case "big-vision":
-      return prisma.bigVision as unknown as ProductModel;
-    default:
-      return prisma.bigAssistant as unknown as ProductModel;
-  }
-}
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -43,9 +23,12 @@ export async function POST(request: Request) {
   }
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId },
-    select: { role: true },
+    select: { role: { select: { name: true } } },
   });
-  if (!employee || (employee.role !== "ADMIN" && employee.role !== "MARKETING")) {
+  if (
+    !employee ||
+    (employee.role.name !== "ADMIN" && employee.role.name !== "MARKETING")
+  ) {
     return NextResponse.redirect(new URL(`${redirectTo}?error=forbidden`, request.url));
   }
 
@@ -53,8 +36,10 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL(redirectTo, request.url));
   }
 
-  const model = getModel(productType);
-  const existing = await model.findUnique({ where: { id: productId } });
+  const categoryName = productCategoryByType[productType];
+  const existing = await prisma.product.findFirst({
+    where: { id: productId, category: { categoryName } },
+  });
   if (!existing) {
     return NextResponse.redirect(new URL(`${redirectTo}?error=1`, request.url));
   }
@@ -63,14 +48,7 @@ export async function POST(request: Request) {
     prisma.archivedProduct.create({
       data: {
         originalId: existing.id,
-        productType:
-          productType === "big-assistant"
-            ? "BIG_ASSISTANT"
-            : productType === "big-legal"
-              ? "BIG_LEGAL"
-              : productType === "big-social"
-                ? "BIG_SOCIAL"
-                : "BIG_VISION",
+        categoryId: existing.categoryId,
         namaProduk: existing.namaProduk,
         hargaProduk: existing.hargaProduk,
         deskripsiProduk: existing.deskripsiProduk,
@@ -80,7 +58,7 @@ export async function POST(request: Request) {
         deletedBy: employeeId,
       },
     }),
-    model.delete({ where: { id: productId } }),
+    prisma.product.delete({ where: { id: productId } }),
   ]);
 
   return NextResponse.redirect(new URL(redirectTo, request.url));

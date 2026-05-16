@@ -4,33 +4,12 @@ import { readEmployeeSessionId } from "@/lib/auth";
 
 type ProductType = "big-assistant" | "big-legal" | "big-social" | "big-vision";
 
-type ProductModel = {
-  update: (args: {
-    where: { id: string };
-    data: Partial<{
-      namaProduk: string;
-      hargaProduk: string;
-      deskripsiProduk: string;
-      durasiProduk: string;
-      terjual: string;
-    }>;
-  }) => Promise<unknown>;
+const productCategoryByType: Record<ProductType, string> = {
+  "big-assistant": "Big Assistant",
+  "big-legal": "Big Legal",
+  "big-social": "Big Social",
+  "big-vision": "Big Vision",
 };
-
-function getModel(productType: ProductType) {
-  switch (productType) {
-    case "big-assistant":
-      return prisma.bigAssistant as unknown as ProductModel;
-    case "big-legal":
-      return prisma.bigLegal as unknown as ProductModel;
-    case "big-social":
-      return prisma.bigSocial as unknown as ProductModel;
-    case "big-vision":
-      return prisma.bigVision as unknown as ProductModel;
-    default:
-      return prisma.bigAssistant as unknown as ProductModel;
-  }
-}
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -48,9 +27,12 @@ export async function POST(request: Request) {
   }
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId },
-    select: { role: true },
+    select: { role: { select: { name: true } } },
   });
-  if (!employee || (employee.role !== "ADMIN" && employee.role !== "MARKETING")) {
+  if (
+    !employee ||
+    (employee.role.name !== "ADMIN" && employee.role.name !== "MARKETING")
+  ) {
     return NextResponse.redirect(new URL(`${redirectTo}?error=forbidden`, request.url));
   }
 
@@ -58,9 +40,9 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL(redirectTo, request.url));
   }
 
-  const model = getModel(productType);
-  await model.update({
-    where: { id: productId },
+  const categoryName = productCategoryByType[productType];
+  await prisma.product.updateMany({
+    where: { id: productId, category: { categoryName } },
     data: {
       ...(name ? { namaProduk: name } : {}),
       ...(price ? { hargaProduk: price } : {}),

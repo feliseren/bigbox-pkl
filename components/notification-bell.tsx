@@ -55,17 +55,15 @@ export function NotificationBell({ items }: NotificationBellProps) {
   }, [open]);
 
   function handleToggle() {
-    setOpen((value) => {
-      const next = !value;
-      if (next && items.length > 0) {
-        setReadIds((prev) => {
-          const nextSet = new Set(prev);
-          items.forEach((item) => nextSet.add(item.id));
-          return nextSet;
-        });
-      }
-      return next;
-    });
+    const nextOpen = !open;
+    if (nextOpen && items.length > 0) {
+      setReadIds((prev) => {
+        const nextSet = new Set(prev);
+        items.forEach((item) => nextSet.add(item.id));
+        return nextSet;
+      });
+    }
+    setOpen(nextOpen);
   }
 
   return (

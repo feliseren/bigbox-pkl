@@ -4,39 +4,17 @@ import { readEmployeeSessionId } from "@/lib/auth";
 
 type ProductType = "big-assistant" | "big-legal" | "big-social" | "big-vision";
 
-type ProductModel = {
-  findUnique: (args: { where: { id: string } }) => Promise<{ id: string } | null>;
-  create: (args: {
-    data: {
-      id: string;
-      namaProduk: string;
-      hargaProduk: string;
-      deskripsiProduk: string;
-      durasiProduk: string;
-      terjual: string;
-    };
-  }) => Promise<unknown>;
+const productCategoryByType: Record<ProductType, string> = {
+  "big-assistant": "Big Assistant",
+  "big-legal": "Big Legal",
+  "big-social": "Big Social",
+  "big-vision": "Big Vision",
 };
 
-function getModel(productType: ProductType) {
-  switch (productType) {
-    case "big-assistant":
-      return prisma.bigAssistant as unknown as ProductModel;
-    case "big-legal":
-      return prisma.bigLegal as unknown as ProductModel;
-    case "big-social":
-      return prisma.bigSocial as unknown as ProductModel;
-    case "big-vision":
-      return prisma.bigVision as unknown as ProductModel;
-    default:
-      return prisma.bigAssistant as unknown as ProductModel;
-  }
-}
-
-async function generateUniqueId(model: ProductModel) {
+async function generateUniqueId() {
   for (let attempt = 0; attempt < 20; attempt += 1) {
     const id = String(Math.floor(1000 + Math.random() * 9000));
-    const exists = await model.findUnique({ where: { id } });
+    const exists = await prisma.product.findUnique({ where: { id } });
     if (!exists) {
       return id;
     }
@@ -59,9 +37,12 @@ export async function POST(request: Request) {
   }
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId },
-    select: { role: true },
+    select: { role: { select: { name: true } } },
   });
-  if (!employee || (employee.role !== "ADMIN" && employee.role !== "MARKETING")) {
+  if (
+    !employee ||
+    (employee.role.name !== "ADMIN" && employee.role.name !== "MARKETING")
+  ) {
     return NextResponse.redirect(new URL(`${redirectTo}?error=forbidden`, request.url));
   }
 
@@ -69,12 +50,20 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL(redirectTo, request.url));
   }
 
-  const model = getModel(productType);
-  const id = await generateUniqueId(model);
+  const categoryName = productCategoryByType[productType];
+  const category = await prisma.productCategory.findFirst({
+    where: { categoryName },
+    select: { id: true },
+  });
+  if (!category) {
+    return NextResponse.redirect(new URL(`${redirectTo}?error=category`, request.url));
+  }
+  const id = await generateUniqueId();
 
-  await model.create({
+  await prisma.product.create({
     data: {
       id,
+      categoryId: category.id,
       namaProduk: name,
       hargaProduk: price,
       deskripsiProduk: description,

@@ -98,7 +98,7 @@ export function StoriesSection() {
                   className="mt-6 flex w-full items-center justify-between rounded-lg bg-[#2d3561] px-4 py-3 font-semibold text-white transition-colors hover:bg-[#ff6b3d]"
                 >
                   <span>Baca Selengkapnya</span>
-                  <span>></span>
+                  <span>&gt;</span>
                 </button>
 
                 {/* Rating */}
@@ -165,7 +165,7 @@ export function StoriesSection() {
               className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#ff6b3d] px-8 py-3 font-semibold text-white transition-colors hover:bg-[#ff5722]"
             >
               <span>Konsultasi Sekarang</span>
-              <span>></span>
+              <span>&gt;</span>
             </a>
           </div>
         </div>

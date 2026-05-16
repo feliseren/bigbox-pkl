@@ -6,37 +6,17 @@ import { mkdir, writeFile } from "fs/promises";
 
 type ProductType = "big-assistant" | "big-legal" | "big-social" | "big-vision";
 
-type OrderModel = {
-  findUnique: (args: { where: { id: string } }) => Promise<{ id: string } | null>;
-  create: (args: {
-    data: {
-      id: string;
-      productType: "BIG_ASSISTANT" | "BIG_LEGAL" | "BIG_SOCIAL" | "BIG_VISION";
-      productId: string;
-      totalPesanan: string;
-      namaCustomer: string;
-      statusPesanan: string;
-      jenisPembayaran: string;
-      buktiPembayaran: string;
-      userId: string;
-    };
-  }) => Promise<unknown>;
+const productCategoryByType: Record<ProductType, string> = {
+  "big-assistant": "Big Assistant",
+  "big-legal": "Big Legal",
+  "big-social": "Big Social",
+  "big-vision": "Big Vision",
 };
 
-const productTypeMap: Record<
-  ProductType,
-  "BIG_ASSISTANT" | "BIG_LEGAL" | "BIG_SOCIAL" | "BIG_VISION"
-> = {
-  "big-assistant": "BIG_ASSISTANT",
-  "big-legal": "BIG_LEGAL",
-  "big-social": "BIG_SOCIAL",
-  "big-vision": "BIG_VISION",
-};
-
-async function generateUniqueOrderId(model: OrderModel) {
+async function generateUniqueOrderId() {
   for (let attempt = 0; attempt < 20; attempt += 1) {
     const id = String(Math.floor(1000 + Math.random() * 9000));
-    const exists = await model.findUnique({ where: { id } });
+    const exists = await prisma.order.findUnique({ where: { id } });
     if (!exists) {
       return id;
     }
@@ -64,8 +44,16 @@ export async function POST(request: Request) {
   if (!productType || !productId || !total || !paymentMethod) {
     return NextResponse.redirect(new URL("/", request.url));
   }
-  if (!productTypeMap[productType]) {
+  const categoryName = productCategoryByType[productType];
+  if (!categoryName) {
     return NextResponse.redirect(new URL("/", request.url));
+  }
+  const product = await prisma.product.findFirst({
+    where: { id: productId, category: { categoryName } },
+    select: { id: true },
+  });
+  if (!product) {
+    return NextResponse.redirect(new URL("/pembayaran?error=product", request.url));
   }
 
   const proofFile =
@@ -85,21 +73,35 @@ export async function POST(request: Request) {
   await writeFile(path.join(uploadDir, filename), fileBuffer);
   const proofPath = `/uploads/${filename}`;
 
-  const orderModel = prisma.order as unknown as OrderModel;
-  const id = await generateUniqueOrderId(orderModel);
+  const id = await generateUniqueOrderId();
+  const defaultConfirmer = await prisma.employee.findFirst({
+    select: { id: true },
+    orderBy: { createdAt: "asc" },
+  });
+  if (!defaultConfirmer) {
+    return NextResponse.redirect(new URL("/pembayaran?error=employee", request.url));
+  }
 
-  await orderModel.create({
-    data: {
-      id,
-      productType: productTypeMap[productType],
-      productId,
-      totalPesanan: total,
-      namaCustomer: user.fullName,
-      statusPesanan: "Pending",
-      jenisPembayaran: paymentMethod,
-      buktiPembayaran: proofPath,
-      userId,
-    },
+  await prisma.$transaction(async (tx) => {
+    await tx.order.create({
+      data: {
+        id,
+        productId: product.id,
+        totalPesanan: total,
+        namaCustomer: user.fullName,
+        statusPesanan: "Pending",
+        userId,
+      },
+    });
+    await tx.payment.create({
+      data: {
+        orderId: id,
+        confirmedBy: defaultConfirmer.id,
+        jenisPembayaran: paymentMethod,
+        buktiPembayaran: proofPath,
+        statusPembayaran: "Pending",
+      },
+    });
   });
 
   return NextResponse.redirect(new URL("/", request.url));

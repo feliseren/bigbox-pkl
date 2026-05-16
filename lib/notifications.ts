@@ -61,71 +61,20 @@ export async function getUserNotifications(
   const orders = await prisma.order.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
+    include: {
+      product: {
+        select: {
+          namaProduk: true,
+          durasiProduk: true,
+        },
+      },
+    },
   });
   if (orders.length === 0) return [];
 
-  const idsByType = {
-    BIG_ASSISTANT: new Set<string>(),
-    BIG_LEGAL: new Set<string>(),
-    BIG_SOCIAL: new Set<string>(),
-    BIG_VISION: new Set<string>(),
-  };
-  orders.forEach((order) => {
-    idsByType[order.productType].add(order.productId);
-  });
-
-  const [assistant, legal, social, vision] = await Promise.all([
-    prisma.bigAssistant.findMany({
-      where: { id: { in: Array.from(idsByType.BIG_ASSISTANT) } },
-      select: { id: true, namaProduk: true, durasiProduk: true },
-    }),
-    prisma.bigLegal.findMany({
-      where: { id: { in: Array.from(idsByType.BIG_LEGAL) } },
-      select: { id: true, namaProduk: true, durasiProduk: true },
-    }),
-    prisma.bigSocial.findMany({
-      where: { id: { in: Array.from(idsByType.BIG_SOCIAL) } },
-      select: { id: true, namaProduk: true, durasiProduk: true },
-    }),
-    prisma.bigVision.findMany({
-      where: { id: { in: Array.from(idsByType.BIG_VISION) } },
-      select: { id: true, namaProduk: true, durasiProduk: true },
-    }),
-  ]);
-
-  const productMap = new Map<
-    string,
-    { namaProduk: string; durasiProduk: string | null }
-  >();
-  assistant.forEach((item) =>
-    productMap.set(`BIG_ASSISTANT:${item.id}`, {
-      namaProduk: item.namaProduk,
-      durasiProduk: item.durasiProduk,
-    }),
-  );
-  legal.forEach((item) =>
-    productMap.set(`BIG_LEGAL:${item.id}`, {
-      namaProduk: item.namaProduk,
-      durasiProduk: item.durasiProduk,
-    }),
-  );
-  social.forEach((item) =>
-    productMap.set(`BIG_SOCIAL:${item.id}`, {
-      namaProduk: item.namaProduk,
-      durasiProduk: item.durasiProduk,
-    }),
-  );
-  vision.forEach((item) =>
-    productMap.set(`BIG_VISION:${item.id}`, {
-      namaProduk: item.namaProduk,
-      durasiProduk: item.durasiProduk,
-    }),
-  );
-
   const now = new Date();
   return orders.flatMap((order) => {
-    const key = `${order.productType}:${order.productId}`;
-    const product = productMap.get(key);
+    const product = order.product;
     if (!product) return [];
     const duration = parseDuration(product.durasiProduk);
     const endDate = addDuration(order.createdAt, duration);

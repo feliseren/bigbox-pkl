@@ -7,203 +7,167 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Test {
-  id Int @id @default(autoincrement())
+model Role {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+  employees   Employee[]
 
-  @@map("test")
-}
-
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  fullName  String
-  hasLocalPassword Boolean @default(true) @map("has_local_password")
-  createdAt DateTime @default(now())
-  orders    Order[]
-  reviews   Review[]
-  resetTokens PasswordResetToken[]
-
-  @@map("user")
+  @@map("roles")
 }
 
 model Employee {
-  id        String   @id
-  fullName  String
+  id        String    @id @default(cuid())
+  roleId    String    @map("role_id")
+  fullName  String    @map("full_name")
   password  String
-  role      EmployeeRole @default(STAFF)
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now()) @map("created_at")
 
-  @@map("employee")
+  role             Role               @relation(fields: [roleId], references: [id])
+  projects         Project[]
+  whatsNews        WhatsNew[]
+  confirmedPayments Payment[]         @relation("PaymentConfirmedBy")
+  archivedProjects ArchivedProject[]
+  archivedWhatsNews ArchivedWhatsNew[]
+
+  @@map("employees")
 }
 
-enum EmployeeRole {
-  ADMIN
-  MARKETING
-  PROJECT_MANAGEMENT
-  STAFF
+model User {
+  id               String               @id @default(cuid())
+  email            String               @unique
+  password         String
+  fullName         String               @map("full_name")
+  hasLocalPassword Boolean              @default(true) @map("has_local_password")
+  createdAt        DateTime             @default(now()) @map("created_at")
+
+  orders           Order[]
+  reviews          NewsReview[]
+  resetTokens      PasswordResetToken[]
+  customerContacts CustomerContact[]
+  consultations    Consultation[]
+
+  @@map("users")
 }
 
-model Project {
-  id          String   @id
-  startLabel  String
-  targetLabel String
-  owner       String
-  status      String
-  createdAt   DateTime @default(now())
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
-  @@map("project")
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("password_reset_tokens")
 }
 
-model BigAssistant {
-  id              String @id
-  namaProduk      String @map("nama_produk")
-  hargaProduk     String @map("harga_produk")
-  deskripsiProduk String @map("deskripsi_produk")
-  durasiProduk    String @map("durasi_produk")
+model ProductCategory {
+  id           String    @id @default(cuid())
+  categoryName String    @map("category_name")
+  description  String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  products Product[]
+  archivedProducts ArchivedProduct[]
+
+  @@map("product_categories")
+}
+
+model Product {
+  id              String    @id
+  categoryId      String    @map("category_id")
+  namaProduk      String    @map("nama_produk")
+  hargaProduk     String    @map("harga_produk")
+  deskripsiProduk String    @map("deskripsi_produk")
+  durasiProduk    String    @map("durasi_produk")
   terjual         String
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  @@map("big_assistant")
-}
+  category         ProductCategory   @relation(fields: [categoryId], references: [id])
+  orders           Order[]
+  archivedProducts ArchivedProduct[]
 
-model BigVision {
-  id              String @id
-  namaProduk      String @map("nama_produk")
-  hargaProduk     String @map("harga_produk")
-  deskripsiProduk String @map("deskripsi_produk")
-  durasiProduk    String @map("durasi_produk")
-  terjual         String
-
-  @@map("big_vision")
-}
-
-model BigLegal {
-  id              String @id
-  namaProduk      String @map("nama_produk")
-  hargaProduk     String @map("harga_produk")
-  deskripsiProduk String @map("deskripsi_produk")
-  durasiProduk    String @map("durasi_produk")
-  terjual         String
-
-  @@map("big_legal")
-}
-
-model BigSocial {
-  id              String @id
-  namaProduk      String @map("nama_produk")
-  hargaProduk     String @map("harga_produk")
-  deskripsiProduk String @map("deskripsi_produk")
-  durasiProduk    String @map("durasi_produk")
-  terjual         String
-
-  @@map("big_social")
-}
-
-enum ProductType {
-  BIG_ASSISTANT
-  BIG_LEGAL
-  BIG_SOCIAL
-  BIG_VISION
+  @@map("products")
 }
 
 model Order {
-  id            String      @id @map("order_id")
-  productType   ProductType @map("product_type")
-  productId     String      @map("product_id")
-  totalPesanan  String      @map("total_pesanan")
-  namaCustomer  String      @map("nama_customer")
-  statusPesanan String      @map("status_pesanan")
-  jenisPembayaran String    @map("jenis_pembayaran")
-  buktiPembayaran String    @map("bukti_pembayaran")
-  userId        String      @map("user_id")
-  user          User        @relation(fields: [userId], references: [id])
-  createdAt     DateTime    @default(now()) @map("created_at")
+  id            String    @id @map("order_id")
+  userId        String    @map("user_id")
+  productId     String    @map("product_id")
+  totalPesanan  String    @map("total_pesanan")
+  namaCustomer  String    @map("nama_customer")
+  statusPesanan String    @map("status_pesanan")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  payment Payment?
 
   @@map("orders")
 }
 
-model CustomerContact {
-  id            String   @id @default(cuid())
-  fullName      String   @map("full_name")
-  phoneCode     String   @map("phone_code")
-  phoneNumber   String   @map("phone_number")
-  companyName   String   @map("company_name")
-  industry      String   @map("industry")
-  industryOther String?  @map("industry_other")
-  companyEmail  String   @map("company_email")
-  companyScale  String   @map("company_scale")
-  message       String   @map("message")
-  createdAt     DateTime @default(now()) @map("created_at")
+model Payment {
+  id               String    @id @default(cuid())
+  orderId          String    @unique @map("order_id")
+  confirmedBy      String    @map("confirmed_by")
+  jenisPembayaran  String    @map("jenis_pembayaran")
+  buktiPembayaran  String    @map("bukti_pembayaran")
+  statusPembayaran String    @map("status_pembayaran")
+  paidAt           DateTime? @map("paid_at")
+  confirmedAt      DateTime? @map("confirmed_at")
 
-  @@map("customer_contacts")
-}
+  order              Order    @relation(fields: [orderId], references: [id])
+  confirmedByEmployee Employee @relation("PaymentConfirmedBy", fields: [confirmedBy], references: [id])
 
-model Consultation {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  phone     String
-  company   String?
-  product   String   // BigAI atau BigVision
-  message   String   @db.LongText
-  createdAt DateTime @default(now())
-
-  @@map("consultation")
+  @@map("payments")
 }
 
 model NewsStory {
-  id               String   @id @default(cuid())
+  id               String       @id @default(cuid())
   title            String
   category         String
-  authorName       String   @map("author_name")
-  imageUrl         String?  @map("image_url")
-  documentUrl      String?  @map("document_url")
-  contentText      String?  @db.LongText @map("content_text")
-  summaryPart1     String?  @db.LongText @map("summary_part_1")
-  summaryPart2     String?  @db.LongText @map("summary_part_2")
-  summaryPart3     String?  @db.LongText @map("summary_part_3")
-  customerName     String?  @map("customer_name")
-  customerIndustry String?  @map("customer_industry")
-  customerSize     String?  @map("customer_size")
-  customerLocation String?  @map("customer_location")
-  customerProducts String?  @db.LongText @map("customer_products")
-  viewCount        Int      @default(0) @map("view_count")
-  commentCount     Int      @default(0) @map("comment_count")
-  createdAt        DateTime @default(now()) @map("created_at")
-  updatedAt        DateTime @updatedAt @map("updated_at")
-  deletedAt        DateTime? @map("deleted_at")
-  reviews          Review[]
+  authorName       String       @map("author_name")
+  imageUrl         String?      @map("image_url")
+  documentUrl      String?      @map("document_url")
+  contentText      String?      @db.LongText @map("content_text")
+  summaryPart1     String?      @db.LongText @map("summary_part_1")
+  summaryPart2     String?      @db.LongText @map("summary_part_2")
+  summaryPart3     String?      @db.LongText @map("summary_part_3")
+  customerName     String?      @map("customer_name")
+  customerIndustry String?      @map("customer_industry")
+  customerSize     String?      @map("customer_size")
+  customerLocation String?      @map("customer_location")
+  customerProducts String?      @db.LongText @map("customer_products")
+  viewCount        Int          @default(0) @map("view_count")
+  commentCount     Int          @default(0) @map("comment_count")
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+  deletedAt        DateTime?    @map("deleted_at")
+
+  reviews          NewsReview[]
   views            NewsView[]
 
   @@map("news_stories")
 }
 
-model Review {
-  id          String   @id @default(cuid())
-  newsStoryId String   @map("news_story_id")
-  userId      String   @map("user_id")
+model NewsReview {
+  id          String    @id @default(cuid())
+  newsStoryId String    @map("news_story_id")
+  userId      String    @map("user_id")
   rating      Int
-  comment     String   @db.LongText
-  createdAt   DateTime @default(now()) @map("created_at")
+  comment     String    @db.LongText
+  createdAt   DateTime  @default(now()) @map("created_at")
   deletedAt   DateTime? @map("deleted_at")
 
   newsStory NewsStory @relation(fields: [newsStoryId], references: [id])
   user      User      @relation(fields: [userId], references: [id])
 
   @@map("news_reviews")
-}
-
-model PasswordResetToken {
-  id        String   @id @default(cuid())
-  userId    String
-  tokenHash String   @unique
-  expiresAt DateTime
-  usedAt    DateTime?
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id])
-
-  @@map("password_reset_tokens")
 }
 
 model NewsView {
@@ -216,8 +180,23 @@ model NewsView {
   @@map("news_views")
 }
 
+model Project {
+  id          String   @id
+  employeeId  String   @map("employee_id")
+  startLabel  String   @map("start_label")
+  targetLabel String   @map("target_label")
+  status      String
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  employee         Employee          @relation(fields: [employeeId], references: [id])
+  archivedProjects ArchivedProject[]
+
+  @@map("projects")
+}
+
 model WhatsNew {
   id           String   @id @default(cuid())
+  employeeId   String   @map("employee_id")
   title        String
   category     String
   summary      String   @db.LongText
@@ -225,24 +204,64 @@ model WhatsNew {
   imageUrl     String?  @map("image_url")
   isHighlight  Boolean  @default(false) @map("is_highlight")
   publishDate  DateTime @map("publish_date")
-  authorName   String   @map("author_name")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
+
+  employee         Employee           @relation(fields: [employeeId], references: [id])
+  archivedWhatsNew ArchivedWhatsNew[]
 
   @@map("whats_new")
 }
 
+model CustomerContact {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  fullName      String   @map("full_name")
+  phoneCode     String   @map("phone_code")
+  phoneNumber   String   @map("phone_number")
+  companyName   String   @map("company_name")
+  industry      String   @map("industry")
+  industryOther String?  @map("industry_other")
+  companyEmail  String   @map("company_email")
+  companyScale  String   @map("company_scale")
+  message       String   @db.LongText
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("customer_contacts")
+}
+
+model Consultation {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  name      String
+  email     String
+  phone     String
+  company   String?
+  product   String
+  message   String   @db.LongText
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("consultations")
+}
+
 model ArchivedProduct {
-  id              String      @id @default(cuid())
-  originalId      String      @map("original_id")
-  productType     ProductType @map("product_type")
-  namaProduk      String      @map("nama_produk")
-  hargaProduk     String      @map("harga_produk")
-  deskripsiProduk String      @map("deskripsi_produk")
-  durasiProduk    String      @map("durasi_produk")
+  id              String   @id @default(cuid())
+  originalId      String   @map("original_id")
+  categoryId      String   @map("category_id")
+  namaProduk      String   @map("nama_produk")
+  hargaProduk     String   @map("harga_produk")
+  deskripsiProduk String   @map("deskripsi_produk")
+  durasiProduk    String   @map("durasi_produk")
   terjual         String
-  deletedAt       DateTime    @default(now()) @map("deleted_at")
-  deletedBy       String?     @map("deleted_by")
+  deletedAt       DateTime @default(now()) @map("deleted_at")
+  deletedBy       String?  @map("deleted_by")
+
+  product  Product @relation(fields: [originalId], references: [id])
+  category ProductCategory @relation(fields: [categoryId], references: [id])
 
   @@map("archived_products")
 }
@@ -250,13 +269,16 @@ model ArchivedProduct {
 model ArchivedProject {
   id          String   @id @default(cuid())
   originalId  String   @map("original_id")
+  employeeId  String   @map("employee_id")
   startLabel  String   @map("start_label")
   targetLabel String   @map("target_label")
-  owner       String
   status      String
   createdAt   DateTime @map("created_at")
   deletedAt   DateTime @default(now()) @map("deleted_at")
   deletedBy   String?  @map("deleted_by")
+
+  project  Project  @relation(fields: [originalId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
 
   @@map("archived_projects")
 }
@@ -264,6 +286,7 @@ model ArchivedProject {
 model ArchivedWhatsNew {
   id           String   @id @default(cuid())
   originalId   String   @map("original_id")
+  employeeId   String   @map("employee_id")
   title        String
   category     String
   summary      String   @db.LongText
@@ -271,11 +294,13 @@ model ArchivedWhatsNew {
   imageUrl     String?  @map("image_url")
   isHighlight  Boolean  @map("is_highlight")
   publishDate  DateTime @map("publish_date")
-  authorName   String   @map("author_name")
   createdAt    DateTime @map("created_at")
   updatedAt    DateTime @map("updated_at")
   deletedAt    DateTime @default(now()) @map("deleted_at")
   deletedBy    String?  @map("deleted_by")
+
+  whatsNew WhatsNew @relation(fields: [originalId], references: [id])
+  employee Employee @relation(fields: [employeeId], references: [id])
 
   @@map("archived_whats_new")
 }
