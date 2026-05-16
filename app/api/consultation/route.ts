@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { readSessionUserId } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
+    const userId = await readSessionUserId();
+    if (!userId) {
+      return NextResponse.json({ error: "Belum login" }, { status: 401 });
+    }
+
     const data = await request.json();
 
     const { name, email, phone, company, product, message } = data;
@@ -17,6 +23,7 @@ export async function POST(request: NextRequest) {
     // Simpan ke database
     const consultation = await prisma.consultation.create({
       data: {
+        userId,
         name,
         email,
         phone,

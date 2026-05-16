@@ -108,41 +108,16 @@ export default async function ProfilePage({
         : error === "3"
             ? "Password lama salah."
             : null;
-  const [orders, bigAssistant, bigLegal, bigSocial, bigVision] = await Promise.all(
-    [
-      prisma.order.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
-      prisma.bigAssistant.findMany(),
-      prisma.bigLegal.findMany(),
-      prisma.bigSocial.findMany(),
-      prisma.bigVision.findMany(),
-    ],
-  );
-  const productMaps: Record<
-    "BIG_ASSISTANT" | "BIG_LEGAL" | "BIG_SOCIAL" | "BIG_VISION",
-    Map<string, string>
-  > = {
-    BIG_ASSISTANT: new Map(bigAssistant.map((item) => [item.id, item.namaProduk])),
-    BIG_LEGAL: new Map(bigLegal.map((item) => [item.id, item.namaProduk])),
-    BIG_SOCIAL: new Map(bigSocial.map((item) => [item.id, item.namaProduk])),
-    BIG_VISION: new Map(bigVision.map((item) => [item.id, item.namaProduk])),
-  };
-  const productDurations: Record<
-    "BIG_ASSISTANT" | "BIG_LEGAL" | "BIG_SOCIAL" | "BIG_VISION",
-    Map<string, string>
-  > = {
-    BIG_ASSISTANT: new Map(bigAssistant.map((item) => [item.id, item.durasiProduk])),
-    BIG_LEGAL: new Map(bigLegal.map((item) => [item.id, item.durasiProduk])),
-    BIG_SOCIAL: new Map(bigSocial.map((item) => [item.id, item.durasiProduk])),
-    BIG_VISION: new Map(bigVision.map((item) => [item.id, item.durasiProduk])),
-  };
-  const productLinks: Record<
-    "BIG_ASSISTANT" | "BIG_LEGAL" | "BIG_SOCIAL" | "BIG_VISION",
-    string
-  > = {
-    BIG_ASSISTANT: "/produk/big-assistant",
-    BIG_LEGAL: "/produk/big-legal",
-    BIG_SOCIAL: "/produk/big-social",
-    BIG_VISION: "/produk/big-vision",
+  const orders = await prisma.order.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: { product: { include: { category: true } } },
+  });
+  const productLinks: Record<string, string> = {
+    "Big Assistant": "/produk/big-assistant",
+    "Big Legal": "/produk/big-legal",
+    "Big Social": "/produk/big-social",
+    "Big Vision": "/produk/big-vision",
   };
   const today = startOfDayInTimeZone(new Date());
 
@@ -239,14 +214,12 @@ export default async function ProfilePage({
                 >
                   <span>{order.id}</span>
                   <span>
-                    {productMaps[order.productType].get(order.productId) ??
-                      order.productId}
+                    {order.product?.namaProduk ?? order.productId}
                   </span>
                   <span>{order.statusPesanan}</span>
                   <span>
                     {(() => {
-                      const durationRaw =
-                        productDurations[order.productType].get(order.productId);
+                      const durationRaw = order.product?.durasiProduk;
                       const duration = parseDuration(durationRaw);
                       if (!duration) return "-";
                       const endDate = addDuration(order.createdAt, duration);
@@ -255,8 +228,7 @@ export default async function ProfilePage({
                   </span>
                   <span>
                     {(() => {
-                      const durationRaw =
-                        productDurations[order.productType].get(order.productId);
+                      const durationRaw = order.product?.durasiProduk;
                       const duration = parseDuration(durationRaw);
                       if (!duration || order.statusPesanan !== "Done") return "-";
                       const endDate = addDuration(order.createdAt, duration);
@@ -264,7 +236,7 @@ export default async function ProfilePage({
                       return (
                         <a
                           className="inline-flex items-center rounded-md border border-[#2a3ad7] px-3 py-1 text-xs font-semibold text-[#2a3ad7]"
-                          href={productLinks[order.productType]}
+                          href={productLinks[order.product?.category.categoryName ?? ""] ?? "/produk"}
                         >
                           Pesan Lagi
                         </a>
@@ -280,3 +252,4 @@ export default async function ProfilePage({
     </div>
   );
 }
+

@@ -12,10 +12,10 @@ export const dynamic = "force-dynamic";
 export default async function SuccessHistoryPage() {
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
-  const canManageNews = employee?.role === "PROJECT_MANAGEMENT";
+  const canManageNews = employee?.role.name === "PROJECT_MANAGEMENT";
 
   return (
     <div className="project-layout">
@@ -261,3 +261,4 @@ export default async function SuccessHistoryPage() {
     </div>
   );
 }
+

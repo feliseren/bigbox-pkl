@@ -1,12 +1,12 @@
 import Image from "next/image";
 
 type SignupPageProps = {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string | string[] }>;
 };
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {
   const params = (await searchParams) ?? {};
-  const error = params.error;
+  const error = Array.isArray(params.error) ? params.error[0] : params.error;
 
   return (
     <div className="h-screen overflow-hidden bg-gradient-to-br from-[#f6f8ff] via-white to-[#eef2ff] px-3 py-3 lg:flex lg:items-center lg:justify-center">
@@ -95,9 +95,19 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                   Lengkapi semua data terlebih dahulu.
                 </p>
               )}
+              {error === "terms" && (
+                <p className="text-[11px] font-semibold text-[#c0392b]">
+                  Setujui syarat dan ketentuan terlebih dahulu.
+                </p>
+              )}
 
               <label className="flex items-center gap-2 text-[10px] text-[#6b6b6b] sm:text-[11px]">
-                <input className="h-4 w-4 rounded border-[#cfcfcf]" type="checkbox" />
+                <input
+                  className="h-4 w-4 rounded border-[#cfcfcf]"
+                  name="agreement"
+                  type="checkbox"
+                  value="1"
+                />
                 I agree to terms & conditions
               </label>
 

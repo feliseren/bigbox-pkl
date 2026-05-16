@@ -74,59 +74,53 @@ function buildSimplePdf(content: string) {
 export async function GET() {
   const doneOrdersAll = await prisma.order.findMany({
     where: { statusPesanan: "Done" },
+    include: { product: { include: { category: true } } },
   });
   const [bigAssistant, bigLegal, bigSocial, bigVision, archivedProducts] =
     await Promise.all([
-    prisma.bigAssistant.findMany(),
-    prisma.bigLegal.findMany(),
-    prisma.bigSocial.findMany(),
-    prisma.bigVision.findMany(),
-    prisma.archivedProduct.findMany(),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Assistant" } } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Legal" } } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Social" } } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Vision" } } }),
+    prisma.archivedProduct.findMany({ include: { category: true } }),
   ]);
-
-  const productTypeLabel: Record<string, string> = {
-    BIG_ASSISTANT: "Big Assistant",
-    BIG_LEGAL: "Big Legal",
-    BIG_SOCIAL: "Big Social",
-    BIG_VISION: "Big Vision",
-  };
 
   const productByKey = new Map<string, { name: string; price: string; type: string }>();
   bigAssistant.forEach((item) => {
-    productByKey.set(`BIG_ASSISTANT:${item.id}`, {
+    productByKey.set(item.id, {
       name: item.namaProduk,
       price: item.hargaProduk,
       type: "Big Assistant",
     });
   });
   bigLegal.forEach((item) => {
-    productByKey.set(`BIG_LEGAL:${item.id}`, {
+    productByKey.set(item.id, {
       name: item.namaProduk,
       price: item.hargaProduk,
       type: "Big Legal",
     });
   });
   bigSocial.forEach((item) => {
-    productByKey.set(`BIG_SOCIAL:${item.id}`, {
+    productByKey.set(item.id, {
       name: item.namaProduk,
       price: item.hargaProduk,
       type: "Big Social",
     });
   });
   bigVision.forEach((item) => {
-    productByKey.set(`BIG_VISION:${item.id}`, {
+    productByKey.set(item.id, {
       name: item.namaProduk,
       price: item.hargaProduk,
       type: "Big Vision",
     });
   });
   archivedProducts.forEach((item) => {
-    const key = `${item.productType}:${item.originalId}`;
+    const key = item.originalId;
     if (productByKey.has(key)) return;
     productByKey.set(key, {
       name: item.namaProduk,
       price: item.hargaProduk,
-      type: productTypeLabel[item.productType] ?? String(item.productType),
+      type: item.category.categoryName,
     });
   });
 
@@ -135,7 +129,7 @@ export async function GET() {
     { name: string; type: string; count: number; revenue: number }
   >();
   doneOrdersAll.forEach((order) => {
-    const key = `${order.productType}:${order.productId}`;
+    const key = order.productId;
     const product = productByKey.get(key);
     if (!product) return;
     const entry = productStats.get(key) ?? {
@@ -250,3 +244,4 @@ export async function GET() {
     },
   });
 }
+

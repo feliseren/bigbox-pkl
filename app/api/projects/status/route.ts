@@ -13,9 +13,9 @@ export async function POST(request: Request) {
   }
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId },
-    select: { role: true },
+    select: { role: { select: { name: true } } },
   });
-  if (!employee || employee.role !== "PROJECT_MANAGEMENT") {
+  if (!employee || employee.role.name !== "PROJECT_MANAGEMENT") {
     return NextResponse.json({ ok: false }, { status: 403 });
   }
 
@@ -30,3 +30,4 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ ok: true });
 }
+

@@ -23,7 +23,7 @@ export default async function EmployeeProfilePage({
     redirect("/login_karyawan");
   }
 
-  const employee = await prisma.employee.findUnique({ where: { id: employeeId } });
+  const employee = await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } });
   if (!employee) {
     redirect("/login_karyawan");
   }
@@ -120,3 +120,4 @@ export default async function EmployeeProfilePage({
     </div>
   );
 }
+

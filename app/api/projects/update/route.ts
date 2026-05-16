@@ -7,7 +7,6 @@ export async function POST(request: Request) {
   const projectId = String(formData.get("projectId") || "").trim();
   const startLabel = String(formData.get("startLabel") || "").trim();
   const targetLabel = String(formData.get("targetLabel") || "").trim();
-  const owner = String(formData.get("owner") || "").trim();
   const status = String(formData.get("status") || "").trim();
 
   const employeeId = await readEmployeeSessionId();
@@ -16,15 +15,15 @@ export async function POST(request: Request) {
   }
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId },
-    select: { role: true },
+    select: { role: { select: { name: true } } },
   });
-  if (!employee || employee.role !== "PROJECT_MANAGEMENT") {
+  if (!employee || employee.role.name !== "PROJECT_MANAGEMENT") {
     return NextResponse.redirect(
       new URL("/dashboard_karyawan/daftar-projek?error=forbidden", request.url),
     );
   }
 
-  if (!projectId || !startLabel || !targetLabel || !owner || !status) {
+  if (!projectId || !startLabel || !targetLabel || !status) {
     return NextResponse.redirect(
       new URL("/dashboard_karyawan/daftar-projek?error=1", request.url),
     );
@@ -35,10 +34,11 @@ export async function POST(request: Request) {
     data: {
       startLabel,
       targetLabel,
-      owner,
+      employeeId,
       status,
     },
   });
 
   return NextResponse.redirect(new URL("/dashboard_karyawan/daftar-projek", request.url));
 }
+

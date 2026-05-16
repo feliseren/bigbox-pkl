@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL(redirectTo, request.url), 303);
   }
 
-  const review = await prisma.review.findFirst({
+  const review = await prisma.newsReview.findFirst({
     where: { id: reviewId, deletedAt: null },
     select: { userId: true, newsStoryId: true, comment: true },
   });
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   try {
     if (review.comment) {
       await prisma.$transaction([
-        prisma.review.update({
+        prisma.newsReview.update({
           where: { id: reviewId },
           data: { deletedAt: new Date() },
         }),
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
         }),
       ]);
     } else {
-      await prisma.review.update({
+      await prisma.newsReview.update({
         where: { id: reviewId },
         data: { deletedAt: new Date() },
       });

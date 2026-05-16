@@ -135,30 +135,31 @@ export async function GET(request: Request) {
       statusPesanan: "Done",
       createdAt: { gte: prevRangeStart, lt: safeRangeEnd },
     },
+    include: { product: true },
   });
   const [bigAssistant, bigLegal, bigSocial, bigVision, archivedProducts] =
     await Promise.all([
-    prisma.bigAssistant.findMany(),
-    prisma.bigLegal.findMany(),
-    prisma.bigSocial.findMany(),
-    prisma.bigVision.findMany(),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Assistant" } } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Legal" } } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Social" } } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Vision" } } }),
     prisma.archivedProduct.findMany(),
   ]);
   const productByKey = new Map<string, string>();
   bigAssistant.forEach((item) => {
-    productByKey.set(`BIG_ASSISTANT:${item.id}`, item.namaProduk);
+    productByKey.set(item.id, item.namaProduk);
   });
   bigLegal.forEach((item) => {
-    productByKey.set(`BIG_LEGAL:${item.id}`, item.namaProduk);
+    productByKey.set(item.id, item.namaProduk);
   });
   bigSocial.forEach((item) => {
-    productByKey.set(`BIG_SOCIAL:${item.id}`, item.namaProduk);
+    productByKey.set(item.id, item.namaProduk);
   });
   bigVision.forEach((item) => {
-    productByKey.set(`BIG_VISION:${item.id}`, item.namaProduk);
+    productByKey.set(item.id, item.namaProduk);
   });
   archivedProducts.forEach((item) => {
-    const key = `${item.productType}:${item.originalId}`;
+    const key = item.originalId;
     if (productByKey.has(key)) return;
     productByKey.set(key, item.namaProduk);
   });
@@ -170,7 +171,7 @@ export async function GET(request: Request) {
     dailyTotals.set(key, (dailyTotals.get(key) ?? 0) + amount);
     if (order.createdAt >= rangeStart && order.createdAt < safeRangeEnd) {
       const productName =
-        productByKey.get(`${order.productType}:${order.productId}`) ?? order.productId;
+        order.product?.namaProduk ?? productByKey.get(order.productId) ?? order.productId;
       const rowKey = `${key}|${productName}`;
       const row = tableMap.get(rowKey) ?? {
         date: key,
@@ -353,3 +354,4 @@ export async function GET(request: Request) {
     },
   });
 }
+

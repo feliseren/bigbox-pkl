@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const employee = await prisma.employee.findUnique({ where: { id: employeeId } });
+  const employee = await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } });
   if (!employee) {
     return NextResponse.redirect(new URL("/login_karyawan", request.url));
   }
@@ -47,3 +47,4 @@ export async function POST(request: Request) {
     new URL("/dashboard_karyawan/profile?success=1", request.url),
   );
 }
+

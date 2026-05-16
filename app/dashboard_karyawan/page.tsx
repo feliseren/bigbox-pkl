@@ -79,7 +79,7 @@ export default async function DashboardKaryawanPage({
 }) {
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
   const resolvedSearchParams = await searchParams;
   const rawPeriod = resolvedSearchParams?.period;
@@ -178,6 +178,7 @@ export default async function DashboardKaryawanPage({
   });
   const doneOrdersAll = await prisma.order.findMany({
     where: { statusPesanan: "Done", createdAt: { gte: rangeStart, lt: safeRangeEnd } },
+    include: { product: { include: { category: true } } },
   });
   const dailyTotals = new Map<string, number>();
   const dailyCounts = new Map<string, number>();
@@ -300,7 +301,7 @@ export default async function DashboardKaryawanPage({
           value: item.value,
         }));
   const maxViewerValue = Math.max(1, ...viewerSeries.map((item) => item.value));
-  const reviewCounts = await prisma.review.groupBy({
+  const reviewCounts = await prisma.newsReview.groupBy({
     by: ["rating"],
     _count: { rating: true },
     where: {
@@ -323,44 +324,15 @@ export default async function DashboardKaryawanPage({
       percent,
     };
   });
-  const [bigAssistant, bigLegal, bigSocial, bigVision] = await Promise.all([
-    prisma.bigAssistant.findMany(),
-    prisma.bigLegal.findMany(),
-    prisma.bigSocial.findMany(),
-    prisma.bigVision.findMany(),
-  ]);
-  const productByKey = new Map<string, { name: string; price: string }>();
-  bigAssistant.forEach((item) => {
-    productByKey.set(`BIG_ASSISTANT:${item.id}`, {
-      name: item.namaProduk,
-      price: item.hargaProduk,
-    });
-  });
-  bigLegal.forEach((item) => {
-    productByKey.set(`BIG_LEGAL:${item.id}`, {
-      name: item.namaProduk,
-      price: item.hargaProduk,
-    });
-  });
-  bigSocial.forEach((item) => {
-    productByKey.set(`BIG_SOCIAL:${item.id}`, {
-      name: item.namaProduk,
-      price: item.hargaProduk,
-    });
-  });
-  bigVision.forEach((item) => {
-    productByKey.set(`BIG_VISION:${item.id}`, {
-      name: item.namaProduk,
-      price: item.hargaProduk,
-    });
-  });
   const productStats = new Map<
     string,
     { count: number; revenue: number; price: string; name: string }
   >();
   doneOrdersAll.forEach((order) => {
-    const key = `${order.productType}:${order.productId}`;
-    const product = productByKey.get(key);
+    const key = order.productId;
+    const product = order.product
+      ? { name: order.product.namaProduk, price: order.product.hargaProduk }
+      : null;
     if (!product) return;
     const entry = productStats.get(key) ?? {
       count: 0,
@@ -385,26 +357,21 @@ export default async function DashboardKaryawanPage({
   const totalOrders = doneOrdersAll.length;
   const aiOrderCounts = doneOrdersAll.reduce(
     (acc, order) => {
-      acc[order.productType] += 1;
+      const categoryName = order.product?.category.categoryName;
+      if (categoryName && categoryName in acc) {
+        acc[categoryName as keyof typeof acc] += 1;
+      }
       return acc;
     },
     {
-      BIG_ASSISTANT: 0,
-      BIG_LEGAL: 0,
-      BIG_SOCIAL: 0,
-      BIG_VISION: 0,
+      "Big Assistant": 0,
+      "Big Legal": 0,
+      "Big Social": 0,
+      "Big Vision": 0,
     },
   );
   const aiOrders = aiOrderColors.map((item) => {
-    const key =
-      item.name === "Big Vision"
-        ? "BIG_VISION"
-        : item.name === "Big Social"
-          ? "BIG_SOCIAL"
-          : item.name === "Big Assistant"
-            ? "BIG_ASSISTANT"
-            : "BIG_LEGAL";
-    const value = aiOrderCounts[key];
+    const value = aiOrderCounts[item.name as keyof typeof aiOrderCounts];
     return { ...item, value };
   });
   const aiDonutGradient = (() => {
@@ -413,15 +380,7 @@ export default async function DashboardKaryawanPage({
     }
     let start = 0;
     const slices = aiOrderColors.map((item) => {
-      const key =
-        item.name === "Big Vision"
-          ? "BIG_VISION"
-          : item.name === "Big Social"
-            ? "BIG_SOCIAL"
-            : item.name === "Big Assistant"
-              ? "BIG_ASSISTANT"
-              : "BIG_LEGAL";
-      const value = aiOrderCounts[key];
+      const value = aiOrderCounts[item.name as keyof typeof aiOrderCounts];
       const pct = (value / totalOrders) * 100;
       const from = start;
       const to = start + pct;
@@ -707,4 +666,6 @@ export default async function DashboardKaryawanPage({
     </div>
   );
 }
+
+
 

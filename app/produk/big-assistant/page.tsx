@@ -56,7 +56,7 @@ export default async function BigAssistantPage() {
   const notifications = userId ? await getUserNotifications(userId) : [];
   const formatPrice = (value: string) =>
     value.startsWith("Rp") ? value : `Rp ${value}`;
-  const pricing = (await prisma.bigAssistant.findMany({ orderBy: { id: "desc" } })).map(
+  const pricing = (await prisma.product.findMany({ where: { category: { categoryName: "Big Assistant" } }, orderBy: { id: "desc" } })).map(
     (item) => ({
     id: item.id,
     name: item.namaProduk,
@@ -333,5 +333,6 @@ export default async function BigAssistantPage() {
     </div>
   );
 }
+
 
 

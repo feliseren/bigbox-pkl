@@ -36,10 +36,10 @@ export default async function DaftarBeritaPage({
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
-  const canManageNews = employee?.role === "PROJECT_MANAGEMENT";
+  const canManageNews = employee?.role.name === "PROJECT_MANAGEMENT";
   const rawQuery = resolvedSearchParams?.q;
   const rawCategory = resolvedSearchParams?.category;
   const query =
@@ -359,3 +359,4 @@ export default async function DaftarBeritaPage({
     </div>
   );
 }
+

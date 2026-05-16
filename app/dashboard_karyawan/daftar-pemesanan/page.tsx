@@ -26,36 +26,20 @@ export default async function DaftarPemesananPage({
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
-  const [orders, bigAssistant, bigLegal, bigSocial, bigVision] = await Promise.all(
-    [
-      prisma.order.findMany({ orderBy: { createdAt: "desc" } }),
-      prisma.bigAssistant.findMany(),
-      prisma.bigLegal.findMany(),
-      prisma.bigSocial.findMany(),
-      prisma.bigVision.findMany(),
-    ],
-  );
-  const productMaps: Record<
-    "BIG_ASSISTANT" | "BIG_LEGAL" | "BIG_SOCIAL" | "BIG_VISION",
-    Map<string, string>
-  > = {
-    BIG_ASSISTANT: new Map(bigAssistant.map((item) => [item.id, item.namaProduk])),
-    BIG_LEGAL: new Map(bigLegal.map((item) => [item.id, item.namaProduk])),
-    BIG_SOCIAL: new Map(bigSocial.map((item) => [item.id, item.namaProduk])),
-    BIG_VISION: new Map(bigVision.map((item) => [item.id, item.namaProduk])),
-  };
+  const orders = await prisma.order.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { product: true, payment: true },
+  });
   const orderItems: OrderItem[] = orders.map((order) => ({
     id: order.id,
-    item:
-      productMaps[order.productType].get(order.productId) ??
-      order.productId,
+    item: order.product?.namaProduk ?? order.productId,
     total: order.totalPesanan,
     customer: order.namaCustomer,
     status: order.statusPesanan as OrderStatus,
-    paymentType: order.jenisPembayaran,
-    paymentProof: order.buktiPembayaran,
+    paymentType: order.payment?.jenisPembayaran ?? "-",
+    paymentProof: order.payment?.buktiPembayaran ?? "",
   }));
   const rawQuery = resolvedSearchParams?.q;
   const rawStatus = resolvedSearchParams?.status;
@@ -332,3 +316,5 @@ export default async function DaftarPemesananPage({
     </div>
   );
 }
+
+

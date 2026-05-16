@@ -54,9 +54,9 @@ export async function POST(request: Request) {
   }
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId },
-    select: { role: true, fullName: true },
+    select: { role: { select: { name: true } }, fullName: true },
   });
-  if (!employee || employee.role !== "MARKETING") {
+  if (!employee || employee.role.name !== "MARKETING") {
     return NextResponse.redirect(
       new URL(`${redirectTo}?error=forbidden`, request.url),
       303,
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       imageUrl,
       isHighlight,
       publishDate,
-      authorName: employee.fullName || "Marketing",
+      employeeId,
     });
   } catch (error) {
     console.error("Failed to create whats new:", error);
@@ -96,3 +96,4 @@ export async function POST(request: Request) {
 
   return NextResponse.redirect(new URL(redirectTo, request.url), 303);
 }
+

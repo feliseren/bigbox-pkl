@@ -30,6 +30,8 @@ type ListOption = {
   icon: React.ReactNode;
 };
 
+type EditorActionId = ToolbarAction["id"] | ListOption["id"];
+
 const toolbarActions: ToolbarAction[] = [
   {
     id: "bold",
@@ -274,7 +276,7 @@ const listOptions: ListOption[] = [
   },
 ];
 
-const getCommandForAction = (action: ToolbarAction["id"]) => {
+const getCommandForAction = (action: EditorActionId) => {
   switch (action) {
     case "align-left":
       return "justifyLeft";
@@ -414,7 +416,7 @@ export default function SuccessHistoryEditor({
     const selection = window.getSelection();
     const anchorNode = selection?.anchorNode ?? null;
     const element = anchorNode instanceof Element ? anchorNode : anchorNode?.parentElement;
-    const list = element?.closest("ul, ol");
+    const list = element?.closest<HTMLElement>("ul, ol");
     if (list && editorRef.current?.contains(list)) {
       const style = listStyleByAction[listType];
       if (style && list.style.listStyleType === style) {
@@ -449,7 +451,7 @@ export default function SuccessHistoryEditor({
       const anchorNode = selection?.anchorNode ?? null;
       const element =
         anchorNode instanceof Element ? anchorNode : anchorNode?.parentElement;
-      let list = element?.closest("ul, ol") ?? null;
+      let list = element?.closest<HTMLElement>("ul, ol") ?? null;
       if (!list && editorRef.current) {
         list = document.createElement(
           command === "insertOrderedList" ? "ol" : "ul",

@@ -21,14 +21,17 @@ const sanitizeId = (value: string) => value.replace(/[^a-zA-Z0-9_-]/g, "");
 export default async function BigLegalPage() {
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
   const canManageProducts =
-    employee?.role === "ADMIN" || employee?.role === "MARKETING";
+    employee?.role.name === "ADMIN" || employee?.role.name === "MARKETING";
   const [products, orders] = await Promise.all([
-    prisma.bigLegal.findMany({ orderBy: { id: "desc" } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Legal" } }, orderBy: { id: "desc" } }),
     prisma.order.findMany({
-      where: { productType: "BIG_LEGAL", statusPesanan: "Done" },
+      where: {
+        statusPesanan: "Done",
+        product: { category: { categoryName: "Big Legal" } },
+      },
     }),
   ]);
   const orderCounts = new Map<string, number>();
@@ -253,3 +256,5 @@ export default async function BigLegalPage() {
     </div>
   );
 }
+
+

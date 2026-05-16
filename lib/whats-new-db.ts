@@ -30,6 +30,7 @@ export async function fetchWhatsNew(filters: WhatsNewFilters = {}) {
 
   return prisma.whatsNew.findMany({
     where,
+    include: { employee: { select: { fullName: true } } },
     orderBy: [{ publishDate: "desc" }, { createdAt: "desc" }],
   });
 }
@@ -37,6 +38,7 @@ export async function fetchWhatsNew(filters: WhatsNewFilters = {}) {
 export async function fetchWhatsNewHighlight() {
   return prisma.whatsNew.findFirst({
     where: { isHighlight: true },
+    include: { employee: { select: { fullName: true } } },
     orderBy: [{ publishDate: "desc" }, { createdAt: "desc" }],
   });
 }
@@ -49,7 +51,7 @@ export async function createWhatsNew(data: {
   imageUrl: string | null;
   isHighlight: boolean;
   publishDate: Date;
-  authorName: string;
+  employeeId: string;
 }) {
   return prisma.whatsNew.create({ data });
 }
@@ -82,7 +84,7 @@ export async function deleteWhatsNew(id: string, deletedBy?: string | null) {
         imageUrl: existing.imageUrl,
         isHighlight: existing.isHighlight,
         publishDate: existing.publishDate,
-        authorName: existing.authorName,
+        employeeId: existing.employeeId,
         createdAt: existing.createdAt,
         updatedAt: existing.updatedAt,
         deletedAt: new Date(),

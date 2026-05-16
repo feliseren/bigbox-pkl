@@ -1,5 +1,5 @@
-﻿import Image from "next/image";
-import type { Prisma, Project } from "@prisma/client";
+import Image from "next/image";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { ProjectStatusSelect } from "@/components/project-status-select";
@@ -18,9 +18,9 @@ export default async function DaftarProjekPage({
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
-  const canManageProjects = employee?.role === "PROJECT_MANAGEMENT";
+  const canManageProjects = employee?.role.name === "PROJECT_MANAGEMENT";
   const rawQuery = resolvedSearchParams?.q;
   const rawStatus = resolvedSearchParams?.status;
   const query =
@@ -50,7 +50,7 @@ export default async function DaftarProjekPage({
                       { id: { contains: query } },
                       { startLabel: { contains: query } },
                       { targetLabel: { contains: query } },
-                      { owner: { contains: query } },
+                      { employee: { fullName: { contains: query } } },
                       { status: { contains: query } },
                     ],
                   },
@@ -60,8 +60,9 @@ export default async function DaftarProjekPage({
           ],
         }
       : undefined;
-  const projects: Project[] = await prisma.project.findMany({
+  const projects = await prisma.project.findMany({
     where,
+    include: { employee: { select: { fullName: true } } },
     orderBy: { createdAt: "desc" },
   });
   const totalProjects = await prisma.project.count({ where });
@@ -166,7 +167,7 @@ export default async function DaftarProjekPage({
                       <span className="bold">{project.id}</span>
                       <span>{project.startLabel}</span>
                       <span className="bold">{project.targetLabel}</span>
-                      <span>{project.owner}</span>
+                      <span>{project.employee.fullName}</span>
                       <span>
                         <ProjectStatusSelect
                           projectId={project.id}
@@ -231,10 +232,7 @@ export default async function DaftarProjekPage({
                       Target Selesai
                       <input name="targetLabel" type="date" required />
                     </label>
-                    <label>
-                      Penanggung Jawab
-                      <input name="owner" placeholder="Joseph Wheeler" required />
-                    </label>
+                    <input type="hidden" name="owner" value={employee?.fullName ?? ""} />
                     <label>
                       Status
                       <select name="status" defaultValue="Process" required>
@@ -297,14 +295,11 @@ export default async function DaftarProjekPage({
                               required
                             />
                           </label>
-                          <label>
-                            Penanggung Jawab
-                            <input
-                              name="owner"
-                              defaultValue={project.owner}
-                              required
-                            />
-                          </label>
+                          <input
+                            type="hidden"
+                            name="owner"
+                            value={project.employee.fullName}
+                          />
                           <label>
                             Status
                             <select name="status" defaultValue={project.status}>
@@ -330,6 +325,7 @@ export default async function DaftarProjekPage({
     </div>
   );
 }
+
 
 
 

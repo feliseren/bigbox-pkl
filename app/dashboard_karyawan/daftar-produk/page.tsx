@@ -41,26 +41,23 @@ const durationPlaceholderByTitle: Record<string, string> = {
 export default async function DaftarProdukPage() {
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
   const canManageProducts =
-    employee?.role === "ADMIN" || employee?.role === "MARKETING";
+    employee?.role.name === "ADMIN" || employee?.role.name === "MARKETING";
   const [bigAssistant, bigLegal, bigSocial, bigVision, orders] = await Promise.all([
-    prisma.bigAssistant.findMany({ orderBy: { id: "desc" } }),
-    prisma.bigLegal.findMany({ orderBy: { id: "desc" } }),
-    prisma.bigSocial.findMany({ orderBy: { id: "desc" } }),
-    prisma.bigVision.findMany({ orderBy: { id: "desc" } }),
-    prisma.order.findMany({ where: { statusPesanan: "Done" } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Assistant" } }, orderBy: { id: "desc" } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Legal" } }, orderBy: { id: "desc" } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Social" } }, orderBy: { id: "desc" } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Vision" } }, orderBy: { id: "desc" } }),
+    prisma.order.findMany({
+      where: { statusPesanan: "Done" },
+      include: { product: { include: { category: true } } },
+    }),
   ]);
-  const orderCounts = {
-    BIG_ASSISTANT: new Map<string, number>(),
-    BIG_LEGAL: new Map<string, number>(),
-    BIG_SOCIAL: new Map<string, number>(),
-    BIG_VISION: new Map<string, number>(),
-  };
+  const orderCounts = new Map<string, number>();
   orders.forEach((order) => {
-    const bucket = orderCounts[order.productType];
-    bucket.set(order.productId, (bucket.get(order.productId) ?? 0) + 1);
+    orderCounts.set(order.productId, (orderCounts.get(order.productId) ?? 0) + 1);
   });
   const productSections: ProductSection[] = [
     {
@@ -69,7 +66,7 @@ export default async function DaftarProdukPage() {
         id: item.id,
         name: item.namaProduk,
         price: item.hargaProduk,
-        soldTo: String(orderCounts.BIG_ASSISTANT.get(item.id) ?? 0),
+        soldTo: String(orderCounts.get(item.id) ?? 0),
         description: item.deskripsiProduk,
         duration: item.durasiProduk,
       })),
@@ -80,7 +77,7 @@ export default async function DaftarProdukPage() {
         id: item.id,
         name: item.namaProduk,
         price: item.hargaProduk,
-        soldTo: String(orderCounts.BIG_LEGAL.get(item.id) ?? 0),
+        soldTo: String(orderCounts.get(item.id) ?? 0),
         description: item.deskripsiProduk,
         duration: item.durasiProduk,
       })),
@@ -91,7 +88,7 @@ export default async function DaftarProdukPage() {
         id: item.id,
         name: item.namaProduk,
         price: item.hargaProduk,
-        soldTo: String(orderCounts.BIG_SOCIAL.get(item.id) ?? 0),
+        soldTo: String(orderCounts.get(item.id) ?? 0),
         description: item.deskripsiProduk,
         duration: item.durasiProduk,
       })),
@@ -102,7 +99,7 @@ export default async function DaftarProdukPage() {
         id: item.id,
         name: item.namaProduk,
         price: item.hargaProduk,
-        soldTo: String(orderCounts.BIG_VISION.get(item.id) ?? 0),
+        soldTo: String(orderCounts.get(item.id) ?? 0),
         description: item.deskripsiProduk,
         duration: item.durasiProduk,
       })),
@@ -377,3 +374,5 @@ export default async function DaftarProdukPage() {
     </div>
   );
 }
+
+

@@ -20,14 +20,17 @@ const sanitizeId = (value: string) => value.replace(/[^a-zA-Z0-9_-]/g, "");
 export default async function BigVisionPage() {
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
   const canManageProducts =
-    employee?.role === "ADMIN" || employee?.role === "MARKETING";
+    employee?.role.name === "ADMIN" || employee?.role.name === "MARKETING";
   const [products, orders] = await Promise.all([
-    prisma.bigVision.findMany({ orderBy: { id: "desc" } }),
+    prisma.product.findMany({ where: { category: { categoryName: "Big Vision" } }, orderBy: { id: "desc" } }),
     prisma.order.findMany({
-      where: { productType: "BIG_VISION", statusPesanan: "Done" },
+      where: {
+        statusPesanan: "Done",
+        product: { category: { categoryName: "Big Vision" } },
+      },
     }),
   ]);
   const orderCounts = new Map<string, number>();
@@ -298,3 +301,5 @@ export default async function BigVisionPage() {
     </div>
   );
 }
+
+

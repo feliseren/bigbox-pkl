@@ -10,9 +10,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const reset = params.reset ?? "";
 
   return (
-    <div className="h-screen overflow-hidden bg-gradient-to-br from-[#f6f8ff] via-white to-[#eef2ff] px-3 py-3 lg:flex lg:items-center lg:justify-center">
-      <div className="mx-auto flex h-full w-full max-w-6xl flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_30px_70px_rgba(37,44,90,0.18)] lg:h-[min(560px,calc(100vh-24px))] lg:flex-row">
-        <div className="flex w-full flex-col justify-between px-6 py-5 sm:px-8 sm:py-6 lg:w-[45%] lg:py-8">
+    <div className="min-h-screen overflow-y-auto bg-gradient-to-br from-[#f6f8ff] via-white to-[#eef2ff] px-3 py-3 lg:flex lg:items-center lg:justify-center">
+      <div className="mx-auto flex min-h-[calc(100vh-24px)] w-full max-w-6xl flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_30px_70px_rgba(37,44,90,0.18)] lg:min-h-0 lg:h-[min(600px,calc(100vh-24px))] lg:flex-row">
+        <div className="flex w-full flex-col justify-between gap-4 px-6 py-5 sm:px-8 sm:py-6 lg:w-[45%] lg:py-8">
           <div>
             <div className="mb-6 flex items-center gap-3">
               <Image

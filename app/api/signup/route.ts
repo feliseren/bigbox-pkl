@@ -7,9 +7,13 @@ export async function POST(request: Request) {
   const fullName = String(formData.get("fullName") || "").trim();
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
+  const agreement = formData.get("agreement") === "1";
 
   if (!fullName || !email || !password) {
     return NextResponse.redirect(new URL("/signup?error=1", request.url));
+  }
+  if (!agreement) {
+    return NextResponse.redirect(new URL("/signup?error=terms", request.url));
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });

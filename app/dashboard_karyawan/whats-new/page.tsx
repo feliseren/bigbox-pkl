@@ -32,10 +32,10 @@ export default async function WhatsNewDashboardPage({
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
-  const canManage = employee?.role === "MARKETING";
+  const canManage = employee?.role.name === "MARKETING";
   const rawQuery = resolvedSearchParams?.q;
   const rawCategory = resolvedSearchParams?.category;
   const query =
@@ -174,7 +174,7 @@ export default async function WhatsNewDashboardPage({
                       <span className="bold">{item.title}</span>
                       <span>{item.category}</span>
                       <span>{formatDate(item.publishDate)}</span>
-                      <span>{item.authorName}</span>
+                      <span>{item.employee.fullName}</span>
                       <span>{item.isHighlight ? "Ya" : "Tidak"}</span>
                       <span className="align-right actions">
                         <a
@@ -363,3 +363,4 @@ export default async function WhatsNewDashboardPage({
     </div>
   );
 }
+

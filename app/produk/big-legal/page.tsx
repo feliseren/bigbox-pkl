@@ -79,7 +79,7 @@ export default async function BigLegalPage() {
   const notifications = userId ? await getUserNotifications(userId) : [];
   const formatPrice = (value: string) =>
     value.startsWith("Rp") ? value : `Rp ${value}`;
-  const pricing = (await prisma.bigLegal.findMany({ orderBy: { id: "desc" } })).map(
+  const pricing = (await prisma.product.findMany({ where: { category: { categoryName: "Big Legal" } }, orderBy: { id: "desc" } })).map(
     (item) => ({
     id: item.id,
     name: item.namaProduk,
@@ -379,5 +379,6 @@ export default async function BigLegalPage() {
     </div>
   );
 }
+
 
 

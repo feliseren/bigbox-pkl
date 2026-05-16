@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 
     if (safeComment) {
       await prisma.$transaction([
-        prisma.review.create({
+        prisma.newsReview.create({
           data: {
             newsStoryId: newsId,
             userId,
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
         }),
       ]);
     } else {
-      const existingRatingOnly = await prisma.review.findFirst({
+      const existingRatingOnly = await prisma.newsReview.findFirst({
         where: {
           newsStoryId: newsId,
           userId,
@@ -79,12 +79,12 @@ export async function POST(request: Request) {
         orderBy: { createdAt: "desc" },
       });
       if (existingRatingOnly) {
-        await prisma.review.update({
+        await prisma.newsReview.update({
           where: { id: existingRatingOnly.id },
           data: { rating },
         });
       } else {
-        await prisma.review.create({
+        await prisma.newsReview.create({
           data: {
             newsStoryId: newsId,
             userId,

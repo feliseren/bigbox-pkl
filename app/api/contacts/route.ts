@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { readSessionUserId } from "@/lib/auth";
 import { NextResponse } from "next/server";
 
 function readValue(formData: FormData, key: string) {
@@ -7,6 +8,13 @@ function readValue(formData: FormData, key: string) {
 }
 
 export async function POST(request: Request) {
+  const userId = await readSessionUserId();
+  if (!userId) {
+    return NextResponse.redirect(
+      new URL(`/login?redirect=${encodeURIComponent("/hubungi-kami")}`, request.url),
+    );
+  }
+
   const formData = await request.formData();
   const fullName = readValue(formData, "fullName");
   const phoneCode = readValue(formData, "phoneCode");
@@ -35,6 +43,7 @@ export async function POST(request: Request) {
 
   await prisma.customerContact.create({
     data: {
+      userId,
       fullName,
       phoneCode,
       phoneNumber,
