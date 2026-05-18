@@ -35,7 +35,7 @@ export default async function WhatsNewDashboardPage({
     ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
-  const canManage = employee?.role.name === "MARKETING";
+  const canManage = employee?.role.name.toLowerCase() === "marketing";
   const rawQuery = resolvedSearchParams?.q;
   const rawCategory = resolvedSearchParams?.category;
   const query =

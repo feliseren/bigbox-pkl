@@ -14,7 +14,11 @@ export async function POST(request: Request) {
     where: { id: employeeId },
     select: { role: { select: { name: true } } },
   });
-  if (!employee || employee.role.name !== "PROJECT_MANAGEMENT") {
+  const roleName = employee?.role.name.toLowerCase();
+  if (
+    !employee ||
+    (roleName !== "project manager" && roleName !== "project_management")
+  ) {
     return NextResponse.redirect(
       new URL("/dashboard_karyawan/daftar-projek?error=forbidden", request.url),
     );
@@ -51,4 +55,5 @@ export async function POST(request: Request) {
 
   return NextResponse.redirect(new URL("/dashboard_karyawan/daftar-projek", request.url));
 }
+
 

@@ -28,6 +28,7 @@ export default async function DaftarPemesananPage({
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
+  const canConfirmOrders = employee?.role.name.toLowerCase() === "admin";
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     include: { product: true, payment: true },
@@ -285,12 +286,14 @@ export default async function DaftarPemesananPage({
                         <input value={order.status} readOnly />
                       </label>
                       <div className="project-form-actions">
-                        <form method="post" action="/api/orders/confirm">
-                          <input type="hidden" name="orderId" value={order.id} />
-                          <button className="btn-confirm" type="submit">
-                            Konfirmasi Pembayaran
-                          </button>
-                        </form>
+                        {canConfirmOrders ? (
+                          <form method="post" action="/api/orders/confirm">
+                            <input type="hidden" name="orderId" value={order.id} />
+                            <button className="btn-confirm" type="submit">
+                              Konfirmasi Pembayaran
+                            </button>
+                          </form>
+                        ) : null}
                         <a href="#" className="ghost">
                           Tutup
                         </a>

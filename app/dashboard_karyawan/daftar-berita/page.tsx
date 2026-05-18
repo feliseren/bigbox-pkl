@@ -39,7 +39,9 @@ export default async function DaftarBeritaPage({
     ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
-  const canManageNews = employee?.role.name === "PROJECT_MANAGEMENT";
+  const roleName = employee?.role.name.toLowerCase();
+  const canManageNews =
+    roleName === "project manager" || roleName === "project_management";
   const rawQuery = resolvedSearchParams?.q;
   const rawCategory = resolvedSearchParams?.category;
   const query =

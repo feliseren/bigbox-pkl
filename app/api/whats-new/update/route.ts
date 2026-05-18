@@ -57,7 +57,8 @@ export async function POST(request: Request) {
     where: { id: employeeId },
     select: { role: { select: { name: true } } },
   });
-  if (!employee || employee.role.name !== "MARKETING") {
+  const roleName = employee?.role.name.toLowerCase();
+  if (!employee || roleName !== "marketing") {
     return NextResponse.redirect(
       new URL(`${redirectTo}?error=forbidden`, request.url),
       303,

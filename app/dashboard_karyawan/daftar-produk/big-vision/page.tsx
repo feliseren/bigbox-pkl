@@ -22,8 +22,9 @@ export default async function BigVisionPage() {
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
+  const roleName = employee?.role.name.toLowerCase();
   const canManageProducts =
-    employee?.role.name === "ADMIN" || employee?.role.name === "MARKETING";
+    roleName === "admin" || roleName === "marketing";
   const [products, orders] = await Promise.all([
     prisma.product.findMany({ where: { category: { categoryName: "Big Vision" } }, orderBy: { id: "desc" } }),
     prisma.order.findMany({

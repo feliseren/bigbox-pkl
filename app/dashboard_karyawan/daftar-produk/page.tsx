@@ -43,8 +43,9 @@ export default async function DaftarProdukPage() {
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
+  const roleName = employee?.role.name.toLowerCase();
   const canManageProducts =
-    employee?.role.name === "ADMIN" || employee?.role.name === "MARKETING";
+    roleName === "admin" || roleName === "marketing";
   const [bigAssistant, bigLegal, bigSocial, bigVision, orders] = await Promise.all([
     prisma.product.findMany({ where: { category: { categoryName: "Big Assistant" } }, orderBy: { id: "desc" } }),
     prisma.product.findMany({ where: { category: { categoryName: "Big Legal" } }, orderBy: { id: "desc" } }),

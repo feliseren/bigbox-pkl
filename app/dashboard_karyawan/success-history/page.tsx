@@ -15,7 +15,9 @@ export default async function SuccessHistoryPage() {
     ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
-  const canManageNews = employee?.role.name === "PROJECT_MANAGEMENT";
+  const roleName = employee?.role.name.toLowerCase();
+  const canManageNews =
+    roleName === "project manager" || roleName === "project_management";
 
   return (
     <div className="project-layout">
