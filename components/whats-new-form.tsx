@@ -33,7 +33,7 @@ export default function WhatsNewForm({ categories }: WhatsNewFormProps) {
               </button>
             </div>
             <form
-              className="project-form"
+              className="project-form compact-whats-new-form"
               method="post"
               action="/api/whats-new"
               encType="multipart/form-data"
@@ -71,7 +71,7 @@ export default function WhatsNewForm({ categories }: WhatsNewFormProps) {
                 Ringkasan Singkat
                 <textarea
                   name="summary"
-                  rows={4}
+                  rows={3}
                   placeholder="Ringkasan singkat update..."
                   required
                 />
@@ -80,7 +80,7 @@ export default function WhatsNewForm({ categories }: WhatsNewFormProps) {
                 Detail (opsional)
                 <textarea
                   name="contentText"
-                  rows={4}
+                  rows={3}
                   placeholder="Detail update..."
                 />
               </label>
@@ -88,13 +88,32 @@ export default function WhatsNewForm({ categories }: WhatsNewFormProps) {
                 Upload Gambar (opsional)
                 <input type="file" name="image" accept="image/*" />
               </label>
-              <label>
-                Jadikan Highlight
-                <select name="isHighlight" defaultValue="0">
-                  <option value="0">Tidak</option>
-                  <option value="1">Ya</option>
-                </select>
-              </label>
+              <fieldset>
+                <legend className="mb-2 block text-sm font-semibold text-[#1f1f1f]">
+                  Jadikan Highlight
+                </legend>
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-slate-300 px-2.5 py-1.5 text-sm">
+                    <input
+                      type="radio"
+                      name="isHighlight"
+                      value="0"
+                      defaultChecked
+                      className="h-4 w-4 accent-[#2a3ad7]"
+                    />
+                    <span>Tidak</span>
+                  </label>
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-slate-300 px-2.5 py-1.5 text-sm">
+                    <input
+                      type="radio"
+                      name="isHighlight"
+                      value="1"
+                      className="h-4 w-4 accent-[#2a3ad7]"
+                    />
+                    <span>Ya</span>
+                  </label>
+                </div>
+              </fieldset>
               <div className="project-form-actions">
                 <button type="submit">Simpan</button>
                 <button

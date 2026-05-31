@@ -30,6 +30,7 @@ model Employee {
   confirmedPayments Payment[]         @relation("PaymentConfirmedBy")
   archivedProjects ArchivedProject[]
   archivedWhatsNews ArchivedWhatsNew[]
+  archivedProducts ArchivedProduct[]
 
   @@map("employees")
 }
@@ -260,8 +261,9 @@ model ArchivedProduct {
   deletedAt       DateTime @default(now()) @map("deleted_at")
   deletedBy       String?  @map("deleted_by")
 
-  product  Product @relation(fields: [originalId], references: [id])
-  category ProductCategory @relation(fields: [categoryId], references: [id])
+  product   Product         @relation(fields: [originalId], references: [id])
+  category  ProductCategory @relation(fields: [categoryId], references: [id])
+  employee  Employee?       @relation(fields: [deletedBy], references: [id])
 
   @@map("archived_products")
 }

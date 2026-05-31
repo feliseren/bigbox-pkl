@@ -95,7 +95,7 @@ const partnerLogos = [
   { src: "/sinjai.png", alt: "Kabupaten Sinjai" },
   { src: "/telkomidn.png", alt: "Telkom Indonesia" },
   { src: "/ugm.png", alt: "UGM" },
-  { src: "/kimia%20farma.png", alt: "Kimia Farma" },
+  { src: "/kimiafarma.png", alt: "Kimia Farma" },
   { src: "/kominfo.jpg", alt: "Kominfo" },
   { src: "/ntb.png", alt: "NTB" },
   { src: "/papuabarat.png", alt: "Papua Barat" },
@@ -167,9 +167,18 @@ export default async function Home() {
 
       <main className="pb-24">
         <section className="pt-0">
-          <div className="hero-beranda relative h-[calc(100vh-60px)] w-full">
-            <div className="absolute left-[69px] top-[256px] max-w-[520px] text-white">
-              <h1 className="text-[48px] font-semibold italic leading-[55px]">
+          <div className="relative flex h-[clamp(260px,56vw,760px)] w-full items-center overflow-hidden">
+            <Image
+              src="/background-beranda.gif"
+              alt="Hero background"
+              fill
+              priority
+              unoptimized
+              sizes="100vw"
+              className="object-cover object-center"
+            />
+            <div className="mx-auto w-full max-w-[1237px] px-6">
+              <h1 className="relative z-10 max-w-[520px] text-[30px] font-semibold italic leading-[1.2] text-white sm:text-[38px] md:text-[48px] md:leading-[55px]">
                 Wujudkan Strategi Bisnis Akurat Bersama Solusi AI dan Big Data
                 yang Tepat
               </h1>

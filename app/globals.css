@@ -1277,6 +1277,18 @@ body {
   color: #6b7185;
 }
 
+.compact-whats-new-form {
+  gap: 10px;
+}
+
+.compact-whats-new-form textarea {
+  min-height: 84px;
+}
+
+.compact-whats-new-form .project-form-actions {
+  margin-top: 4px;
+}
+
 .success-card {
   padding: 26px;
 }

@@ -14,6 +14,7 @@ type NotificationBellProps = {
 
 export function NotificationBell({ items }: NotificationBellProps) {
   const [open, setOpen] = useState(false);
+  const [hideBadge, setHideBadge] = useState(false);
   const [readIds, setReadIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") {
       return new Set();
@@ -31,6 +32,7 @@ export function NotificationBell({ items }: NotificationBellProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const unreadItems = items.filter((item) => !readIds.has(item.id));
   const count = unreadItems.length;
+  const visibleCount = hideBadge || open ? 0 : count;
 
   useEffect(() => {
     try {
@@ -45,6 +47,13 @@ export function NotificationBell({ items }: NotificationBellProps) {
 
   useEffect(() => {
     if (!open) return;
+    if (items.length > 0) {
+      setReadIds((prev) => {
+        const nextSet = new Set(prev);
+        items.forEach((item) => nextSet.add(item.id));
+        return nextSet;
+      });
+    }
     function handleClick(event: MouseEvent) {
       if (!containerRef.current) return;
       if (containerRef.current.contains(event.target as Node)) return;
@@ -55,16 +64,20 @@ export function NotificationBell({ items }: NotificationBellProps) {
   }, [open]);
 
   function handleToggle() {
-    const nextOpen = !open;
-    if (nextOpen && items.length > 0) {
-      setReadIds((prev) => {
-        const nextSet = new Set(prev);
-        items.forEach((item) => nextSet.add(item.id));
-        return nextSet;
-      });
-    }
-    setOpen(nextOpen);
+    setOpen((prev) => {
+      const nextOpen = !prev;
+      if (nextOpen) {
+        setHideBadge(true);
+      }
+      return nextOpen;
+    });
   }
+
+  useEffect(() => {
+    if (count === 0) {
+      setHideBadge(false);
+    }
+  }, [count]);
 
   return (
     <div className="notification-bell" ref={containerRef}>
@@ -88,7 +101,9 @@ export function NotificationBell({ items }: NotificationBellProps) {
             strokeLinejoin="round"
           />
         </svg>
-        {count > 0 ? <span className="notification-badge">{count}</span> : null}
+        {visibleCount > 0 ? (
+          <span className="notification-badge">{visibleCount}</span>
+        ) : null}
       </button>
       {open ? (
         <div className="notification-dropdown">

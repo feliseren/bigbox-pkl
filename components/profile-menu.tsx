@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type ProfileMenuProps = {
   fullName: string;
@@ -8,9 +8,21 @@ type ProfileMenuProps = {
 
 export function ProfileMenu({ fullName }: ProfileMenuProps) {
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (!containerRef.current) return;
+      if (containerRef.current.contains(event.target as Node)) return;
+      setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#524a4e]"
         onClick={() => setOpen((prev) => !prev)}

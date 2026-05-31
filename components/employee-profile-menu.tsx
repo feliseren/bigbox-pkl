@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type EmployeeProfileMenuProps = {
   fullName: string;
@@ -12,9 +12,21 @@ export function EmployeeProfileMenu({
   employeeId,
 }: EmployeeProfileMenuProps) {
   const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (!containerRef.current) return;
+      if (containerRef.current.contains(event.target as Node)) return;
+      setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [open]);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         className="project-user border-0 bg-transparent p-0"
         type="button"

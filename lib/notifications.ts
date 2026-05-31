@@ -76,17 +76,28 @@ export async function getUserNotifications(
   return orders.flatMap((order) => {
     const product = order.product;
     if (!product) return [];
+    const notifications: NotificationItem[] = [];
+
+    if (order.statusPesanan === "Done") {
+      notifications.push({
+        id: `payment-confirmed-${order.id}`,
+        title: "Pembayaran Terkonfirmasi",
+        message: `Pembayaran untuk produk ${product.namaProduk} telah dikonfirmasi. Pesanan Anda sudah aktif.`,
+      });
+    }
+
     const duration = parseDuration(product.durasiProduk);
     const endDate = addDuration(order.createdAt, duration);
-    if (now <= endDate) return [];
-    return [
-      {
-        id: order.id,
+    if (now > endDate) {
+      notifications.push({
+        id: `subscription-ended-${order.id}`,
         title: product.namaProduk,
         message: `Langganan produk ${product.namaProduk} sudah berakhir pada ${formatDate(
           endDate,
         )}.`,
-      },
-    ];
+      });
+    }
+
+    return notifications;
   });
 }

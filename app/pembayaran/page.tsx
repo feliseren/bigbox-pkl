@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { readSessionUserId } from "@/lib/auth";
 import { PaymentForm } from "@/components/payment-form";
+import { BackButton } from "@/components/back-button";
 
 export const dynamic = "force-dynamic";
 
@@ -66,23 +67,27 @@ export default async function PembayaranPage({
     productType && productId ? await loadProduct(productType, productId) : null;
 
   return (
-    <div className="min-h-screen bg-white px-6 py-10 text-[#1f2430]">
-      <div className="mx-auto max-w-[880px] space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold">Halaman Pembayaran</h1>
-          <p className="text-sm text-[#6b7185]">
+    <div className="h-screen overflow-hidden bg-gradient-to-b from-[#f3f6ff] via-[#f8faff] to-white px-6 py-4 text-[#1f2430]">
+      <div className="mx-auto flex h-full max-w-[980px] flex-col gap-4">
+        <div className="shrink-0 rounded-2xl border border-[#dbe3ff] bg-white/90 px-5 py-4 shadow-[0_10px_30px_rgba(42,58,215,0.08)] backdrop-blur">
+          <BackButton
+            className="mb-2 inline-flex items-center rounded-lg border border-[#cfd9fb] bg-[#f6f8ff] px-3 py-1.5 text-xs font-semibold text-[#2a46e6] transition hover:bg-[#e8eeff]"
+            label="< Kembali"
+          />
+          <h1 className="text-xl font-semibold text-[#172554]">Halaman Pembayaran</h1>
+          <p className="text-xs text-[#6b7185]">
             Lengkapi detail pembayaran untuk melanjutkan pesanan.
           </p>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm font-semibold">Nama</p>
-          <p className="text-sm text-[#6b7185]">{user?.fullName ?? "-"}</p>
+        <div className="shrink-0 rounded-2xl border border-[#dbe3ff] bg-white p-4 shadow-[0_8px_24px_rgba(24,46,122,0.08)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#6b7185]">Nama</p>
+          <p className="text-sm font-medium text-[#1f2430]">{user?.fullName ?? "-"}</p>
         </div>
 
         {product ? (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-4 text-sm font-semibold">
+          <div className="min-h-0 flex-1 rounded-2xl border border-[#dbe3ff] bg-white p-4 shadow-[0_12px_32px_rgba(24,46,122,0.09)]">
+            <div className="mb-3 inline-flex rounded-full bg-[#e8edff] px-3 py-1 text-xs font-semibold text-[#1f3fd6]">
               {PRODUCT_TITLE[productType ?? "big-assistant"]}
             </div>
             <PaymentForm
@@ -118,7 +123,7 @@ export default async function PembayaranPage({
             />
           </div>
         ) : (
-          <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-[#6b7185]">
+          <div className="rounded-2xl border border-[#dbe3ff] bg-white p-4 text-sm text-[#6b7185]">
             Produk belum dipilih. Silakan kembali ke halaman produk dan pilih paket.
           </div>
         )}
