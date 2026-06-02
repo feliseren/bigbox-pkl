@@ -26,7 +26,7 @@ export default async function BigVisionPage() {
   const canManageProducts =
     roleName === "admin" || roleName === "marketing";
   const [products, orders] = await Promise.all([
-    prisma.product.findMany({ where: { category: { categoryName: "Big Vision" } }, orderBy: { id: "desc" } }),
+    prisma.product.findMany({ where: { archivedProducts: { none: {} }, category: { categoryName: "Big Vision" } }, orderBy: { id: "desc" } }),
     prisma.order.findMany({
       where: {
         statusPesanan: "Done",
@@ -142,6 +142,9 @@ export default async function BigVisionPage() {
                       <ProductActionButtons
                         canManage={canManageProducts}
                         editHref={`#edit-product-${sanitizeId(row.id)}`}
+                        productId={row.id}
+                        productType="big-vision"
+                        redirectTo="/dashboard_karyawan/daftar-produk/big-vision"
                       />
                     </span>
                   </div>
@@ -285,6 +288,7 @@ export default async function BigVisionPage() {
                         <div className="product-form-actions">
                           <ConfirmDeleteButton
                             className="btn-delete"
+                            confirmMessage="Apakah yakin ingin menghapus produk ini? Produk akan dipindahkan ke arsip dan data penjualan tetap tersimpan."
                             formAction="/api/products/delete"
                           />
                           <button className="btn-update" type="submit">

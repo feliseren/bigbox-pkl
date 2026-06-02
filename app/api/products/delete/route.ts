@@ -39,7 +39,11 @@ export async function POST(request: Request) {
 
   const categoryName = productCategoryByType[productType];
   const existing = await prisma.product.findFirst({
-    where: { id: productId, category: { categoryName } },
+    where: {
+      id: productId,
+      category: { categoryName },
+      archivedProducts: { none: {} },
+    },
   });
   if (!existing) {
     return NextResponse.redirect(new URL(`${redirectTo}?error=1`, request.url));
@@ -59,7 +63,6 @@ export async function POST(request: Request) {
         deletedBy: employeeId,
       },
     }),
-    prisma.product.delete({ where: { id: productId } }),
   ]);
 
   return NextResponse.redirect(new URL(redirectTo, request.url));

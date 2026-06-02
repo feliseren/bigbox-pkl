@@ -72,14 +72,16 @@ export default async function WhatsNewPage({
     <div className="min-h-screen bg-[#f5f6fb] text-[#1f2430]">
       <header className="sticky top-0 z-30 site-header">
         <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
-          <Image
-            src="/bigbox_logo-removebg-preview.png"
-            alt="BigBox logo"
-            width={179}
-            height={56}
-            className="h-10 w-auto"
-            priority
-          />
+          <Link href="/">
+            <Image
+              src="/bigbox_logo-removebg-preview.png"
+              alt="BigBox logo"
+              width={179}
+              height={56}
+              className="h-10 w-auto"
+              priority
+            />
+          </Link>
           <nav className="hidden items-center gap-10 text-sm font-semibold text-white md:flex">
             <Link className="nav-link hover:text-gray-200" href="/">
               Beranda
@@ -122,11 +124,8 @@ export default async function WhatsNewPage({
               DAFTAR PEMBARUAN
             </h1>
             <p className="mt-3 text-sm text-slate-200 md:text-base">
-              Update terbaru produk & inovasi BigBox
+              Pembaruan produk & inovasi BigBox
             </p>
-            <span className="mt-5 inline-flex items-center justify-center rounded-full bg-[#2563eb] px-6 py-2 text-sm font-semibold shadow-[0_10px_24px_rgba(37,99,235,0.35)]">
-              Updated Weekly
-            </span>
           </div>
         </section>
 

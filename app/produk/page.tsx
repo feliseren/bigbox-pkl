@@ -43,7 +43,7 @@ export default async function ProdukPage() {
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-30 site-header">
         <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
-          <div className="flex items-center gap-3">
+          <a className="flex items-center gap-3" href="/">
             <Image
               src="/bigbox_logo-removebg-preview.png"
               alt="BigBox logo"
@@ -52,7 +52,7 @@ export default async function ProdukPage() {
               className="h-10 w-auto"
               priority
             />
-          </div>
+          </a>
           <nav className="hidden items-center gap-10 text-sm font-semibold text-[var(--accent)] md:flex">
             <a className="nav-link" href="/">
               Beranda

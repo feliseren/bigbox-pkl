@@ -78,10 +78,10 @@ export async function GET() {
   });
   const [bigAssistant, bigLegal, bigSocial, bigVision, archivedProducts] =
     await Promise.all([
-    prisma.product.findMany({ where: { category: { categoryName: "Big Assistant" } } }),
-    prisma.product.findMany({ where: { category: { categoryName: "Big Legal" } } }),
-    prisma.product.findMany({ where: { category: { categoryName: "Big Social" } } }),
-    prisma.product.findMany({ where: { category: { categoryName: "Big Vision" } } }),
+    prisma.product.findMany({ where: { archivedProducts: { none: {} }, category: { categoryName: "Big Assistant" } } }),
+    prisma.product.findMany({ where: { archivedProducts: { none: {} }, category: { categoryName: "Big Legal" } } }),
+    prisma.product.findMany({ where: { archivedProducts: { none: {} }, category: { categoryName: "Big Social" } } }),
+    prisma.product.findMany({ where: { archivedProducts: { none: {} }, category: { categoryName: "Big Vision" } } }),
     prisma.archivedProduct.findMany({ include: { category: true } }),
   ]);
 

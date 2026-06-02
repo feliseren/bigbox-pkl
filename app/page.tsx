@@ -124,7 +124,7 @@ export default async function Home() {
     <div className="min-h-screen bg-[var(--bg)]">
       <header className="sticky top-0 z-30 site-header">
         <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
-          <div className="flex items-center gap-3">
+          <a className="flex items-center gap-3" href="/">
             <Image
               src="/bigbox_logo-removebg-preview.png"
               alt="BigBox logo"
@@ -133,7 +133,7 @@ export default async function Home() {
               className="h-10 w-auto"
               priority
             />
-          </div>
+          </a>
           <nav className="hidden items-center gap-10 text-sm font-semibold text-[var(--accent)] md:flex">
             <a className="nav-link active" href="/">
               Beranda
@@ -261,7 +261,7 @@ export default async function Home() {
 
         <section className="mx-auto max-w-[1237px] px-6 py-8">
           <div className="mb-10 text-center">
-            <h2 className="text-[36px] font-bold text-[var(--ink)]">AWARD</h2>
+            <h2 className="text-[36px] font-bold text-[var(--ink)]">PENGHARGAAN</h2>
             <div className="mx-auto mt-3 h-[4px] w-[147px] bg-[var(--ink)]" />
           </div>
           <div className="award-surface">

@@ -1,10 +1,14 @@
 "use client";
 
+import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 import { useState } from "react";
 
 type ProductActionButtonsProps = {
   canManage: boolean;
   editHref: string;
+  productId: string;
+  productType: string;
+  redirectTo: string;
 };
 
 const cannotEditMessage = "yang dapat mengedit produk hanya admin dan marketing";
@@ -14,6 +18,9 @@ const cannotDeleteMessage =
 export function ProductActionButtons({
   canManage,
   editHref,
+  productId,
+  productType,
+  redirectTo,
 }: ProductActionButtonsProps) {
   const [message, setMessage] = useState<string | null>(null);
 
@@ -30,16 +37,27 @@ export function ProductActionButtons({
       >
         Ubah
       </a>
-      <button
-        className="btn-delete"
-        type="button"
-        onClick={() => {
-          if (canManage) return;
-          setMessage(cannotDeleteMessage);
-        }}
-      >
-        Hapus
-      </button>
+      {canManage ? (
+        <form method="post" action="/api/products/delete">
+          <input type="hidden" name="productId" value={productId} />
+          <input type="hidden" name="productType" value={productType} />
+          <input type="hidden" name="redirect" value={redirectTo} />
+          <ConfirmDeleteButton
+            className="btn-delete"
+            confirmMessage="Apakah yakin ingin menghapus produk ini? Produk akan dipindahkan ke arsip dan data penjualan tetap tersimpan."
+          />
+        </form>
+      ) : (
+        <button
+          className="btn-delete"
+          type="button"
+          onClick={() => {
+            setMessage(cannotDeleteMessage);
+          }}
+        >
+          Hapus
+        </button>
+      )}
       {message ? (
         <div
           className="product-alert-overlay"

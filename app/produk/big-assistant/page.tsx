@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { readSessionUserId } from "@/lib/auth";
 import { ProfileMenu } from "@/components/profile-menu";
@@ -56,7 +57,7 @@ export default async function BigAssistantPage() {
   const notifications = userId ? await getUserNotifications(userId) : [];
   const formatPrice = (value: string) =>
     value.startsWith("Rp") ? value : `Rp ${value}`;
-  const pricing = (await prisma.product.findMany({ where: { category: { categoryName: "Big Assistant" } }, orderBy: { id: "desc" } })).map(
+  const pricing = (await prisma.product.findMany({ where: { archivedProducts: { none: {} }, category: { categoryName: "Big Assistant" } }, orderBy: { id: "desc" } })).map(
     (item) => ({
     id: item.id,
     name: item.namaProduk,
@@ -69,7 +70,7 @@ export default async function BigAssistantPage() {
     <div className="min-h-screen bg-white">
       <header className="sticky top-0 z-30 site-header">
         <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
-          <div className="flex items-center gap-3">
+          <Link className="flex items-center gap-3" href="/">
             <Image
               src="/bigbox_logo-removebg-preview.png"
               alt="BigBox logo"
@@ -78,20 +79,20 @@ export default async function BigAssistantPage() {
               className="h-10 w-auto"
               priority
             />
-          </div>
+          </Link>
           <nav className="hidden items-center gap-10 text-sm font-semibold text-[var(--accent)] md:flex">
-            <a className="nav-link" href="/">
+            <Link className="nav-link" href="/">
               Beranda
-            </a>
-            <a className="nav-link active" href="/produk">
+            </Link>
+            <Link className="nav-link active" href="/produk">
               Produk
-            </a>
-            <a className="nav-link" href="/cerita-kami">
+            </Link>
+            <Link className="nav-link" href="/cerita-kami">
               Cerita Kami
-            </a>
-            <a className="nav-link" href="/whats-new">
+            </Link>
+            <Link className="nav-link" href="/whats-new">
               Daftar Pembaruan
-            </a>
+            </Link>
           </nav>
           {user ? (
             <div className="flex items-center gap-3">
@@ -99,12 +100,12 @@ export default async function BigAssistantPage() {
               <ProfileMenu fullName={user.fullName} />
             </div>
           ) : (
-            <a
+            <Link
               className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#524a4e]"
               href="/login"
             >
               Masuk
-            </a>
+            </Link>
           )}
         </div>
       </header>
@@ -221,7 +222,7 @@ export default async function BigAssistantPage() {
 
         <section className="mx-auto max-w-[1237px] px-6 pb-6 text-center">
           <h3 className="text-xl font-semibold text-[#2c2c2c]">
-            BigAssistant Pricing
+            Produk Big Assistant
           </h3>
           <div className="mx-auto mt-3 h-[3px] w-[200px] bg-[#2c2c2c]" />
         </section>

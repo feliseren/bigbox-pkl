@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
@@ -47,10 +46,10 @@ export default async function DaftarProdukPage() {
   const canManageProducts =
     roleName === "admin" || roleName === "marketing";
   const [bigAssistant, bigLegal, bigSocial, bigVision, orders] = await Promise.all([
-    prisma.product.findMany({ where: { category: { categoryName: "Big Assistant" } }, orderBy: { id: "desc" } }),
-    prisma.product.findMany({ where: { category: { categoryName: "Big Legal" } }, orderBy: { id: "desc" } }),
-    prisma.product.findMany({ where: { category: { categoryName: "Big Social" } }, orderBy: { id: "desc" } }),
-    prisma.product.findMany({ where: { category: { categoryName: "Big Vision" } }, orderBy: { id: "desc" } }),
+    prisma.product.findMany({ where: { archivedProducts: { none: {} }, category: { categoryName: "Big Assistant" } }, orderBy: { id: "desc" } }),
+    prisma.product.findMany({ where: { archivedProducts: { none: {} }, category: { categoryName: "Big Legal" } }, orderBy: { id: "desc" } }),
+    prisma.product.findMany({ where: { archivedProducts: { none: {} }, category: { categoryName: "Big Social" } }, orderBy: { id: "desc" } }),
+    prisma.product.findMany({ where: { archivedProducts: { none: {} }, category: { categoryName: "Big Vision" } }, orderBy: { id: "desc" } }),
     prisma.order.findMany({
       where: { statusPesanan: "Done" },
       include: { product: { include: { category: true } } },
@@ -167,6 +166,9 @@ export default async function DaftarProdukPage() {
                             editHref={`#edit-${productSlugByTitle[section.title]}-${sanitizeId(
                               item.id
                             )}`}
+                            productId={item.id}
+                            productType={productSlugByTitle[section.title]}
+                            redirectTo="/dashboard_karyawan/daftar-produk"
                           />
                         </span>
                       </div>
@@ -296,6 +298,7 @@ export default async function DaftarProdukPage() {
                               <div className="product-form-actions">
                                 <ConfirmDeleteButton
                                   className="btn-delete"
+                                  confirmMessage="Apakah yakin ingin menghapus produk ini? Produk akan dipindahkan ke arsip dan data penjualan tetap tersimpan."
                                   formAction="/api/products/delete"
                                 />
                                 <button className="btn-update" type="submit">

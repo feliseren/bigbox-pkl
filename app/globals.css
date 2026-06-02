@@ -146,16 +146,20 @@ body {
 
 .nav-link {
   position: relative;
+  display: inline-flex;
+  justify-content: center;
+  text-align: center;
 }
 
 .nav-link.active::after {
   content: "";
   position: absolute;
-  left: 0;
+  left: 50%;
   bottom: -10px;
-  width: 52px;
+  width: min(52px, 70%);
   height: 0;
   border-bottom: 2px solid var(--accent);
+  transform: translateX(-50%);
 }
 
 .tujuan-title {

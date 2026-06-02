@@ -43,7 +43,11 @@ export async function POST(request: Request) {
 
   const categoryName = productCategoryByType[productType];
   await prisma.product.updateMany({
-    where: { id: productId, category: { categoryName } },
+    where: {
+      id: productId,
+      category: { categoryName },
+      archivedProducts: { none: {} },
+    },
     data: {
       ...(name ? { namaProduk: name } : {}),
       ...(price ? { hargaProduk: price } : {}),

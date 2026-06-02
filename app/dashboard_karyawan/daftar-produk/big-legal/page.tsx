@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { ProductActionButtons } from "@/components/product-action-buttons";
@@ -27,7 +26,7 @@ export default async function BigLegalPage() {
   const canManageProducts =
     roleName === "admin" || roleName === "marketing";
   const [products, orders] = await Promise.all([
-    prisma.product.findMany({ where: { category: { categoryName: "Big Legal" } }, orderBy: { id: "desc" } }),
+    prisma.product.findMany({ where: { archivedProducts: { none: {} }, category: { categoryName: "Big Legal" } }, orderBy: { id: "desc" } }),
     prisma.order.findMany({
       where: {
         statusPesanan: "Done",
@@ -97,6 +96,9 @@ export default async function BigLegalPage() {
                       <ProductActionButtons
                         canManage={canManageProducts}
                         editHref={`#edit-product-${sanitizeId(row.id)}`}
+                        productId={row.id}
+                        productType="big-legal"
+                        redirectTo="/dashboard_karyawan/daftar-produk/big-legal"
                       />
                     </span>
                   </div>
@@ -240,6 +242,7 @@ export default async function BigLegalPage() {
                         <div className="product-form-actions">
                           <ConfirmDeleteButton
                             className="btn-delete"
+                            confirmMessage="Apakah yakin ingin menghapus produk ini? Produk akan dipindahkan ke arsip dan data penjualan tetap tersimpan."
                             formAction="/api/products/delete"
                           />
                           <button className="btn-update" type="submit">

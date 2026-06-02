@@ -99,6 +99,12 @@ function buildDashboardRangeState(
     return new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
   })();
   const rangeEnd = (() => {
+    if (selected === "monthly") {
+      return new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    }
+    if (selected === "yearly") {
+      return new Date(today.getFullYear() + 1, 0, 1);
+    }
     if (selected === "range") {
       const parsed = parseDateInput(toValue);
       if (parsed) {

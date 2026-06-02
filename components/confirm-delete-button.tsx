@@ -6,6 +6,8 @@ type ConfirmDeleteButtonProps = {
   className?: string;
   label?: string;
   confirmMessage?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
   formAction?: string;
   type?: "submit" | "button";
 };
@@ -14,6 +16,8 @@ export function ConfirmDeleteButton({
   className,
   label = "Hapus",
   confirmMessage = "Apakah anda yakin ingin menghapus?",
+  confirmLabel = "Ya, hapus",
+  cancelLabel = "Batal",
   formAction,
   type = "submit",
 }: ConfirmDeleteButtonProps) {
@@ -60,14 +64,14 @@ export function ConfirmDeleteButton({
                 type="button"
                 onClick={() => setIsOpen(false)}
               >
-                Batal
+                {cancelLabel}
               </button>
               <button
                 className="product-alert-button"
                 type="button"
                 onClick={handleConfirm}
               >
-                Hapus
+                {confirmLabel}
               </button>
             </div>
           </div>

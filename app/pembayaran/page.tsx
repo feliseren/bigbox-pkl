@@ -37,7 +37,11 @@ async function loadProduct(
 ): Promise<PaymentProduct | null> {
   const categoryName = PRODUCT_TITLE[productType];
   const item = await prisma.product.findFirst({
-    where: { id: productId, category: { categoryName } },
+    where: {
+      id: productId,
+      category: { categoryName },
+      archivedProducts: { none: {} },
+    },
   });
   if (!item) return null;
   return {

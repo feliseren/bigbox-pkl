@@ -49,7 +49,11 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL("/", request.url));
   }
   const product = await prisma.product.findFirst({
-    where: { id: productId, category: { categoryName } },
+    where: {
+      id: productId,
+      category: { categoryName },
+      archivedProducts: { none: {} },
+    },
     select: { id: true },
   });
   if (!product) {
