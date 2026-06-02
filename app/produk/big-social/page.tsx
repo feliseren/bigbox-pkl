@@ -109,8 +109,7 @@ export default async function BigSocialPage() {
               className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#524a4e]"
               href="/login"
             >
-              <span className="inline-block h-4 w-4 rounded-full border border-[#524a4e]" />
-              Login
+              Masuk
             </a>
           )}
         </div>

@@ -79,7 +79,7 @@ export default async function DaftarProjekPage({
         <div className="project-main">
           <header className="project-header">
             <div>
-              <h1 className="project-title">Daftar Project</h1>
+              <h1 className="project-title">Daftar Proyek</h1>
               <p className="project-subtitle">Pantau status dan progres proyek berjalan.</p>
             </div>
             <EmployeeProfileMenu
@@ -96,7 +96,7 @@ export default async function DaftarProjekPage({
                     className={`project-tab${!normalizedStatus ? " active" : ""}`}
                     href={buildTabHref()}
                   >
-                    Show All
+                    Semua
                   </a>
                   <a
                     className={`project-tab${
@@ -104,7 +104,7 @@ export default async function DaftarProjekPage({
                     }`}
                     href={buildTabHref("Process")}
                   >
-                    Process
+                    Sedang Berlangsung
                   </a>
                   <a
                     className={`project-tab${
@@ -112,7 +112,7 @@ export default async function DaftarProjekPage({
                     }`}
                     href={buildTabHref("Done")}
                   >
-                    Done
+                    Selesai
                   </a>
                 </div>
                 <form
@@ -126,7 +126,7 @@ export default async function DaftarProjekPage({
                   ) : null}
                   <input
                     name="q"
-                    placeholder="Search project"
+                    placeholder="Cari proyek"
                     defaultValue={query}
                     suppressHydrationWarning
                   />
@@ -192,14 +192,14 @@ export default async function DaftarProjekPage({
                   <div className="project-table-empty">
                     {query
                       ? "Tidak ada hasil pencarian."
-                      : "Belum ada data project."}
+                      : "Belum ada data proyek."}
                   </div>
                 )}
               </div>
 
               <div className="project-footer">
                 <div className="project-showing">
-                  <span>Showing</span>
+                  <span>Menampilkan</span>
                   <button className="select" type="button" suppressHydrationWarning>
                     {projects.length} <span className="caret">v</span>
                   </button>
@@ -216,7 +216,7 @@ export default async function DaftarProjekPage({
               <div id="new-project" className="project-modal">
                 <div className="project-modal-card">
                   <div className="project-modal-header">
-                    <h2>Tambah Project</h2>
+                    <h2>Tambah Proyek</h2>
                     <a className="project-modal-close" href="#">
                       x
                     </a>
@@ -238,8 +238,8 @@ export default async function DaftarProjekPage({
                     <label>
                       Status
                       <select name="status" defaultValue="Process" required>
-                        <option value="Process">Process</option>
-                        <option value="Done">Done</option>
+                        <option value="Process">Sedang Berlangsung</option>
+                        <option value="Done">Selesai</option>
                       </select>
                     </label>
                     <div className="project-form-actions">
@@ -264,7 +264,7 @@ export default async function DaftarProjekPage({
                     >
                       <div className="project-modal-card">
                         <div className="project-modal-header">
-                          <h2>Edit Project</h2>
+                          <h2>Ubah Proyek</h2>
                           <a className="project-modal-close" href="#">
                             x
                           </a>
@@ -305,8 +305,8 @@ export default async function DaftarProjekPage({
                           <label>
                             Status
                             <select name="status" defaultValue={project.status}>
-                              <option value="Process">Process</option>
-                              <option value="Done">Done</option>
+                              <option value="Process">Sedang Berlangsung</option>
+                              <option value="Done">Selesai</option>
                             </select>
                           </label>
                           <div className="project-form-actions">

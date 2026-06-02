@@ -33,13 +33,13 @@ export default async function EmployeeProfilePage({
   const success = normalizeParam(resolvedSearchParams?.success);
   const message =
     success === "1"
-      ? "Password berhasil diubah."
+      ? "Kata sandi berhasil diubah."
       : error === "1"
-        ? "Lengkapi semua field password."
+        ? "Lengkapi semua field kata sandi."
         : error === "2"
-          ? "Konfirmasi password tidak sama."
+          ? "Konfirmasi kata sandi tidak sama."
           : error === "3"
-            ? "Password lama salah."
+            ? "Kata sandi lama salah."
             : null;
 
   return (
@@ -51,7 +51,7 @@ export default async function EmployeeProfilePage({
           <header className="project-header">
             <div>
               <h1 className="project-title">Profil Karyawan</h1>
-              <p className="project-subtitle">Lihat data akun dan ubah password.</p>
+              <p className="project-subtitle">Lihat data akun dan ubah kata sandi.</p>
             </div>
             <div className="project-user">
               <span>{employee.fullName}</span>
@@ -95,22 +95,22 @@ export default async function EmployeeProfilePage({
                 action="/api/employee/password"
               >
                 <h2 className="text-sm font-semibold text-[#1f1f1f]">
-                  Ubah Password
+                  Ubah Kata Sandi
                 </h2>
                 <label>
-                  Password Lama
+                  Kata Sandi Lama
                   <input name="currentPassword" type="password" required />
                 </label>
                 <label>
-                  Password Baru
+                  Kata Sandi Baru
                   <input name="newPassword" type="password" required />
                 </label>
                 <label>
-                  Konfirmasi Password Baru
+                  Konfirmasi Kata Sandi Baru
                   <input name="confirmPassword" type="password" required />
                 </label>
                 <div className="profile-password-actions">
-                  <button type="submit">Ubah Password</button>
+                  <button type="submit">Ubah Kata Sandi</button>
                 </div>
               </form>
             </section>

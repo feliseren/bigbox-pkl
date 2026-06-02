@@ -90,7 +90,7 @@ export default function WhatsNewForm({ categories }: WhatsNewFormProps) {
               </label>
               <fieldset>
                 <legend className="mb-2 block text-sm font-semibold text-[#1f1f1f]">
-                  Jadikan Highlight
+                  Jadikan Sorotan
                 </legend>
                 <div className="flex flex-wrap gap-2">
                   <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-slate-300 px-2.5 py-1.5 text-sm">

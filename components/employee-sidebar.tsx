@@ -25,7 +25,7 @@ const menuItems = [
   },
   {
     key: "projek",
-    label: "Daftar Projek",
+    label: "Daftar Proyek",
     href: "/dashboard_karyawan/daftar-projek",
   },
   {
@@ -85,7 +85,7 @@ export function EmployeeSidebar({ active }: EmployeeSidebarProps) {
         action="/api/logout_karyawan"
       >
         <button className="project-logout" type="submit">
-          Logout
+          Keluar
         </button>
       </form>
     </aside>

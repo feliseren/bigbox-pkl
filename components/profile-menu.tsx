@@ -28,8 +28,7 @@ export function ProfileMenu({ fullName }: ProfileMenuProps) {
         onClick={() => setOpen((prev) => !prev)}
         type="button"
       >
-        <span className="inline-block h-4 w-4 rounded-full border border-[#524a4e]" />
-        Profile
+        Profil
       </button>
       {open && (
         <div className="absolute right-0 mt-2 w-40 rounded-lg border border-[#d6d6d6] bg-white py-2 text-sm shadow-lg">
@@ -42,7 +41,7 @@ export function ProfileMenu({ fullName }: ProfileMenuProps) {
               className="w-full px-3 py-2 text-left text-[#3a3a3a] hover:bg-[#f5f5f5]"
               type="submit"
             >
-              Logout
+              Keluar
             </button>
           </form>
         </div>

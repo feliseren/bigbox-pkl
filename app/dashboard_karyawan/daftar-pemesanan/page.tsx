@@ -18,6 +18,11 @@ type OrderItem = {
   paymentProof: string;
 };
 
+const orderStatusLabel: Record<OrderStatus, string> = {
+  Pending: "Tertunda",
+  Done: "Selesai",
+};
+
 export default async function DaftarPemesananPage({
   searchParams,
 }: {
@@ -113,7 +118,7 @@ export default async function DaftarPemesananPage({
                     className={`project-tab${!normalizedStatus ? " active" : ""}`}
                     href={buildTabHref()}
                   >
-                    Show All
+                    Semua
                   </a>
                   <a
                     className={`project-tab${
@@ -121,7 +126,7 @@ export default async function DaftarPemesananPage({
                     }`}
                     href={buildTabHref("Pending")}
                   >
-                    Pending
+                    Tertunda
                   </a>
                   <a
                     className={`project-tab${
@@ -129,7 +134,7 @@ export default async function DaftarPemesananPage({
                     }`}
                     href={buildTabHref("Done")}
                   >
-                    Done
+                    Selesai
                   </a>
                 </div>
                 <form
@@ -142,7 +147,7 @@ export default async function DaftarPemesananPage({
                   ) : null}
                   <input
                     name="q"
-                    placeholder="Search order"
+                    placeholder="Cari Pesanan"
                     defaultValue={query}
                     suppressHydrationWarning
                   />
@@ -192,7 +197,7 @@ export default async function DaftarPemesananPage({
                         <span
                           className={`status-pill ${order.status.toLowerCase()}`}
                         >
-                          {order.status}
+                          {orderStatusLabel[order.status]}
                         </span>
                       </span>
                       <span className="align-right actions">
@@ -283,7 +288,7 @@ export default async function DaftarPemesananPage({
                       </label>
                       <label>
                         Status
-                        <input value={order.status} readOnly />
+                        <input value={orderStatusLabel[order.status]} readOnly />
                       </label>
                       <div className="project-form-actions">
                         {canConfirmOrders ? (
@@ -305,7 +310,7 @@ export default async function DaftarPemesananPage({
 
               <div className="project-footer">
                 <div className="project-showing">
-                  <span>Showing</span>
+                  <span>Menampilkan</span>
                   <button className="select" type="button" suppressHydrationWarning>
                     {filteredOrders.length} <span className="caret">v</span>
                   </button>

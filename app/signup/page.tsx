@@ -27,10 +27,10 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
             </div>
 
             <h1 className="text-[22px] font-semibold text-[#0f172a] sm:text-[24px] lg:text-[26px]">
-              Welcome to BigBox
+              Selamat Datang di BigBox
             </h1>
             <p className="mt-1 text-[10px] text-[#667085] sm:text-[11px]">
-              Kindly fill in your details below to create an account
+              Silakan lengkapi data Anda di bawah ini untuk membuat akun
             </p>
 
             <form className="mt-4 space-y-2 sm:space-y-2.5" method="post" action="/api/signup">
@@ -39,13 +39,13 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                   className="text-[10px] font-semibold text-[#334155] sm:text-[11px]"
                   htmlFor="fullName"
                 >
-                  Full Name
+                  Nama Lengkap
                 </label>
                 <input
                   className="mt-1 w-full rounded-lg border border-[#d7ddea] px-3.5 py-1.5 text-sm text-[#111827] outline-none focus:border-[#2f2f6f] focus:ring-2 focus:ring-[#c6c9ff]"
                   id="fullName"
                   name="fullName"
-                  placeholder="Enter your full name"
+                  placeholder="Masukkan nama lengkap"
                   type="text"
                   suppressHydrationWarning
                 />
@@ -56,13 +56,13 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                   className="text-[10px] font-semibold text-[#334155] sm:text-[11px]"
                   htmlFor="email"
                 >
-                  Email Address*
+                  Alamat Email*
                 </label>
                 <input
                   className="mt-1 w-full rounded-lg border border-[#d7ddea] px-3.5 py-1.5 text-sm text-[#111827] outline-none focus:border-[#2f2f6f] focus:ring-2 focus:ring-[#c6c9ff]"
                   id="email"
                   name="email"
-                  placeholder="Enter your email address"
+                  placeholder="Masukkan alamat email"
                   type="email"
                   suppressHydrationWarning
                 />
@@ -73,13 +73,13 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                   className="text-[10px] font-semibold text-[#334155] sm:text-[11px]"
                   htmlFor="password"
                 >
-                  Password
+                  Kata Sandi
                 </label>
                 <input
                   className="mt-1 w-full rounded-lg border border-[#d7ddea] px-3.5 py-1.5 text-sm text-[#111827] outline-none focus:border-[#2f2f6f] focus:ring-2 focus:ring-[#c6c9ff]"
                   id="password"
                   name="password"
-                  placeholder="Input Password"
+                  placeholder="Masukkan kata sandi"
                   type="password"
                   suppressHydrationWarning
                 />
@@ -101,27 +101,36 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 </p>
               )}
 
-              <label className="flex items-center gap-2 text-[10px] text-[#6b6b6b] sm:text-[11px]">
+              <div className="flex items-center gap-2 text-[10px] text-[#6b6b6b] sm:text-[11px]">
                 <input
                   className="h-4 w-4 rounded border-[#cfcfcf]"
+                  id="agreement"
                   name="agreement"
                   type="checkbox"
                   value="1"
                 />
-                I agree to terms & conditions
-              </label>
+                <label htmlFor="agreement">
+                  Saya setuju dengan{" "}
+                  <a
+                    className="font-semibold text-[#3f4ce0] hover:underline"
+                    href="/syarat-ketentuan"
+                  >
+                    syarat dan ketentuan
+                  </a>
+                </label>
+              </div>
 
               <button
                 className="mt-1 w-full rounded-lg bg-[#151a5b] py-1.5 text-sm font-semibold text-white"
                 type="submit"
                 suppressHydrationWarning
               >
-                Register Account
+                Daftar Akun
               </button>
 
               <div className="flex items-center gap-3 text-[9px] text-[#8a8a8a] sm:text-[10px]">
                 <div className="h-px w-full bg-[#dedede]" />
-                Or
+                Atau
                 <div className="h-px w-full bg-[#dedede]" />
               </div>
 
@@ -132,13 +141,13 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 <span className="grid h-6 w-6 place-items-center rounded-full bg-white text-[#ea4335]">
                   G
                 </span>
-                Register with Google
+                Daftar dengan Google
               </a>
 
               <p className="text-[10px] text-[#6b6b6b] sm:text-[11px]">
-                Already have an account?{" "}
+                Sudah punya akun?{" "}
                 <a className="font-semibold text-[#3f4ce0]" href="/login">
-                  Log in
+                  Masuk
                 </a>
               </p>
             </form>

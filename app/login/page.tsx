@@ -6,8 +6,18 @@ type LoginPageProps = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = (await searchParams) ?? {};
-  const hasError = Boolean(params.error);
+  const error = params.error ?? "";
   const reset = params.reset ?? "";
+  const errorMessage =
+    error === "1"
+      ? "Email atau kata sandi salah."
+      : error === "google_email"
+        ? "Akun Google harus menggunakan email yang valid dan terverifikasi."
+        : error === "google_config"
+          ? "Masuk dengan Google belum dikonfigurasi."
+          : error === "google_state" || error === "google_token" || error === "google"
+            ? "Masuk dengan Google gagal. Silakan coba lagi."
+            : "";
 
   return (
     <div className="min-h-screen overflow-y-auto bg-gradient-to-br from-[#f6f8ff] via-white to-[#eef2ff] px-3 py-3 lg:flex lg:items-center lg:justify-center">
@@ -26,10 +36,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
 
             <h1 className="text-[22px] font-semibold text-[#0f172a] sm:text-[24px] lg:text-[26px]">
-              Welcome Back!
+              Selamat Datang Kembali!
             </h1>
             <p className="mt-1 text-[10px] text-[#667085] sm:text-[11px]">
-              We are very happy to see you back!
+              Kami senang Anda kembali.
             </p>
 
             <form
@@ -60,7 +70,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   className="text-[10px] font-semibold text-[#334155] sm:text-[11px]"
                   htmlFor="password"
                 >
-                  Password
+                  Kata Sandi
                 </label>
                 <input
                   className="mt-1 w-full rounded-lg border border-[#d7ddea] px-3.5 py-1.5 text-sm text-[#111827] outline-none focus:border-[#2f2f6f] focus:ring-2 focus:ring-[#c6c9ff]"
@@ -72,11 +82,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 />
               </div>
 
-              {hasError && (
+              {errorMessage ? (
                 <p className="text-sm font-semibold text-[#c0392b]">
-                  Email atau password salah.
+                  {errorMessage}
                 </p>
-              )}
+              ) : null}
               {reset === "1" && (
                 <p className="text-sm font-semibold text-[#2d7a4f]">
                   Link reset sudah dikirim ke email Anda.
@@ -84,7 +94,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               )}
               {reset === "2" && (
                 <p className="text-sm font-semibold text-[#2d7a4f]">
-                  Password berhasil diubah. Silakan login.
+                  Kata sandi berhasil diubah. Silakan masuk.
                 </p>
               )}
 
@@ -96,11 +106,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                   type="checkbox"
                   value="1"
                 />
-                <label htmlFor="remember">Remember me</label>
+                <label htmlFor="remember">Ingat saya</label>
               </div>
 
               <a className="text-[10px] font-semibold text-[#3f4ce0] sm:text-[11px]" href="/forgot-password">
-                Forgot Password?
+                Lupa Kata Sandi?
               </a>
 
               <button
@@ -136,13 +146,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                       strokeWidth="1.6"
                     />
                   </svg>
-                  Login
+                  Masuk
                 </span>
               </button>
 
               <div className="flex items-center gap-3 text-[9px] text-[#8a8a8a] sm:text-[10px]">
                 <div className="h-px w-full bg-[#dedede]" />
-                OR
+                ATAU
                 <div className="h-px w-full bg-[#dedede]" />
               </div>
 
@@ -153,13 +163,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 <span className="grid h-6 w-6 place-items-center rounded-full bg-white text-[#ea4335]">
                   G
                 </span>
-                Login with Google
+                Masuk dengan Google
               </a>
 
               <p className="text-center text-[10px] text-[#6b6b6b] sm:text-[11px]">
-                Don't have account?{" "}
+                Belum punya akun?{" "}
                 <a className="font-semibold text-[#3f4ce0]" href="/signup">
-                  Sign Up here!
+                  Daftar di sini!
                 </a>
               </p>
             </form>
@@ -169,7 +179,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             className="mt-3 block w-full rounded-lg bg-[#151a5b] py-1.5 text-center text-sm font-semibold text-white"
             href="/login_karyawan"
           >
-            Login Sebagai Karyawan
+            Masuk Sebagai Karyawan
           </a>
         </div>
 

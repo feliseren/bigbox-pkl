@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
@@ -72,33 +71,14 @@ function formatPrice(value: string) {
   return value.startsWith("Rp") ? value : `Rp ${value}`;
 }
 
-export default async function DashboardKaryawanPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ period?: string | string[]; from?: string | string[]; to?: string | string[] }>;
-}) {
-  const employeeId = await readEmployeeSessionId();
-  const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
-    : null;
-  const resolvedSearchParams = await searchParams;
-  const rawPeriod = resolvedSearchParams?.period;
-  const rawFrom = resolvedSearchParams?.from;
-  const rawTo = resolvedSearchParams?.to;
-  const selectedPeriod = Array.isArray(rawPeriod) ? rawPeriod[0] : rawPeriod;
-  const fromParam = Array.isArray(rawFrom) ? rawFrom[0] : rawFrom;
-  const toParam = Array.isArray(rawTo) ? rawTo[0] : rawTo;
-  const period = ["weekly", "monthly", "yearly", "range"].includes(
-    selectedPeriod || "",
-  )
-    ? (selectedPeriod as "weekly" | "monthly" | "yearly" | "range")
-    : "weekly";
-  const today = startOfDayInTimeZone(new Date());
-  const endOfToday = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate() + 1,
-  );
+function buildDashboardRangeState(
+  selected: "weekly" | "monthly" | "yearly" | "range",
+  fromValue: string | undefined,
+  toValue: string | undefined,
+  today: Date,
+  endOfToday: Date,
+  monthLabels: string[],
+) {
   const parseDateInput = (value?: string) => {
     if (!value) return null;
     const [year, month, day] = value.split("-").map((part) => Number(part));
@@ -106,30 +86,30 @@ export default async function DashboardKaryawanPage({
     return new Date(year, month - 1, day);
   };
   const rangeStart = (() => {
-    if (period === "monthly") {
+    if (selected === "monthly") {
       return new Date(today.getFullYear(), today.getMonth(), 1);
     }
-    if (period === "yearly") {
+    if (selected === "yearly") {
       return new Date(today.getFullYear(), 0, 1);
     }
-    if (period === "range") {
-      const parsed = parseDateInput(fromParam);
+    if (selected === "range") {
+      const parsed = parseDateInput(fromValue);
       return parsed ?? new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
     }
     return new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
   })();
   const rangeEnd = (() => {
-    if (period === "range") {
-      const parsed = parseDateInput(toParam);
+    if (selected === "range") {
+      const parsed = parseDateInput(toValue);
       if (parsed) {
         return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate() + 1);
       }
     }
     return endOfToday;
   })();
-  const hasCustomRange = period === "range" && fromParam && toParam;
+  const hasCustomRange = selected === "range" && fromValue && toValue;
   const noDataRange =
-    hasCustomRange &&
+    Boolean(hasCustomRange) &&
     (rangeStart >= rangeEnd || rangeStart >= endOfToday || rangeEnd > endOfToday);
   const safeRangeEnd = noDataRange ? rangeStart : rangeEnd;
   const rangeLengthDays = Math.max(
@@ -143,24 +123,99 @@ export default async function DashboardKaryawanPage({
     prevRangeEnd.getDate() - rangeLengthDays,
   );
   const periodLabel =
-    period === "monthly"
+    selected === "monthly"
       ? "Bulanan"
-      : period === "yearly"
+      : selected === "yearly"
         ? "Tahunan"
-        : period === "range"
+        : selected === "range"
           ? "Range"
           : "Mingguan";
   const rangeLabel =
-    period === "range" && fromParam && toParam
-      ? `${fromParam} - ${toParam}`
-      : period === "range"
+    selected === "range" && fromValue && toValue
+      ? `${fromValue} - ${toValue}`
+      : selected === "range"
         ? "Pilih rentang tanggal"
-      : period === "monthly"
-        ? `Bulan ${MONTH_LABELS[today.getMonth()]} ${today.getFullYear()}`
-        : period === "yearly"
-          ? `Tahun ${today.getFullYear()}`
-          : "Last 7 days";
-  const rangeLabelDisplay = noDataRange ? "Data tidak tersedia" : rangeLabel;
+        : selected === "monthly"
+          ? `Bulan ${monthLabels[today.getMonth()]} ${today.getFullYear()}`
+          : selected === "yearly"
+            ? `Tahun ${today.getFullYear()}`
+            : "7 hari terakhir";
+  return {
+    rangeStart,
+    safeRangeEnd,
+    prevRangeStart,
+    periodLabel,
+    rangeLabelDisplay: noDataRange ? "Data tidak tersedia" : rangeLabel,
+    noDataRange,
+    rangeLengthDays,
+  };
+}
+
+export default async function DashboardKaryawanPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{
+    period?: string | string[];
+    from?: string | string[];
+    to?: string | string[];
+    viewerPeriod?: string | string[];
+    viewerFrom?: string | string[];
+    viewerTo?: string | string[];
+  }>;
+}) {
+  const employeeId = await readEmployeeSessionId();
+  const employee = employeeId
+    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
+    : null;
+  const resolvedSearchParams = await searchParams;
+  const rawPeriod = resolvedSearchParams?.period;
+  const rawFrom = resolvedSearchParams?.from;
+  const rawTo = resolvedSearchParams?.to;
+  const rawViewerPeriod = resolvedSearchParams?.viewerPeriod;
+  const rawViewerFrom = resolvedSearchParams?.viewerFrom;
+  const rawViewerTo = resolvedSearchParams?.viewerTo;
+  const selectedPeriod = Array.isArray(rawPeriod) ? rawPeriod[0] : rawPeriod;
+  const fromParam = Array.isArray(rawFrom) ? rawFrom[0] : rawFrom;
+  const toParam = Array.isArray(rawTo) ? rawTo[0] : rawTo;
+  const selectedViewerPeriod = Array.isArray(rawViewerPeriod)
+    ? rawViewerPeriod[0]
+    : rawViewerPeriod;
+  const viewerFromParam = Array.isArray(rawViewerFrom)
+    ? rawViewerFrom[0]
+    : rawViewerFrom;
+  const viewerToParam = Array.isArray(rawViewerTo) ? rawViewerTo[0] : rawViewerTo;
+  const period = ["weekly", "monthly", "yearly", "range"].includes(
+    selectedPeriod || "",
+  )
+    ? (selectedPeriod as "weekly" | "monthly" | "yearly" | "range")
+    : "weekly";
+  const viewerPeriod = ["weekly", "monthly", "yearly", "range"].includes(
+    selectedViewerPeriod || "",
+  )
+    ? (selectedViewerPeriod as "weekly" | "monthly" | "yearly" | "range")
+    : "weekly";
+  const today = startOfDayInTimeZone(new Date());
+  const endOfToday = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() + 1,
+  );
+  const revenueRange = buildDashboardRangeState(
+    period,
+    fromParam,
+    toParam,
+    today,
+    endOfToday,
+    MONTH_LABELS,
+  );
+  const viewerRange = buildDashboardRangeState(
+    viewerPeriod,
+    viewerFromParam,
+    viewerToParam,
+    today,
+    endOfToday,
+    MONTH_LABELS,
+  );
   const reportParams = new URLSearchParams();
   if (period) {
     reportParams.set("period", period);
@@ -173,11 +228,17 @@ export default async function DashboardKaryawanPage({
   const doneOrdersRange = await prisma.order.findMany({
     where: {
       statusPesanan: "Done",
-      createdAt: { gte: prevRangeStart, lt: safeRangeEnd },
+      createdAt: { gte: revenueRange.prevRangeStart, lt: revenueRange.safeRangeEnd },
     },
   });
   const doneOrdersAll = await prisma.order.findMany({
-    where: { statusPesanan: "Done", createdAt: { gte: rangeStart, lt: safeRangeEnd } },
+    where: {
+      statusPesanan: "Done",
+      createdAt: {
+        gte: revenueRange.rangeStart,
+        lt: revenueRange.safeRangeEnd,
+      },
+    },
     include: { product: { include: { category: true } } },
   });
   const dailyTotals = new Map<string, number>();
@@ -190,7 +251,10 @@ export default async function DashboardKaryawanPage({
   });
   const viewLogs = await prisma.newsView.findMany({
     where: {
-      createdAt: { gte: prevRangeStart, lt: safeRangeEnd },
+      createdAt: {
+        gte: viewerRange.rangeStart,
+        lt: viewerRange.safeRangeEnd,
+      },
       newsStory: { deletedAt: null },
     },
     select: { createdAt: true },
@@ -200,31 +264,31 @@ export default async function DashboardKaryawanPage({
     const key = dateKeyInTimeZone(view.createdAt);
     viewCountsByDay.set(key, (viewCountsByDay.get(key) ?? 0) + 1);
   });
-  const currentViewerRangeRaw = Array.from({ length: rangeLengthDays }).map(
+  const currentViewerRangeRaw = Array.from({ length: viewerRange.rangeLengthDays }).map(
     (_, index) => {
       const date = new Date(
-        rangeStart.getFullYear(),
-        rangeStart.getMonth(),
-        rangeStart.getDate() + index,
+        viewerRange.rangeStart.getFullYear(),
+        viewerRange.rangeStart.getMonth(),
+        viewerRange.rangeStart.getDate() + index,
       );
       const key = dateKeyInTimeZone(date);
       return { date, value: viewCountsByDay.get(key) ?? 0 };
     },
   );
-  const currentRangeRaw = Array.from({ length: rangeLengthDays }).map((_, index) => {
+  const currentRangeRaw = Array.from({ length: revenueRange.rangeLengthDays }).map((_, index) => {
     const date = new Date(
-      rangeStart.getFullYear(),
-      rangeStart.getMonth(),
-      rangeStart.getDate() + index,
+      revenueRange.rangeStart.getFullYear(),
+      revenueRange.rangeStart.getMonth(),
+      revenueRange.rangeStart.getDate() + index,
     );
     const key = dateKeyInTimeZone(date);
     return { date, value: dailyTotals.get(key) ?? 0 };
   });
-  const prevRangeRaw = Array.from({ length: rangeLengthDays }).map((_, index) => {
+  const prevRangeRaw = Array.from({ length: revenueRange.rangeLengthDays }).map((_, index) => {
     const date = new Date(
-      prevRangeStart.getFullYear(),
-      prevRangeStart.getMonth(),
-      prevRangeStart.getDate() + index,
+      revenueRange.prevRangeStart.getFullYear(),
+      revenueRange.prevRangeStart.getMonth(),
+      revenueRange.prevRangeStart.getDate() + index,
     );
     const key = dateKeyInTimeZone(date);
     return { date, value: dailyTotals.get(key) ?? 0 };
@@ -281,7 +345,7 @@ export default async function DashboardKaryawanPage({
     ...popularNews.map((item) => item.viewCount),
   );
   const monthlyViewerTotals = Array.from({ length: 12 }, () => 0);
-  if (period === "yearly") {
+  if (viewerPeriod === "yearly") {
     currentViewerRangeRaw.forEach((item) => {
       const { month } = getDatePartsInTimeZone(item.date);
       const index = month - 1;
@@ -291,7 +355,7 @@ export default async function DashboardKaryawanPage({
     });
   }
   const viewerSeries =
-    period === "yearly"
+    viewerPeriod === "yearly"
       ? monthlyViewerTotals.map((value, index) => ({
           label: MONTH_LABELS[index],
           value,
@@ -305,7 +369,7 @@ export default async function DashboardKaryawanPage({
     by: ["rating"],
     _count: { rating: true },
     where: {
-      createdAt: { gte: rangeStart, lt: safeRangeEnd },
+      createdAt: { gte: revenueRange.rangeStart, lt: revenueRange.safeRangeEnd },
       deletedAt: null,
       newsStory: { deletedAt: null },
     },
@@ -319,7 +383,7 @@ export default async function DashboardKaryawanPage({
     const count = found ? found._count.rating : 0;
     const percent = totalReviews ? Math.round((count / totalReviews) * 100) : 0;
     return {
-      label: `${rating} Star`,
+      label: `${rating} Bintang`,
       count,
       percent,
     };
@@ -413,14 +477,19 @@ export default async function DashboardKaryawanPage({
                   period={period}
                   from={fromParam}
                   to={toParam}
-                  rangeLabel={rangeLabelDisplay}
+                  rangeLabel={revenueRange.rangeLabelDisplay}
                   variant="inline"
                   maxDate={dateKeyInTimeZone(today)}
+                  hiddenFields={{
+                    viewerPeriod,
+                    viewerFrom: viewerFromParam,
+                    viewerTo: viewerToParam,
+                  }}
                 />
                 <div className="mt-4 flex items-start justify-between gap-4">
                   <div>
                     <p className="text-sm text-[#7a8092]">
-                      Pendapatan {periodLabel}
+                      Pendapatan {revenueRange.periodLabel}
                     </p>
                     <p className="mt-2 text-xl font-semibold">
                       {formatRupiah(currentWeekTotal)}
@@ -428,7 +497,7 @@ export default async function DashboardKaryawanPage({
                   <p className={`mt-1 text-xs ${percentColor}`}>
                     {percentLabel} vs periode sebelumnya
                   </p>
-                  {noDataRange ? (
+                  {revenueRange.noDataRange ? (
                     <p className="mt-2 text-xs text-[#e32626]">
                       Data tidak tersedia untuk tanggal tersebut.
                     </p>
@@ -438,7 +507,7 @@ export default async function DashboardKaryawanPage({
                     className="rounded-lg border border-[#e6e9f5] px-3 py-1 text-xs text-[#4a4f60]"
                     href={reportHref}
                   >
-                    View Report
+                    Lihat Laporan
                   </a>
                 </div>
                 <div className="relative mt-6 rounded-2xl bg-slate-50/80 px-3 py-4">
@@ -475,7 +544,7 @@ export default async function DashboardKaryawanPage({
                 <div className="mt-3 flex items-center gap-4 text-xs text-[#8f95a8]">
                   <span className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-[#5256ff]" />
-                    {rangeLabelDisplay}
+                    {revenueRange.rangeLabelDisplay}
                   </span>
                 </div>
               </section>
@@ -483,20 +552,26 @@ export default async function DashboardKaryawanPage({
               <section className="rounded-[20px] bg-white p-6 shadow-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-base font-semibold">Grafik Viewers</h3>
-                    <p className="text-xs text-[#7a8092]">Monthly Earning</p>
+                    <h3 className="text-base font-semibold">Grafik Pembaca</h3>
                   </div>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-xs text-[#6b7185]">
-                    Quarterly
-                    <svg
-                      className="h-3 w-3"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.937a.75.75 0 111.08 1.04l-4.24 4.5a.75.75 0 01-1.08 0l-4.24-4.5a.75.75 0 01.02-1.06z" />
-                    </svg>
-                  </span>
+                </div>
+                <div className="mt-4">
+                  <DashboardPeriodFilter
+                    period={viewerPeriod}
+                    from={viewerFromParam}
+                    to={viewerToParam}
+                    rangeLabel={viewerRange.rangeLabelDisplay}
+                    variant="inline"
+                    maxDate={dateKeyInTimeZone(today)}
+                    periodFieldName="viewerPeriod"
+                    fromFieldName="viewerFrom"
+                    toFieldName="viewerTo"
+                    hiddenFields={{
+                      period,
+                      from: fromParam,
+                      to: toParam,
+                    }}
+                  />
                 </div>
                 <div className="relative mt-6 rounded-2xl bg-slate-50/80 px-3 py-4">
                   <div className="absolute inset-0 grid grid-rows-4 gap-6 px-3 py-4">
@@ -532,14 +607,20 @@ export default async function DashboardKaryawanPage({
                       })}
                     </div>
                 </div>
+                <div className="mt-3 flex items-center gap-4 text-xs text-[#8f95a8]">
+                  <span className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-[#5256ff]" />
+                    {viewerRange.rangeLabelDisplay}
+                  </span>
+                </div>
               </section>
             </div>
 
             <section className="mt-6 rounded-[20px] bg-white p-6 shadow-lg">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold">Top 5 Products</h3>
+                <h3 className="text-base font-semibold">5 Produk Populer</h3>
                 <div className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-[#6b7185]">
-                  {rangeLabelDisplay}
+                  {revenueRange.rangeLabelDisplay}
                 </div>
               </div>
               <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
@@ -580,7 +661,7 @@ export default async function DashboardKaryawanPage({
                     className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-[#6b7185]"
                     href="/api/reports/ai-orders"
                   >
-                    View Report
+                    Lihat Laporan
                   </a>
                 </div>
                 <div className="mt-6 flex items-center justify-center">
@@ -638,9 +719,9 @@ export default async function DashboardKaryawanPage({
 
             <div className="mt-6 grid gap-6">
               <section className="rounded-[20px] bg-white p-6 shadow-lg">
-                <h3 className="text-base font-semibold">User Feedbacks</h3>
+                <h3 className="text-base font-semibold">Penilaian Pengguna</h3>
                 <p className="text-xs text-[#7a8092]">
-                  Total review: {totalReviews}
+                  Total penilaian : {totalReviews}
                 </p>
                 <div className="mt-4 space-y-3">
                   {reviewSummary.map((item) => (
@@ -666,6 +747,3 @@ export default async function DashboardKaryawanPage({
     </div>
   );
 }
-
-
-

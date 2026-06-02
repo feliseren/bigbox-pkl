@@ -98,15 +98,15 @@ export default async function ProfilePage({
   const success = normalizeParam(resolvedSearchParams?.success);
   const message =
     success === "2"
-      ? "Password berhasil dibuat."
+      ? "Kata sandi berhasil dibuat."
       : success === "1"
-        ? "Password berhasil diubah."
+        ? "Kata sandi berhasil diubah."
       : error === "1"
-        ? "Lengkapi semua field password."
+        ? "Lengkapi semua field kata sandi."
         : error === "2"
-          ? "Konfirmasi password tidak sama."
+          ? "Konfirmasi kata sandi tidak sama."
         : error === "3"
-            ? "Password lama salah."
+            ? "Kata sandi lama salah."
             : null;
   const orders = await prisma.order.findMany({
     where: { userId },
@@ -188,29 +188,29 @@ export default async function ProfilePage({
             action="/api/profile/password"
           >
             <h2 className="text-sm font-semibold text-[#1f1f1f]">
-              {user.hasLocalPassword ? "Ubah Password" : "Set Password"}
+              {user.hasLocalPassword ? "Ubah Kata Sandi" : "Set Kata Sandi"}
             </h2>
             {user.hasLocalPassword ? (
               <label>
-                Password Lama
+                Kata Sandi Lama
                 <input name="currentPassword" type="password" required />
               </label>
             ) : (
               <p className="text-xs text-[#6b6b6b]">
-                Akun Google belum memiliki password lokal. Silakan set password
+                Akun Google belum memiliki kata sandi lokal. Silakan set kata sandi
                 baru di bawah ini.
               </p>
             )}
             <label>
-              Password Baru
+              Kata Sandi Baru
               <input name="newPassword" type="password" required />
             </label>
             <label>
-              Konfirmasi Password Baru
+              Konfirmasi Kata Sandi Baru
               <input name="confirmPassword" type="password" required />
             </label>
             <div className="profile-password-actions">
-              <button type="submit">{user.hasLocalPassword ? "Simpan Perubahan" : "Simpan Password"}</button>
+              <button type="submit">{user.hasLocalPassword ? "Simpan Perubahan" : "Simpan Kata Sandi"}</button>
             </div>
           </form>
         </div>

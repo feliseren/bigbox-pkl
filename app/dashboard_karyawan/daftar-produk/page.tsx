@@ -239,7 +239,7 @@ export default async function DaftarProdukPage() {
                           <div className="product-form-card">
                             <div className="product-form-header">
                               <a className="product-back" href="#">
-                                &lt; Back
+                                &lt; Kembali
                               </a>
                               <h2>{toUpperTitle(section.title)}</h2>
                             </div>
@@ -299,7 +299,7 @@ export default async function DaftarProdukPage() {
                                   formAction="/api/products/delete"
                                 />
                                 <button className="btn-update" type="submit">
-                                  Update
+                                  Perbarui
                                 </button>
                               </div>
                             </form>
@@ -315,7 +315,7 @@ export default async function DaftarProdukPage() {
                       <div className="product-form-card">
                         <div className="product-form-header">
                           <a className="product-back" href="#">
-                            &lt; Back
+                            &lt; Kembali
                           </a>
                           <h2>{toUpperTitle(section.title)}</h2>
                         </div>

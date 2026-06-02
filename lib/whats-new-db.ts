@@ -5,9 +5,36 @@ export type WhatsNewFilters = {
   category?: string;
 };
 
+export const SYSTEM_UPDATE_CATEGORY = "Pembaruan Sistem";
+export const LEGACY_SYSTEM_UPDATE_CATEGORY = "Update Sistem";
+
+export function normalizeWhatsNewCategory(category?: string | null) {
+  const value = category?.trim();
+  if (!value) return "";
+  return value === LEGACY_SYSTEM_UPDATE_CATEGORY
+    ? SYSTEM_UPDATE_CATEGORY
+    : value;
+}
+
+function buildCategoryFilter(category?: string) {
+  const normalizedCategory = normalizeWhatsNewCategory(category);
+  if (!normalizedCategory) return [];
+  if (normalizedCategory === SYSTEM_UPDATE_CATEGORY) {
+    return [
+      {
+        OR: [
+          { category: SYSTEM_UPDATE_CATEGORY },
+          { category: LEGACY_SYSTEM_UPDATE_CATEGORY },
+        ],
+      },
+    ];
+  }
+  return [{ category: normalizedCategory }];
+}
+
 export async function fetchWhatsNew(filters: WhatsNewFilters = {}) {
   const query = filters.query?.trim();
-  const category = filters.category?.trim();
+  const category = normalizeWhatsNewCategory(filters.category);
   const where =
     query || category
       ? {
@@ -23,7 +50,7 @@ export async function fetchWhatsNew(filters: WhatsNewFilters = {}) {
                   },
                 ]
               : []),
-            ...(category ? [{ category }] : []),
+            ...buildCategoryFilter(category),
           ],
         }
       : undefined;
@@ -32,7 +59,12 @@ export async function fetchWhatsNew(filters: WhatsNewFilters = {}) {
     where,
     include: { employee: { select: { fullName: true } } },
     orderBy: [{ publishDate: "desc" }, { createdAt: "desc" }],
-  });
+  }).then((items) =>
+    items.map((item) => ({
+      ...item,
+      category: normalizeWhatsNewCategory(item.category),
+    })),
+  );
 }
 
 export async function fetchWhatsNewHighlight() {
@@ -40,7 +72,14 @@ export async function fetchWhatsNewHighlight() {
     where: { isHighlight: true },
     include: { employee: { select: { fullName: true } } },
     orderBy: [{ publishDate: "desc" }, { createdAt: "desc" }],
-  });
+  }).then((item) =>
+    item
+      ? {
+          ...item,
+          category: normalizeWhatsNewCategory(item.category),
+        }
+      : null,
+  );
 }
 
 export async function createWhatsNew(data: {
@@ -53,7 +92,12 @@ export async function createWhatsNew(data: {
   publishDate: Date;
   employeeId: string;
 }) {
-  return prisma.whatsNew.create({ data });
+  return prisma.whatsNew.create({
+    data: {
+      ...data,
+      category: normalizeWhatsNewCategory(data.category),
+    },
+  });
 }
 
 export async function updateWhatsNew(data: {
@@ -67,7 +111,13 @@ export async function updateWhatsNew(data: {
   publishDate: Date;
 }) {
   const { id, ...rest } = data;
-  return prisma.whatsNew.update({ where: { id }, data: rest });
+  return prisma.whatsNew.update({
+    where: { id },
+    data: {
+      ...rest,
+      category: normalizeWhatsNewCategory(rest.category),
+    },
+  });
 }
 
 export async function deleteWhatsNew(id: string, deletedBy?: string | null) {

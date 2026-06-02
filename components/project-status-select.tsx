@@ -39,8 +39,8 @@ export function ProjectStatusSelect({
       disabled={!canManage || isPending}
       suppressHydrationWarning
     >
-      <option value="Process">Process</option>
-      <option value="Done">Done</option>
+      <option value="Process">Sedang Berlangsung</option>
+      <option value="Done">Selesai</option>
     </select>
   );
 }

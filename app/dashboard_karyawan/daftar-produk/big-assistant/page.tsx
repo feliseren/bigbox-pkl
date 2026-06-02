@@ -57,7 +57,7 @@ export default async function BigAssistantPage() {
           <header className="project-header product-detail-header">
             <div className="product-detail-title">
               <a className="product-back" href="/dashboard_karyawan/daftar-produk">
-                &lt; Back
+                &lt; Kembali
               </a>
               <h1>BIG ASSISTANT</h1>
             </div>
@@ -72,7 +72,7 @@ export default async function BigAssistantPage() {
             <section className="product-detail-card">
               {canManageProducts ? (
                 <a className="product-new-btn" href="#new-product">
-                  New Product
+                  Tambahkan Produk Baru
                 </a>
               ) : null}
               <div className="product-detail-table">
@@ -109,7 +109,7 @@ export default async function BigAssistantPage() {
                 <div className="product-form-card">
                   <div className="product-form-header">
                     <a className="product-back" href="#">
-                      &lt; Back
+                      &lt; Kembali
                     </a>
                     <h2>BIG ASSISTANT</h2>
                   </div>
@@ -195,7 +195,7 @@ export default async function BigAssistantPage() {
                     <div className="product-form-card">
                       <div className="product-form-header">
                         <a className="product-back" href="#">
-                          &lt; Back
+                          &lt; Kembali
                         </a>
                         <h2>BIG ASSISTANT</h2>
                       </div>
@@ -243,7 +243,7 @@ export default async function BigAssistantPage() {
                             formAction="/api/products/delete"
                           />
                           <button className="btn-update" type="submit">
-                            Update
+                            Perbarui
                           </button>
                         </div>
                       </form>

@@ -124,8 +124,7 @@ export default async function StoryDetailPage({
               className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#524a4e] hover:bg-gray-100 transition-colors"
               href="/login"
             >
-              <span className="inline-block h-4 w-4 rounded-full border border-[#524a4e]" />
-              Login
+              Masuk
             </a>
           )}
         </div>

@@ -1,15 +1,19 @@
-import Image from "next/image";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
-import { fetchWhatsNew } from "@/lib/whats-new-db";
+import {
+  fetchWhatsNew,
+  LEGACY_SYSTEM_UPDATE_CATEGORY,
+  normalizeWhatsNewCategory,
+  SYSTEM_UPDATE_CATEGORY,
+} from "@/lib/whats-new-db";
 import WhatsNewForm from "@/components/whats-new-form";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
 export const dynamic = "force-dynamic";
 
-const categories = ["Produk", "Fitur", "Update Sistem"];
+const categories = ["Produk", "Fitur", SYSTEM_UPDATE_CATEGORY];
 
 const sanitizeId = (value: string) => value.replace(/[^a-zA-Z0-9_-]/g, "");
 const formatDate = (value: Date) =>
@@ -41,7 +45,9 @@ export default async function WhatsNewDashboardPage({
   const query =
     (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery)?.trim() ?? "";
   const categoryFilter =
-    (Array.isArray(rawCategory) ? rawCategory[0] : rawCategory)?.trim() ?? "";
+    normalizeWhatsNewCategory(
+      (Array.isArray(rawCategory) ? rawCategory[0] : rawCategory)?.trim() ?? "",
+    );
   const normalizedCategory = categories.includes(categoryFilter)
     ? categoryFilter
     : "";
@@ -72,7 +78,18 @@ export default async function WhatsNewDashboardPage({
                   },
                 ]
               : []),
-            ...(normalizedCategory ? [{ category: normalizedCategory }] : []),
+            ...(normalizedCategory === SYSTEM_UPDATE_CATEGORY
+              ? [
+                  {
+                    OR: [
+                      { category: SYSTEM_UPDATE_CATEGORY },
+                      { category: LEGACY_SYSTEM_UPDATE_CATEGORY },
+                    ],
+                  },
+                ]
+              : normalizedCategory
+                ? [{ category: normalizedCategory }]
+                : []),
           ],
         }
       : undefined;
@@ -131,7 +148,7 @@ export default async function WhatsNewDashboardPage({
                   ) : null}
                   <input
                     name="q"
-                    placeholder="Search update"
+                    placeholder="Cari pembaruan"
                     defaultValue={query}
                     suppressHydrationWarning
                   />
@@ -165,7 +182,7 @@ export default async function WhatsNewDashboardPage({
                   <span>KATEGORI</span>
                   <span>TANGGAL</span>
                   <span>PENULIS</span>
-                  <span>HIGHLIGHT</span>
+                  <span>SOROTAN</span>
                   <span className="align-right">AKSI</span>
                 </div>
                 {updates.length ? (
@@ -210,14 +227,14 @@ export default async function WhatsNewDashboardPage({
                   ))
                 ) : (
                   <div className="project-table-empty">
-                    {query ? "Tidak ada hasil pencarian." : "Belum ada data update."}
+                    {query ? "Tidak ada hasil pencarian." : "Belum ada data."}
                   </div>
                 )}
               </div>
 
               <div className="project-footer">
                 <div className="project-showing">
-                  <span>Showing</span>
+                  <span>Menampilkan</span>
                   <button className="select" type="button" suppressHydrationWarning>
                     {updates.length} <span className="caret">v</span>
                   </button>
@@ -337,7 +354,7 @@ export default async function WhatsNewDashboardPage({
                           <input type="file" name="image" accept="image/*" />
                         </label>
                         <label>
-                          Jadikan Highlight
+                          Jadikan Sorotan
                           <select
                             name="isHighlight"
                             defaultValue={item.isHighlight ? "1" : "0"}

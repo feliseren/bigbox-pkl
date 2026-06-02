@@ -11,6 +11,10 @@ type DashboardPeriodFilterProps = {
   rangeLabel: string;
   variant?: "panel" | "inline";
   maxDate?: string;
+  periodFieldName?: string;
+  fromFieldName?: string;
+  toFieldName?: string;
+  hiddenFields?: Record<string, string | undefined>;
 };
 
 export function DashboardPeriodFilter({
@@ -20,6 +24,10 @@ export function DashboardPeriodFilter({
   rangeLabel,
   variant = "panel",
   maxDate,
+  periodFieldName = "period",
+  fromFieldName = "from",
+  toFieldName = "to",
+  hiddenFields,
 }: DashboardPeriodFilterProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<Period>(period);
   const isRange = selectedPeriod === "range";
@@ -46,10 +54,15 @@ export function DashboardPeriodFilter({
       }`}
       method="get"
     >
+      {hiddenFields
+        ? Object.entries(hiddenFields).map(([name, value]) =>
+            value ? <input key={name} type="hidden" name={name} value={value} /> : null,
+          )
+        : null}
       <label className="flex flex-col gap-1 text-[11px] font-semibold text-[#6b7185]">
         Periode
         <select
-          name="period"
+          name={periodFieldName}
           value={selectedPeriod}
           onChange={(event) => {
             const next = event.target.value as Period;
@@ -72,7 +85,7 @@ export function DashboardPeriodFilter({
             Mulai
             <input
               type="date"
-              name="from"
+              name={fromFieldName}
               defaultValue={from ?? ""}
               max={maxDate}
               onChange={submitForm}
@@ -83,7 +96,7 @@ export function DashboardPeriodFilter({
             Sampai
             <input
               type="date"
-              name="to"
+              name={toFieldName}
               defaultValue={to ?? ""}
               max={maxDate}
               onChange={submitForm}

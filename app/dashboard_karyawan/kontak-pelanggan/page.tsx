@@ -108,7 +108,7 @@ export default async function KontakPelangganPage() {
                   ))
                 ) : (
                   <div className="project-table-empty">
-                    Belum ada request pelanggan.
+                    Belum ada pengajuan dari pelanggan.
                   </div>
                 )}
               </div>

@@ -28,7 +28,7 @@ export function ProductActionButtons({
           setMessage(cannotEditMessage);
         }}
       >
-        Edit
+        Ubah
       </a>
       <button
         className="btn-delete"
@@ -38,7 +38,7 @@ export function ProductActionButtons({
           setMessage(cannotDeleteMessage);
         }}
       >
-        Delete
+        Hapus
       </button>
       {message ? (
         <div

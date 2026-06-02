@@ -1,10 +1,10 @@
-import Image from "next/image";
 import { fetchNewsWithReviews } from "@/lib/news-db";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
 import { NewsActionButtons } from "@/components/news-action-buttons";
+import { NewsReviewIndicator } from "@/components/news-review-indicator";
 
 export const dynamic = "force-dynamic";
 
@@ -154,26 +154,15 @@ export default async function DaftarBeritaPage({
                           </span>
                           {item.viewCount} Dilihat
                         </span>
-                        <span className="news-stat">
-                          <span className="news-stat-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" width="16" height="16">
-                              <path
-                                d="M4 6a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v6a4 4 0 0 1-4 4H9l-5 4v-4a4 4 0 0 1-4-4V6Z"
-                                fill="currentColor"
-                              />
-                            </svg>
-                          </span>
-                          {item.reviews.length}
-                        </span>
+                        <NewsReviewIndicator
+                          newsId={item.id}
+                          reviewHref={`#review-${sanitizeId(item.id)}`}
+                          reviewCount={item.reviews.length}
+                          latestReviewId={item.reviews[0]?.id ?? null}
+                        />
                       </div>
                     </div>
                     <div className="news-actions">
-                      <a
-                        className="news-review-btn"
-                        href={`#review-${sanitizeId(item.id)}`}
-                      >
-                        Lihat Review
-                      </a>
                         <NewsActionButtons
                           canManage={canManageNews}
                           editHref={`#edit-${sanitizeId(item.id)}`}

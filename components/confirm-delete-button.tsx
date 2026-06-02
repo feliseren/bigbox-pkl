@@ -12,7 +12,7 @@ type ConfirmDeleteButtonProps = {
 
 export function ConfirmDeleteButton({
   className,
-  label = "Delete",
+  label = "Hapus",
   confirmMessage = "Apakah anda yakin ingin menghapus?",
   formAction,
   type = "submit",

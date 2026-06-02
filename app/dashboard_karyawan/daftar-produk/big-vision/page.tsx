@@ -93,7 +93,7 @@ export default async function BigVisionPage() {
             action="/api/logout_karyawan"
           >
             <button className="project-logout" type="submit">
-              Logout
+              Keluar
             </button>
           </form>
         </aside>
@@ -102,7 +102,7 @@ export default async function BigVisionPage() {
           <header className="project-header product-detail-header">
             <div className="product-detail-title">
               <a className="product-back" href="/dashboard_karyawan/daftar-produk">
-                &lt; Back
+                &lt; Kembali
               </a>
               <h1>BIG VISION</h1>
             </div>
@@ -117,7 +117,7 @@ export default async function BigVisionPage() {
             <section className="product-detail-card">
               {canManageProducts ? (
                 <a className="product-new-btn" href="#new-product">
-                  New Product
+                  Tambahkan Produk Baru
                 </a>
               ) : null}
               <div className="product-detail-table">
@@ -154,7 +154,7 @@ export default async function BigVisionPage() {
                 <div className="product-form-card">
                   <div className="product-form-header">
                     <a className="product-back" href="#">
-                      &lt; Back
+                      &lt; Kembali
                     </a>
                     <h2>BIG VISION</h2>
                   </div>
@@ -240,7 +240,7 @@ export default async function BigVisionPage() {
                     <div className="product-form-card">
                       <div className="product-form-header">
                         <a className="product-back" href="#">
-                          &lt; Back
+                          &lt; Kembali
                         </a>
                         <h2>BIG VISION</h2>
                       </div>
@@ -288,7 +288,7 @@ export default async function BigVisionPage() {
                             formAction="/api/products/delete"
                           />
                           <button className="btn-update" type="submit">
-                            Update
+                            Perbarui
                           </button>
                         </div>
                       </form>

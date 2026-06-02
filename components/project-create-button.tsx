@@ -23,7 +23,7 @@ export function ProjectCreateButton({ canManage }: ProjectCreateButtonProps) {
           setMessage(cannotCreateMessage);
         }}
       >
-        New Project
+        Tambahkan Proyek Baru
       </a>
       {message ? (
         <div className="product-alert-overlay" onClick={() => setMessage(null)}>

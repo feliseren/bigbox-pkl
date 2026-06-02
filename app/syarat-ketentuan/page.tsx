@@ -1,9 +1,5 @@
 import Image from "next/image";
-import { prisma } from "@/lib/prisma";
-import { readSessionUserId } from "@/lib/auth";
-import { ProfileMenu } from "@/components/profile-menu";
-import { NotificationBell } from "@/components/notification-bell";
-import { getUserNotifications } from "@/lib/notifications";
+import { BackButton } from "@/components/back-button";
 
 const sections = [
   { id: "definisi", label: "Definisi" },
@@ -23,59 +19,16 @@ const sections = [
 ];
 
 export default async function SyaratKetentuanPage() {
-  const userId = await readSessionUserId();
-  const user = userId
-    ? await prisma.user.findUnique({ where: { id: userId } })
-    : null;
-  const notifications = userId ? await getUserNotifications(userId) : [];
   return (
     <div className="min-h-screen bg-white text-[#111111]">
-      <header className="sticky top-0 z-30 site-header">
-        <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/bigbox_logo-removebg-preview.png"
-              alt="BigBox logo"
-              width={179}
-              height={56}
-              className="h-10 w-auto"
-              priority
-            />
-          </div>
-          <nav className="hidden items-center gap-10 text-sm font-semibold text-[var(--accent)] md:flex">
-            <a className="nav-link" href="/">
-              Beranda
-            </a>
-            <a className="nav-link" href="/produk">
-              Produk
-            </a>
-            <a className="nav-link" href="#">
-              Cerita Kami
-            </a>
-          </nav>
-          {user ? (
-            <div className="flex items-center gap-3">
-              <NotificationBell items={notifications} />
-              <ProfileMenu fullName={user.fullName} />
-            </div>
-          ) : (
-            <a
-              className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#524a4e]"
-              href="/login"
-            >
-              <span className="inline-block h-4 w-4 rounded-full border border-[#524a4e]" />
-              Login
-            </a>
-          )}
-        </div>
-      </header>
-
       <main>
       <section className="bg-[#dfe9fb]">
         <div className="mx-auto max-w-[1100px] px-6 py-12">
-          <a className="text-sm font-semibold text-[#2a3ad7]" href="/">
-            {"<"} Kembali
-          </a>
+          <BackButton
+            fallbackHref="/"
+            label="Kembali"
+            className="inline-flex items-center gap-2 rounded-full border border-[#bfd0ff] bg-white px-4 py-2 text-sm font-semibold text-[#2a3ad7] shadow-sm transition hover:border-[#2a3ad7] hover:bg-[#f4f7ff]"
+          />
           <h1 className="text-4xl font-semibold text-[#2a3ad7]">
             Syarat dan Ketentuan
           </h1>
@@ -461,5 +414,6 @@ export default async function SyaratKetentuanPage() {
     </div>
   );
 }
+
 
 

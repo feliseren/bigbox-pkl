@@ -14,7 +14,6 @@ type NotificationBellProps = {
 
 export function NotificationBell({ items }: NotificationBellProps) {
   const [open, setOpen] = useState(false);
-  const [hideBadge, setHideBadge] = useState(false);
   const [readIds, setReadIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") {
       return new Set();
@@ -32,7 +31,7 @@ export function NotificationBell({ items }: NotificationBellProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const unreadItems = items.filter((item) => !readIds.has(item.id));
   const count = unreadItems.length;
-  const visibleCount = hideBadge || open ? 0 : count;
+  const visibleCount = open ? 0 : count;
 
   useEffect(() => {
     try {
@@ -47,13 +46,6 @@ export function NotificationBell({ items }: NotificationBellProps) {
 
   useEffect(() => {
     if (!open) return;
-    if (items.length > 0) {
-      setReadIds((prev) => {
-        const nextSet = new Set(prev);
-        items.forEach((item) => nextSet.add(item.id));
-        return nextSet;
-      });
-    }
     function handleClick(event: MouseEvent) {
       if (!containerRef.current) return;
       if (containerRef.current.contains(event.target as Node)) return;
@@ -61,23 +53,21 @@ export function NotificationBell({ items }: NotificationBellProps) {
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [open]);
+  }, [items, open]);
 
   function handleToggle() {
     setOpen((prev) => {
       const nextOpen = !prev;
-      if (nextOpen) {
-        setHideBadge(true);
+      if (nextOpen && items.length > 0) {
+        setReadIds((current) => {
+          const nextSet = new Set(current);
+          items.forEach((item) => nextSet.add(item.id));
+          return nextSet;
+        });
       }
       return nextOpen;
     });
   }
-
-  useEffect(() => {
-    if (count === 0) {
-      setHideBadge(false);
-    }
-  }, [count]);
 
   return (
     <div className="notification-bell" ref={containerRef}>

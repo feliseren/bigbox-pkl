@@ -15,7 +15,7 @@ export default async function LoginKaryawanPage({
 }) {
   const resolvedSearchParams = await searchParams;
   const error = normalizeParam(resolvedSearchParams?.error);
-  const message = error === "1" ? "ID karyawan atau password salah." : null;
+  const message = error === "1" ? "ID karyawan atau kata sandi salah." : null;
 
   return (
     <div className="min-h-screen bg-[url('/bg-karyawan.jpeg')] bg-cover bg-center px-4 py-4 flex items-center justify-center">
@@ -32,10 +32,10 @@ export default async function LoginKaryawanPage({
             />
           </div>
           <h1 className="text-2xl font-semibold text-[#2b2b2b] sm:text-3xl">
-            Welcome!!
+            Selamat Datang!
           </h1>
           <p className="mt-1 text-xs text-[#6b6b6b] sm:text-sm">
-            Masukkan ID Karyawan dan Password
+            Masukkan ID karyawan dan kata sandi
           </p>
           {message ? (
             <p className="profile-message error">{message}</p>
@@ -50,14 +50,14 @@ export default async function LoginKaryawanPage({
             <input
               className="w-full rounded-lg border border-[#d9d9d9] px-4 py-2.5 text-sm text-[#1f1f1f] outline-none focus:border-[#2f2f6f] focus:ring-2 focus:ring-[#c3c5ff]"
               name="employeeId"
-              placeholder="Id Karyawan"
+              placeholder="ID karyawan"
               suppressHydrationWarning
               type="text"
             />
             <input
               className="w-full rounded-lg border border-[#d9d9d9] px-4 py-2.5 text-sm text-[#1f1f1f] outline-none focus:border-[#2f2f6f] focus:ring-2 focus:ring-[#c3c5ff]"
               name="password"
-              placeholder="Password"
+              placeholder="Kata sandi"
               suppressHydrationWarning
               type="password"
             />
@@ -66,12 +66,12 @@ export default async function LoginKaryawanPage({
               suppressHydrationWarning
               type="submit"
             >
-              Log in
+              Masuk
             </button>
             <p className="text-center text-xs text-[#6b6b6b] sm:text-sm">
               Bukan Karyawan?{" "}
               <a className="font-semibold text-[#3f4ce0]" href="/login">
-                login disini
+                masuk di sini
               </a>
             </p>
           </form>

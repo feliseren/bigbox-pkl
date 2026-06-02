@@ -54,7 +54,7 @@ export function EmployeeProfileMenu({
                 className="mt-1 w-full rounded-md px-2 py-2 text-left text-[#d84b4b] hover:bg-[#f5f5f5]"
                 type="submit"
               >
-                Logout
+                Keluar
               </button>
             </form>
           </div>

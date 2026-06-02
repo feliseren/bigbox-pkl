@@ -5,14 +5,19 @@ import { prisma } from "@/lib/prisma";
 import { NotificationBell } from "@/components/notification-bell";
 import { ProfileMenu } from "@/components/profile-menu";
 import { getUserNotifications } from "@/lib/notifications";
-import { fetchWhatsNew, fetchWhatsNewHighlight } from "@/lib/whats-new-db";
+import {
+  fetchWhatsNew,
+  fetchWhatsNewHighlight,
+  normalizeWhatsNewCategory,
+  SYSTEM_UPDATE_CATEGORY,
+} from "@/lib/whats-new-db";
 
-const categories = ["Semua", "Produk", "Fitur", "Update Sistem"];
+const categories = ["Semua", "Produk", "Fitur", SYSTEM_UPDATE_CATEGORY];
 
 const badgeStyles: Record<string, string> = {
   Produk: "bg-[#e4ecff] text-[#1f3fbf]",
   Fitur: "bg-[#dff3ec] text-[#1b7c55]",
-  "Update Sistem": "bg-[#efe6ff] text-[#5a3df0]",
+  [SYSTEM_UPDATE_CATEGORY]: "bg-[#efe6ff] text-[#5a3df0]",
   Event: "bg-[#ffe9d6] text-[#c6621f]",
 };
 
@@ -35,8 +40,9 @@ export default async function WhatsNewPage({
   const notifications = userId ? await getUserNotifications(userId) : [];
   const resolvedSearchParams = await searchParams;
   const rawCategory = resolvedSearchParams?.category;
-  const selectedCategory =
-    (Array.isArray(rawCategory) ? rawCategory[0] : rawCategory)?.trim() ?? "Semua";
+  const selectedCategory = normalizeWhatsNewCategory(
+    (Array.isArray(rawCategory) ? rawCategory[0] : rawCategory)?.trim() ?? "Semua",
+  );
   const normalizedCategory = categories.includes(selectedCategory)
     ? selectedCategory
     : "Semua";
@@ -75,18 +81,18 @@ export default async function WhatsNewPage({
             priority
           />
           <nav className="hidden items-center gap-10 text-sm font-semibold text-white md:flex">
-            <a className="nav-link hover:text-gray-200" href="/">
+            <Link className="nav-link hover:text-gray-200" href="/">
               Beranda
-            </a>
-            <a className="nav-link hover:text-gray-200" href="/produk">
+            </Link>
+            <Link className="nav-link hover:text-gray-200" href="/produk">
               Produk
-            </a>
-            <a className="nav-link hover:text-gray-200" href="/cerita-kami">
+            </Link>
+            <Link className="nav-link hover:text-gray-200" href="/cerita-kami">
               Cerita Kami
-            </a>
-            <a className="nav-link active hover:text-gray-200" href="/whats-new">
+            </Link>
+            <Link className="nav-link active hover:text-gray-200" href="/whats-new">
               Daftar Pembaruan
-            </a>
+            </Link>
           </nav>
           {user ? (
             <div className="flex items-center gap-3">
@@ -98,8 +104,7 @@ export default async function WhatsNewPage({
               className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#524a4e] hover:bg-gray-100 transition-colors"
               href="/login"
             >
-              <span className="inline-block h-4 w-4 rounded-full border border-[#524a4e]" />
-              Login
+              Masuk
             </a>
           )}
         </div>
