@@ -40,9 +40,9 @@ const durationPlaceholderByTitle: Record<string, string> = {
 export default async function DaftarProdukPage() {
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
-  const roleName = employee?.role.name.toLowerCase();
+  const roleName = employee?.role.toLowerCase();
   const canManageProducts =
     roleName === "admin" || roleName === "marketing";
   const [bigAssistant, bigLegal, bigSocial, bigVision, orders] = await Promise.all([

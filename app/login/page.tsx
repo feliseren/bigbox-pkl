@@ -13,8 +13,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       ? "Email atau kata sandi salah."
       : error === "google_email"
         ? "Akun Google harus menggunakan email yang valid dan terverifikasi."
-        : error === "google_config"
-          ? "Masuk dengan Google belum dikonfigurasi."
+          : error === "google_config"
+            ? "Masuk dengan Google belum dikonfigurasi."
+          : error === "db"
+            ? "Database belum siap. Silakan coba lagi setelah beberapa saat."
           : error === "google_state" || error === "google_token" || error === "google"
             ? "Masuk dengan Google gagal. Silakan coba lagi."
             : "";

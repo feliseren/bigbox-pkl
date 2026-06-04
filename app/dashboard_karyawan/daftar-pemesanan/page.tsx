@@ -31,9 +31,9 @@ export default async function DaftarPemesananPage({
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
-  const canConfirmOrders = employee?.role.name.toLowerCase() === "admin";
+  const canConfirmOrders = employee?.role.toLowerCase() === "admin";
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     include: { product: true, payment: true },

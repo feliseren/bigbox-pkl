@@ -7,6 +7,7 @@
   --accent: #fdeff4;
   --line: #524a4e;
   --panel: rgba(217, 217, 217, 0.3);
+  --font-sans: "Poppins", "Segoe UI", Arial, sans-serif;
 }
 
 body {
@@ -2168,6 +2169,17 @@ input[type="file"]::-webkit-file-upload-button:hover {
   margin: 0;
   font-size: 14px;
   color: #8b90a3;
+}
+
+.news-error {
+  margin-bottom: 16px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  padding: 12px 14px;
+  color: #991b1b;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .news-review-modal {

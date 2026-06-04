@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useRef, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function HubungiKamiPage() {
+function HubungiKamiContent() {
   const [industry, setIndustry] = useState("");
   const [isValid, setIsValid] = useState(false);
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -267,5 +267,17 @@ export default function HubungiKamiPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function HubungiKamiPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[radial-gradient(circle_at_top,_#eef3ff,_#f8faff_46%,_#ffffff_100%)] flex items-center justify-center">
+        <p className="text-sm font-semibold text-[#2a3ad7]">Memuat...</p>
+      </div>
+    }>
+      <HubungiKamiContent />
+    </Suspense>
   );
 }

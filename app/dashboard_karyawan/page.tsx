@@ -171,7 +171,7 @@ export default async function DashboardKaryawanPage({
 }) {
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
   const resolvedSearchParams = await searchParams;
   const rawPeriod = resolvedSearchParams?.period;

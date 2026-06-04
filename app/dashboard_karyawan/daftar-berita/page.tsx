@@ -27,27 +27,39 @@ const resolveImageUrl = (value?: string | null) => {
   if (value.toLowerCase().endsWith(".bin")) return "/bg-karyawan.jpeg";
   return value;
 };
+const errorMessages: Record<string, string> = {
+  "1": "Terjadi kesalahan saat menyimpan berita. Periksa koneksi database dan pastikan file yang diunggah valid.",
+  forbidden: "Anda tidak memiliki akses untuk mengelola berita.",
+};
 
 export default async function DaftarBeritaPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string | string[]; category?: string | string[] }>;
+  searchParams?: Promise<{
+    q?: string | string[];
+    category?: string | string[];
+    error?: string | string[];
+  }>;
 }) {
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
-  const roleName = employee?.role.name.toLowerCase();
+  const roleName = employee?.role.toLowerCase();
   const canManageNews =
     roleName === "project manager" || roleName === "project_management";
   const rawQuery = resolvedSearchParams?.q;
   const rawCategory = resolvedSearchParams?.category;
+  const rawError = resolvedSearchParams?.error;
   const query =
     (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery)?.trim() ?? "";
   const categoryFilter =
     (Array.isArray(rawCategory) ? rawCategory[0] : rawCategory)?.trim() ?? "";
+  const errorKey =
+    (Array.isArray(rawError) ? rawError[0] : rawError)?.trim() ?? "";
+  const errorMessage = errorKey ? errorMessages[errorKey] ?? errorMessages["1"] : "";
   const normalizedCategory = categories.includes(categoryFilter)
     ? categoryFilter
     : "";
@@ -74,6 +86,12 @@ export default async function DaftarBeritaPage({
           </header>
 
           <main className="project-content">
+            {errorMessage ? (
+              <div className="news-error" role="alert">
+                {errorMessage}
+              </div>
+            ) : null}
+
             <section className="news-card">
               <div className="news-toolbar">
                 <h2>Daftar Berita</h2>
@@ -350,4 +368,3 @@ export default async function DaftarBeritaPage({
     </div>
   );
 }
-

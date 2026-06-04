@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { ProfileMenu } from "@/components/profile-menu";
 import { NotificationBell } from "@/components/notification-bell";
 import { getUserNotifications } from "@/lib/notifications";
+import { resolveLocalImageUrl } from "@/lib/media";
 
 export const dynamic = "force-dynamic";
 
@@ -24,11 +25,6 @@ const formatTags = (value?: string | null) =>
         .map((tag) => tag.trim())
         .filter(Boolean)
     : [];
-const resolveImageUrl = (value?: string | null) => {
-  if (!value) return "/bg-karyawan.jpeg";
-  if (value.toLowerCase().endsWith(".bin")) return "/bg-karyawan.jpeg";
-  return value;
-};
 
 export default async function CeritaKamiPage({
   searchParams,
@@ -50,15 +46,20 @@ export default async function CeritaKamiPage({
   const selectedCategory = categories.includes(categoryParam)
     ? categoryParam
     : "Show All";
-  const stories = await fetchNews({
+  const storiesResult = await fetchNews({
     query: searchQuery || undefined,
     category: selectedCategory === "Show All" ? undefined : selectedCategory,
+  }).catch((error) => {
+    console.error("Failed to fetch stories:", error);
+    return null;
   });
+  const stories = storiesResult ?? [];
+  const hasDatabaseError = storiesResult === null;
   const filteredStories = stories.map((story) => ({
     id: story.id,
     client: (story.customerName || story.title).toUpperCase(),
     subtitle: story.title,
-    image: resolveImageUrl(story.imageUrl),
+    image: resolveLocalImageUrl(story.imageUrl),
     tags: formatTags(story.customerProducts),
     category: story.category,
   }));
@@ -68,7 +69,7 @@ export default async function CeritaKamiPage({
       {/* Header */}
       <header className="sticky top-0 z-30 site-header">
         <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
-          <a className="flex items-center gap-3" href="/">
+          <Link className="flex items-center gap-3" href="/">
             <Image
               src="/bigbox_logo-removebg-preview.png"
               alt="BigBox logo"
@@ -77,20 +78,20 @@ export default async function CeritaKamiPage({
               className="h-10 w-auto"
               priority
             />
-          </a>
+          </Link>
           <nav className="hidden items-center gap-10 text-sm font-semibold text-white md:flex">
-            <a className="nav-link hover:text-gray-200" href="/">
+            <Link className="nav-link hover:text-gray-200" href="/">
               Beranda
-            </a>
-            <a className="nav-link hover:text-gray-200" href="/produk">
+            </Link>
+            <Link className="nav-link hover:text-gray-200" href="/produk">
               Produk
-            </a>
-            <a className="nav-link active hover:text-gray-200" href="/cerita-kami">
+            </Link>
+            <Link className="nav-link active hover:text-gray-200" href="/cerita-kami">
               Cerita Kami
-            </a>
-            <a className="nav-link hover:text-gray-200" href="/whats-new">
+            </Link>
+            <Link className="nav-link hover:text-gray-200" href="/whats-new">
               Daftar Pembaruan
-            </a>
+            </Link>
           </nav>
           {user ? (
             <div className="flex items-center gap-3">
@@ -98,12 +99,12 @@ export default async function CeritaKamiPage({
               <ProfileMenu fullName={user.fullName} />
             </div>
           ) : (
-            <a
+            <Link
               className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#524a4e] hover:bg-gray-100 transition-colors"
               href="/login"
             >
               Masuk
-            </a>
+            </Link>
           )}
         </div>
       </header>
@@ -285,7 +286,9 @@ export default async function CeritaKamiPage({
           {filteredStories.length === 0 && (
             <div className="py-12 text-center">
               <p className="text-lg text-gray-600">
-                Tidak ada cerita yang sesuai dengan pencarian Anda.
+                {hasDatabaseError
+                  ? "Cerita belum bisa dimuat. Silakan coba beberapa saat lagi."
+                  : "Tidak ada cerita yang sesuai dengan pencarian Anda."}
               </p>
             </div>
           )}
@@ -393,5 +396,3 @@ export default async function CeritaKamiPage({
     </div>
   );
 }
-
-

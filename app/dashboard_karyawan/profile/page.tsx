@@ -23,7 +23,7 @@ export default async function EmployeeProfilePage({
     redirect("/login_karyawan");
   }
 
-  const employee = await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } });
+  const employee = await prisma.employee.findUnique({ where: { id: employeeId } });
   if (!employee) {
     redirect("/login_karyawan");
   }

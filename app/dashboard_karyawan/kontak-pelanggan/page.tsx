@@ -32,7 +32,7 @@ const buildWhatsappLink = (code: string, number: string) => {
 export default async function KontakPelangganPage() {
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
   const contacts = await prisma.customerContact.findMany({
     orderBy: { createdAt: "desc" },

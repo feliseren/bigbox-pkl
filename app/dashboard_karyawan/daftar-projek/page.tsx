@@ -18,9 +18,9 @@ export default async function DaftarProjekPage({
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
-  const roleName = employee?.role.name.toLowerCase();
+  const roleName = employee?.role.toLowerCase();
   const canManageProjects =
     roleName === "project manager" || roleName === "project_management";
   const rawQuery = resolvedSearchParams?.q;

@@ -71,7 +71,7 @@ export function StoriesSection() {
               {/* Content */}
               <div className="p-6">
                 <p className="text-[12px] font-semibold uppercase text-gray-500">
-                  succes stories
+                  cerita sukses
                 </p>
                 <h3 className="mt-2 text-[20px] font-bold text-black">
                   {story.client}

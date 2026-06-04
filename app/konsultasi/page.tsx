@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 
-export default function KonsultasiPage() {
+function KonsultasiContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const selectedProduct = searchParams.get("product");
@@ -277,6 +277,18 @@ export default function KonsultasiPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function KonsultasiPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-b from-[#2d1b3d] to-[#1a0f2e] text-white flex items-center justify-center">
+        <p className="text-sm font-semibold text-[#ff6b3d]">Memuat...</p>
+      </div>
+    }>
+      <KonsultasiContent />
+    </Suspense>
   );
 }
 

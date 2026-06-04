@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId, readSessionUserId } from "@/lib/auth";
@@ -148,12 +149,12 @@ export default async function ProfilePage({
                 Kelola data akun dan keamanan profil Anda.
               </p>
             </div>
-            <a
+            <Link
               href="/"
               className="inline-flex items-center rounded-xl border border-[#ccd7ff] bg-[#eef2ff] px-4 py-2 text-sm font-semibold text-[#2a3ad7] transition hover:bg-[#dfe7ff]"
             >
               {"< Kembali"}
-            </a>
+            </Link>
           </div>
           {message ? (
             <p

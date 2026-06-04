@@ -36,10 +36,10 @@ export default async function WhatsNewDashboardPage({
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
-  const canManage = employee?.role.name.toLowerCase() === "marketing";
+  const canManage = employee?.role.toLowerCase() === "marketing";
   const rawQuery = resolvedSearchParams?.q;
   const rawCategory = resolvedSearchParams?.category;
   const query =

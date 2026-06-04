@@ -20,9 +20,9 @@ const sanitizeId = (value: string) => value.replace(/[^a-zA-Z0-9_-]/g, "");
 export default async function BigSocialPage() {
   const employeeId = await readEmployeeSessionId();
   const employee = employeeId
-    ? await prisma.employee.findUnique({ where: { id: employeeId }, include: { role: true } })
+    ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
-  const roleName = employee?.role.name.toLowerCase();
+  const roleName = employee?.role.toLowerCase();
   const canManageProducts =
     roleName === "admin" || roleName === "marketing";
   const [products, orders] = await Promise.all([

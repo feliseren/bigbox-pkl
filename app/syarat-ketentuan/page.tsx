@@ -33,15 +33,15 @@ export default async function SyaratKetentuanPage() {
             Syarat dan Ketentuan
           </h1>
           <p className="mt-6 text-base leading-7">
-            <strong>DTP BigBox</strong> (selanjutnya disebut "DTP BigBox" atau
-            "Kami") merupakan platform yang berisikan informasi terkait produk
+            <strong>DTP BigBox</strong> (selanjutnya disebut &quot;DTP BigBox&quot; atau
+            &quot;Kami&quot;) merupakan platform yang berisikan informasi terkait produk
             BigBox untuk memudahkan pengguna memahami produk serta melakukan
             trial maupun pembayaran produk, yang dikelola oleh PT
-            Telekomunikasi Indonesia Tbk (selanjutnya disebut "TELKOM").
+            Telekomunikasi Indonesia Tbk (selanjutnya disebut &quot;TELKOM&quot;).
           </p>
           <p className="mt-4 text-base leading-7">
             Saat menggunakan <strong>DTP BigBox</strong>, pengguna (selanjutnya
-            disebut "Anda" atau "Pengguna") tunduk pada pedoman, aturan, atau
+            disebut &quot;Anda&quot; atau &quot;Pengguna&quot;) tunduk pada pedoman, aturan, atau
             ketentuan yang berlaku, yang dapat diperbarui dari waktu ke waktu
             (termasuk dan tidak terbatas pada Kebijakan Privasi DTP BigBox).
           </p>
@@ -247,7 +247,7 @@ export default async function SyaratKetentuanPage() {
                 Tidak ada seorangpun yang diperbolehkan melakukan upaya dan/atau yang dapat dianggap upaya untuk mengumpulkan, mengolah dan/atau mengungkapkan data yang terkandung dalam sistem elektronik DTP BigBox untuk tujuan yang melanggar peraturan perundang-undangan.
               </p>
               <p className="mt-4">
-                Tidak ada seorangpun yang diperbolehkan menggunakan situs DTP BigBox untuk melanggar keamanan atau integritas jaringan, komputer atau sistem komunikasi apa pun, aplikasi perangkat lunak, atau jaringan atau perangkat komputasi (masing-masing, 'Sistem').
+                Tidak ada seorangpun yang diperbolehkan menggunakan situs DTP BigBox untuk melanggar keamanan atau integritas jaringan, komputer atau sistem komunikasi apa pun, aplikasi perangkat lunak, atau jaringan atau perangkat komputasi (masing-masing, &apos;Sistem&apos;).
               </p>
               <p className="mt-4">
                 Kegiatan yang dilarang termasuk mengakses atau menggunakan Sistem apa pun tanpa izin, termasuk mencoba menyelidiki, memindai, atau menguji kerentanan Sistem atau untuk melanggar segala tindakan keamanan atau otentikasi yang digunakan oleh suatu Sistem.
@@ -261,7 +261,7 @@ export default async function SyaratKetentuanPage() {
               <h2 className="text-xl font-semibold">6. Jaminan TELKOM dan Pembatasan Tanggung Jawab TELKOM secara Umum</h2>
               <ol className="mt-4 list-[lower-alpha] space-y-3 pl-6">
                 <li>
-                  Pengguna setuju bahwa Pengguna memanfaatkan DTP BigBox atas keinginan sendiri dan Layanan DTP BigBox diberikan kepada Pengguna pada 'SEBAGAIMANA ADANYA' dan 'SEBAGAIMANA TERSEDIA'.
+                  Pengguna setuju bahwa Pengguna memanfaatkan DTP BigBox atas keinginan sendiri dan Layanan DTP BigBox diberikan kepada Pengguna pada &apos;SEBAGAIMANA ADANYA&apos; dan &apos;SEBAGAIMANA TERSEDIA&apos;.
                 </li>
                 <li>
                   Sejauh diizinkan oleh hukum yang berlaku, TELKOM (termasuk TELKOM Group, direktur, dan karyawan) tidak bertanggung jawab, dan Pengguna setuju untuk tidak menuntut TELKOM bertanggung jawab, atas segala kerusakan atau kerugian (termasuk namun tidak terbatas pada hilangnya uang, reputasi, keuntungan, atau kerugian tak berwujud lainnya) yang diakibatkan secara langsung atau tidak langsung dari :

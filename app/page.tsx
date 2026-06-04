@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { readSessionUserId } from "@/lib/auth";
 import { ProfileMenu } from "@/components/profile-menu";
@@ -124,7 +125,7 @@ export default async function Home() {
     <div className="min-h-screen bg-[var(--bg)]">
       <header className="sticky top-0 z-30 site-header">
         <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
-          <a className="flex items-center gap-3" href="/">
+          <Link className="flex items-center gap-3" href="/">
             <Image
               src="/bigbox_logo-removebg-preview.png"
               alt="BigBox logo"
@@ -133,20 +134,20 @@ export default async function Home() {
               className="h-10 w-auto"
               priority
             />
-          </a>
+          </Link>
           <nav className="hidden items-center gap-10 text-sm font-semibold text-[var(--accent)] md:flex">
-            <a className="nav-link active" href="/">
+            <Link className="nav-link active" href="/">
               Beranda
-            </a>
-            <a className="nav-link" href="/produk">
+            </Link>
+            <Link className="nav-link" href="/produk">
               Produk
-            </a>
-            <a className="nav-link" href="/cerita-kami">
+            </Link>
+            <Link className="nav-link" href="/cerita-kami">
               Cerita Kami
-            </a>
-            <a className="nav-link" href="/whats-new">
+            </Link>
+            <Link className="nav-link" href="/whats-new">
               Daftar Pembaruan
-            </a>
+            </Link>
           </nav>
           {user ? (
             <div className="flex items-center gap-3">
@@ -154,12 +155,12 @@ export default async function Home() {
               <ProfileMenu fullName={user.fullName} />
             </div>
           ) : (
-            <a
+            <Link
               className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#524a4e]"
               href="/login"
             >
               Masuk
-            </a>
+            </Link>
           )}
         </div>
       </header>

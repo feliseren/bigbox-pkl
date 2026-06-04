@@ -2,41 +2,10 @@ import { NextResponse } from "next/server";
 import { findNewsById, updateNews } from "@/lib/news-db";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
+import { saveUpload } from "@/lib/upload";
 import pdfParse from "pdf-parse";
-import path from "path";
-import { mkdir, writeFile } from "fs/promises";
 
 export const runtime = "nodejs";
-
-async function saveUpload(file: File | null, folder: string) {
-  if (!file || !file.size) return null;
-  const originalName = file.name || "file";
-  const extFromName = path.extname(originalName).toLowerCase();
-  const mime = file.type || "";
-  const extFromMime =
-    mime === "image/jpeg"
-      ? ".jpg"
-      : mime === "image/png"
-        ? ".png"
-        : mime === "image/webp"
-          ? ".webp"
-          : mime === "image/gif"
-            ? ".gif"
-            : mime === "application/pdf"
-              ? ".pdf"
-              : "";
-  const ext =
-    extFromName && extFromName !== ".bin" ? extFromName : extFromMime;
-  const safeBase = path.basename(originalName, ext).replace(/[^a-zA-Z0-9_-]/g, "");
-  const filename = `${safeBase || "file"}-${Date.now()}-${Math.floor(
-    Math.random() * 10000,
-  )}${ext || ".bin"}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads", folder);
-  await mkdir(uploadDir, { recursive: true });
-  const fileBuffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(uploadDir, filename), fileBuffer);
-  return `/uploads/${folder}/${filename}`;
-}
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -63,10 +32,9 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL("/login_karyawan", request.url), 303);
   }
   const employee = await prisma.employee.findUnique({
-    where: { id: employeeId },
-    select: { role: { select: { name: true } } },
+    where: { id: employeeId }, select: { role: true },
   });
-  const roleName = employee?.role.name.toLowerCase();
+  const roleName = employee?.role.toLowerCase();
   if (
     !employee ||
     (roleName !== "project manager" && roleName !== "project_management")
@@ -83,46 +51,50 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL(redirectTo, request.url), 303);
   }
 
-  const keepIfEmpty = (value: string, fallback?: string | null) =>
-    value.trim() ? value : fallback ?? null;
-  const imageUpload =
-    imageFile && typeof imageFile !== "string" ? imageFile : null;
-  const documentUpload =
-    documentFile && typeof documentFile !== "string" ? documentFile : null;
-  const imageUrl = await saveUpload(imageUpload, "news-images");
-  let documentUrl: string | null = null;
-  let contentText: string | null = manualContent || null;
-  if (!contentText && documentUpload) {
-    const docBuffer = Buffer.from(await documentUpload.arrayBuffer());
-    documentUrl = await saveUpload(documentUpload, "news-docs");
-    try {
-      const parsed = await pdfParse(docBuffer);
-      contentText = parsed.text?.trim() || null;
-    } catch (pdfError) {
-      console.error("Failed to parse PDF text:", pdfError);
+  try {
+    const keepIfEmpty = (value: string, fallback?: string | null) =>
+      value.trim() ? value : fallback ?? null;
+    const imageUpload =
+      imageFile && typeof imageFile !== "string" ? imageFile : null;
+    const documentUpload =
+      documentFile && typeof documentFile !== "string" ? documentFile : null;
+    const imageUrl = await saveUpload(imageUpload, "news-images", "image");
+    let documentUrl: string | null = null;
+    let contentText: string | null = manualContent || null;
+    if (!contentText && documentUpload) {
+      const docBuffer = Buffer.from(await documentUpload.arrayBuffer());
+      documentUrl = await saveUpload(documentUpload, "news-docs", "pdf");
+      try {
+        const parsed = await pdfParse(docBuffer);
+        contentText = parsed.text?.trim() || null;
+      } catch (pdfError) {
+        console.error("Failed to parse PDF text:", pdfError);
+      }
     }
-  }
 
-  const result = await updateNews({
-    id,
-    title,
-    category,
-    imageUrl: imageUrl ?? existing.imageUrl,
-    documentUrl: documentUrl ?? existing.documentUrl,
-    contentText: contentText ?? existing.contentText,
-    summaryPart1: keepIfEmpty(summaryPart1, existing.summaryPart1),
-    summaryPart2: keepIfEmpty(summaryPart2, existing.summaryPart2),
-    summaryPart3: keepIfEmpty(summaryPart3, existing.summaryPart3),
-    customerName: keepIfEmpty(customerName, existing.customerName),
-    customerIndustry: keepIfEmpty(customerIndustry, existing.customerIndustry),
-    customerSize: keepIfEmpty(customerSize, existing.customerSize),
-    customerLocation: keepIfEmpty(customerLocation, existing.customerLocation),
-    customerProducts: keepIfEmpty(customerProducts, existing.customerProducts),
-  });
-  if (result.count === 0) {
+    const result = await updateNews({
+      id,
+      title,
+      category,
+      imageUrl: imageUrl ?? existing.imageUrl,
+      documentUrl: documentUrl ?? existing.documentUrl,
+      contentText: contentText ?? existing.contentText,
+      summaryPart1: keepIfEmpty(summaryPart1, existing.summaryPart1),
+      summaryPart2: keepIfEmpty(summaryPart2, existing.summaryPart2),
+      summaryPart3: keepIfEmpty(summaryPart3, existing.summaryPart3),
+      customerName: keepIfEmpty(customerName, existing.customerName),
+      customerIndustry: keepIfEmpty(customerIndustry, existing.customerIndustry),
+      customerSize: keepIfEmpty(customerSize, existing.customerSize),
+      customerLocation: keepIfEmpty(customerLocation, existing.customerLocation),
+      customerProducts: keepIfEmpty(customerProducts, existing.customerProducts),
+    });
+    if (result.count === 0) {
+      return NextResponse.redirect(new URL(`${redirectTo}?error=1`, request.url), 303);
+    }
+  } catch (error) {
+    console.error("Failed to update news story:", error);
     return NextResponse.redirect(new URL(`${redirectTo}?error=1`, request.url), 303);
   }
 
   return NextResponse.redirect(new URL(redirectTo, request.url), 303);
 }
-

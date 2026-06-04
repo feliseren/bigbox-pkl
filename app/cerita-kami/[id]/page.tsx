@@ -30,7 +30,10 @@ export default async function StoryDetailPage({
     ? resolvedParams.id[0]
     : resolvedParams.id ?? "";
   const normalizedId = decodeURIComponent(rawId).trim();
-  const story = await findNewsById(normalizedId);
+  const story = await findNewsById(normalizedId).catch((error) => {
+    console.error("Failed to fetch story detail:", error);
+    return null;
+  });
   const customerId = await readSessionUserId();
   const user = customerId
     ? await prisma.user.findUnique({ where: { id: customerId } })
@@ -90,7 +93,7 @@ export default async function StoryDetailPage({
       {/* Header */}
       <header className="sticky top-0 z-30 site-header">
         <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
-          <a className="flex items-center gap-3" href="/">
+          <Link className="flex items-center gap-3" href="/">
             <Image
               src="/bigbox_logo-removebg-preview.png"
               alt="BigBox logo"
@@ -99,20 +102,20 @@ export default async function StoryDetailPage({
               className="h-10 w-auto"
               priority
             />
-          </a>
+          </Link>
           <nav className="hidden items-center gap-10 text-sm font-semibold text-white md:flex">
-            <a className="nav-link hover:text-gray-200" href="/">
+            <Link className="nav-link hover:text-gray-200" href="/">
               Beranda
-            </a>
-            <a className="nav-link hover:text-gray-200" href="/produk">
+            </Link>
+            <Link className="nav-link hover:text-gray-200" href="/produk">
               Produk
-            </a>
-            <a className="nav-link hover:text-gray-200" href="/cerita-kami">
+            </Link>
+            <Link className="nav-link hover:text-gray-200" href="/cerita-kami">
               Cerita Kami
-            </a>
-            <a className="nav-link hover:text-gray-200" href="/whats-new">
+            </Link>
+            <Link className="nav-link hover:text-gray-200" href="/whats-new">
               Daftar Pembaruan
-            </a>
+            </Link>
           </nav>
           {user ? (
             <div className="flex items-center gap-3">
@@ -120,12 +123,12 @@ export default async function StoryDetailPage({
               <ProfileMenu fullName={user.fullName} />
             </div>
           ) : (
-            <a
+            <Link
               className="flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-semibold text-[#524a4e] hover:bg-gray-100 transition-colors"
               href="/login"
             >
               Masuk
-            </a>
+            </Link>
           )}
         </div>
       </header>

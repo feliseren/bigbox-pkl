@@ -54,10 +54,9 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL("/login_karyawan", request.url), 303);
   }
   const employee = await prisma.employee.findUnique({
-    where: { id: employeeId },
-    select: { role: { select: { name: true } } },
+    where: { id: employeeId }, select: { role: true },
   });
-  const roleName = employee?.role.name.toLowerCase();
+  const roleName = employee?.role.toLowerCase();
   if (!employee || roleName !== "marketing") {
     return NextResponse.redirect(
       new URL(`${redirectTo}?error=forbidden`, request.url),

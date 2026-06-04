@@ -12,10 +12,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
   const employee = await prisma.employee.findUnique({
-    where: { id: employeeId },
-    select: { role: { select: { name: true } } },
+    where: { id: employeeId }, select: { role: true },
   });
-  const roleName = employee?.role.name.toLowerCase();
+  const roleName = employee?.role.toLowerCase();
   if (
     !employee ||
     (roleName !== "project manager" && roleName !== "project_management")

@@ -12,19 +12,17 @@ model Role {
   name        String
   description String?
   createdAt   DateTime   @default(now()) @map("created_at")
-  employees   Employee[]
 
   @@map("roles")
 }
 
 model Employee {
   id        String    @id @default(cuid())
-  roleId    String    @map("role_id")
-  fullName  String    @map("full_name")
+  fullName  String    @map("fullName")
   password  String
-  createdAt DateTime  @default(now()) @map("created_at")
+  createdAt DateTime  @default(now()) @map("createdAt")
+  role      String
 
-  role             Role               @relation(fields: [roleId], references: [id])
   projects         Project[]
   whatsNews        WhatsNew[]
   confirmedPayments Payment[]         @relation("PaymentConfirmedBy")
@@ -32,7 +30,7 @@ model Employee {
   archivedWhatsNews ArchivedWhatsNew[]
   archivedProducts ArchivedProduct[]
 
-  @@map("employees")
+  @@map("employee")
 }
 
 model User {
