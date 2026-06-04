@@ -7,6 +7,7 @@ import { EmployeeSidebar } from "@/components/employee-sidebar";
 type ProfileSearchParams = {
   error?: string | string[];
   success?: string | string[];
+  forceReset?: string | string[];
 };
 
 function normalizeParam(value?: string | string[]) {
@@ -31,9 +32,12 @@ export default async function EmployeeProfilePage({
   const resolvedSearchParams = await searchParams;
   const error = normalizeParam(resolvedSearchParams?.error);
   const success = normalizeParam(resolvedSearchParams?.success);
+  const forceReset = normalizeParam(resolvedSearchParams?.forceReset);
   const message =
     success === "1"
       ? "Kata sandi berhasil diubah."
+      : forceReset === "1" || employee.mustChangePassword
+        ? "Anda harus mengubah kata sandi awal sebelum mengakses fitur lain."
       : error === "1"
         ? "Lengkapi semua field kata sandi."
         : error === "2"
@@ -45,7 +49,7 @@ export default async function EmployeeProfilePage({
   return (
     <div className="project-layout">
       <div className="project-shell">
-        <EmployeeSidebar />
+        <EmployeeSidebar active="profile" />
 
         <div className="project-main">
           <header className="project-header">

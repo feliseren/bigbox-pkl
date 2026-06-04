@@ -30,7 +30,12 @@ export async function POST(request: Request) {
   }
 
   const response = NextResponse.redirect(
-    new URL("/dashboard_karyawan", request.url),
+    new URL(
+      employee.mustChangePassword
+        ? "/dashboard_karyawan/profile?forceReset=1"
+        : "/dashboard_karyawan",
+      request.url,
+    ),
   );
   response.cookies.set(createEmployeeSessionCookie(employee.id));
   return response;

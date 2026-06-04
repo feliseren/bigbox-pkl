@@ -1,12 +1,16 @@
 import { fetchNewsWithReviews } from "@/lib/news-db";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { normalizeEmployeeRole } from "@/lib/employee-role";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
 import { NewsActionButtons } from "@/components/news-action-buttons";
 import { NewsReviewIndicator } from "@/components/news-review-indicator";
 
 export const dynamic = "force-dynamic";
+
+type NewsItem = Awaited<ReturnType<typeof fetchNewsWithReviews>>[number];
+type NewsReview = NewsItem["reviews"][number];
 
 const categories = [
   "Big Vision",
@@ -47,7 +51,7 @@ export default async function DaftarBeritaPage({
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
-  const roleName = employee?.role.toLowerCase();
+  const roleName = normalizeEmployeeRole(employee?.role);
   const canManageNews =
     roleName === "project manager" || roleName === "project_management";
   const rawQuery = resolvedSearchParams?.q;
@@ -138,13 +142,13 @@ export default async function DaftarBeritaPage({
                     ))}
                   </select>
                   <button type="submit" suppressHydrationWarning>
-                    Search
+                    Cari
                   </button>
                 </form>
               </div>
 
               <div className="news-list">
-                {newsItems.map((item) => (
+                {newsItems.map((item: NewsItem) => (
                   <div key={item.id} className="news-item">
                     <div className="news-image">
                       <img
@@ -195,7 +199,7 @@ export default async function DaftarBeritaPage({
               </div>
             </section>
 
-            {canManageNews ? newsItems.map((item) => (
+            {canManageNews ? newsItems.map((item: NewsItem) => (
               <div
                 key={`edit-${item.id}`}
                 id={`edit-${sanitizeId(item.id)}`}
@@ -312,7 +316,7 @@ export default async function DaftarBeritaPage({
               </div>
             )) : null}
 
-            {newsItems.map((item) => (
+            {newsItems.map((item: NewsItem) => (
               <div
                 key={`review-${item.id}`}
                 id={`review-${sanitizeId(item.id)}`}
@@ -327,7 +331,7 @@ export default async function DaftarBeritaPage({
                   </div>
                   <div className="news-review-list">
                     {item.reviews.length ? (
-                      item.reviews.map((review) => (
+                      item.reviews.map((review: NewsReview) => (
                         <div key={review.id} className="news-review-item">
                           <div>
                             <strong>{review.user.fullName}</strong>

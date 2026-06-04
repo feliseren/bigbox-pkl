@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { createResetToken, markPreviousTokensUsed } from "@/lib/password-reset";
-import { sendEmail } from "@/lib/email";
-
-function getAppUrl(requestUrl: string) {
-  return process.env.APP_URL || new URL(requestUrl).origin;
-}
+import { requestCustomerPasswordReset } from "@/lib/password-reset-requests";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -16,33 +11,17 @@ export async function POST(request: Request) {
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
-  if (!user || !user.hasLocalPassword) {
+  if (!user) {
     return NextResponse.redirect(new URL("/forgot-password?error=1", request.url));
   }
 
-  await markPreviousTokensUsed(user.id);
-  const { token, tokenHash, expiresAt } = createResetToken();
-  await prisma.passwordResetToken.create({
-    data: {
-      userId: user.id,
-      tokenHash,
-      expiresAt,
-    },
-  });
+  const result = await requestCustomerPasswordReset(user.id);
+  if (result.kind === "issued") {
+    return NextResponse.redirect(
+      new URL(`/reset-password?token=${result.token}&type=customer`, request.url),
+    );
+  }
 
-  const appUrl = getAppUrl(request.url);
-  const resetUrl = `${appUrl}/reset-password?token=${token}`;
-
-  await sendEmail({
-    to: email,
-    subject: "Reset Password BigBox",
-    html: `
-      <p>Halo ${user.fullName},</p>
-      <p>Silakan reset password Anda dengan klik link berikut (berlaku 60 menit):</p>
-      <p><a href="${resetUrl}">${resetUrl}</a></p>
-      <p>Jika Anda tidak meminta reset, abaikan email ini.</p>
-    `,
-  });
-
-  return NextResponse.redirect(new URL("/login?reset=1", request.url));
+  const status = result.kind === "pending" ? "pending" : "requested";
+  return NextResponse.redirect(new URL(`/forgot-password?status=${status}`, request.url));
 }

@@ -1,7 +1,9 @@
 import Image from "next/image";
+import { ResetRequestLink } from "@/components/reset-request-link";
 
 type LoginKaryawanSearchParams = {
   error?: string | string[];
+  reset?: string | string[];
 };
 
 function normalizeParam(value?: string | string[]) {
@@ -15,6 +17,7 @@ export default async function LoginKaryawanPage({
 }) {
   const resolvedSearchParams = await searchParams;
   const error = normalizeParam(resolvedSearchParams?.error);
+  const reset = normalizeParam(resolvedSearchParams?.reset);
   const message = error === "1" ? "ID karyawan atau kata sandi salah." : null;
 
   return (
@@ -39,6 +42,11 @@ export default async function LoginKaryawanPage({
           </p>
           {message ? (
             <p className="profile-message error">{message}</p>
+          ) : null}
+          {reset === "2" ? (
+            <p className="profile-message success">
+              Kata sandi berhasil diubah. Silakan masuk kembali.
+            </p>
           ) : null}
 
           <form
@@ -68,6 +76,14 @@ export default async function LoginKaryawanPage({
             >
               Masuk
             </button>
+            <div className="text-right">
+              <ResetRequestLink
+                className="text-xs font-semibold text-[#3f4ce0] sm:text-sm"
+                href="/forgot-password-karyawan"
+              >
+                Lupa Kata Sandi?
+              </ResetRequestLink>
+            </div>
             <p className="text-center text-xs text-[#6b6b6b] sm:text-sm">
               Bukan Karyawan?{" "}
               <a className="font-semibold text-[#3f4ce0]" href="/login">

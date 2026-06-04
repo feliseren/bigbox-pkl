@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { createWhatsNew } from "@/lib/whats-new-db";
 import { prisma } from "@/lib/prisma";
+import { normalizeEmployeeRole } from "@/lib/employee-role";
 import path from "path";
 import { mkdir, writeFile } from "fs/promises";
 
@@ -55,7 +56,7 @@ export async function POST(request: Request) {
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId }, select: { role: true, fullName: true },
   });
-  const roleName = employee?.role.toLowerCase();
+  const roleName = normalizeEmployeeRole(employee?.role);
   if (!employee || roleName !== "marketing") {
     return NextResponse.redirect(
       new URL(`${redirectTo}?error=forbidden`, request.url),

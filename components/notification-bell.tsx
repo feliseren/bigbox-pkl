@@ -14,26 +14,35 @@ type NotificationBellProps = {
 
 export function NotificationBell({ items }: NotificationBellProps) {
   const [open, setOpen] = useState(false);
-  const [readIds, setReadIds] = useState<Set<string>>(() => {
-    if (typeof window === "undefined") {
-      return new Set();
-    }
-    try {
-      const raw = window.localStorage.getItem("bb_read_notifications");
-      if (!raw) return new Set();
-      const parsed = JSON.parse(raw);
-      if (!Array.isArray(parsed)) return new Set();
-      return new Set(parsed.filter((value) => typeof value === "string"));
-    } catch {
-      return new Set();
-    }
-  });
+  const [readIds, setReadIds] = useState<Set<string>>(new Set());
+  const [hydrated, setHydrated] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const unreadItems = items.filter((item) => !readIds.has(item.id));
   const count = unreadItems.length;
-  const visibleCount = open ? 0 : count;
+  const visibleCount = hydrated && !open ? count : 0;
 
   useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("bb_read_notifications");
+      if (!raw) {
+        setHydrated(true);
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) {
+        setHydrated(true);
+        return;
+      }
+      setReadIds(new Set(parsed.filter((value) => typeof value === "string")));
+    } catch {
+      // Ignore local storage read errors.
+    } finally {
+      setHydrated(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     try {
       window.localStorage.setItem(
         "bb_read_notifications",
@@ -42,7 +51,7 @@ export function NotificationBell({ items }: NotificationBellProps) {
     } catch {
       // Ignore local storage write errors.
     }
-  }, [readIds]);
+  }, [hydrated, readIds]);
 
   useEffect(() => {
     if (!open) return;
@@ -76,6 +85,7 @@ export function NotificationBell({ items }: NotificationBellProps) {
         type="button"
         onClick={handleToggle}
         aria-label="Notifikasi"
+        suppressHydrationWarning
       >
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none">
           <path

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { normalizeEmployeeRole } from "@/lib/employee-role";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { ProjectStatusSelect } from "@/components/project-status-select";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
@@ -20,7 +21,7 @@ export default async function DaftarProjekPage({
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
-  const roleName = employee?.role.toLowerCase();
+  const roleName = normalizeEmployeeRole(employee?.role);
   const canManageProjects =
     roleName === "project manager" || roleName === "project_management";
   const rawQuery = resolvedSearchParams?.q;

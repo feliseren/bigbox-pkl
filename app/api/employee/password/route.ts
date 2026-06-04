@@ -40,7 +40,7 @@ export async function POST(request: Request) {
   const hashed = await hashPassword(newPassword);
   await prisma.employee.update({
     where: { id: employeeId },
-    data: { password: hashed },
+    data: { password: hashed, mustChangePassword: false },
   });
 
   return NextResponse.redirect(

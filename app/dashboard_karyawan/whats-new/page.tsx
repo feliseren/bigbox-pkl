@@ -8,6 +8,7 @@ import {
   normalizeWhatsNewCategory,
   SYSTEM_UPDATE_CATEGORY,
 } from "@/lib/whats-new-db";
+import { normalizeEmployeeRole } from "@/lib/employee-role";
 import WhatsNewForm from "@/components/whats-new-form";
 import { ConfirmDeleteButton } from "@/components/confirm-delete-button";
 
@@ -39,7 +40,7 @@ export default async function WhatsNewDashboardPage({
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
-  const canManage = employee?.role.toLowerCase() === "marketing";
+  const canManage = normalizeEmployeeRole(employee?.role) === "marketing";
   const rawQuery = resolvedSearchParams?.q;
   const rawCategory = resolvedSearchParams?.category;
   const query =

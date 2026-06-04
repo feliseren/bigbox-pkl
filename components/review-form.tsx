@@ -122,7 +122,11 @@ export default function ReviewForm({ newsId, redirect, avatarLetter }: ReviewFor
             );
           })}
         </div>
-        <button type="submit" disabled={isSubmittingComment}>
+        <button
+          type="submit"
+          disabled={isSubmittingComment}
+          suppressHydrationWarning
+        >
           Kirim
         </button>
       </div>

@@ -342,7 +342,11 @@ export default async function StoryDetailPage({
               <h2 className="review-title">
                 {story.reviews.length} Komentar
               </h2>
-              <button className="review-sort" type="button">
+              <button
+                className="review-sort"
+                type="button"
+                suppressHydrationWarning
+              >
                 <span aria-hidden="true">
                   <svg viewBox="0 0 24 24" width="20" height="20">
                     <path

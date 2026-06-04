@@ -1,15 +1,20 @@
 import Image from "next/image";
+import { redirect } from "next/navigation";
+import { readCurrentEmployee } from "@/lib/employee-session";
+import { normalizeEmployeeRole } from "@/lib/employee-role";
 
 type EmployeeSidebarProps = {
   active?:
     | "dashboard"
     | "produk"
     | "projek"
+    | "profile"
     | "success"
     | "berita"
     | "whats-new"
     | "pemesanan"
-    | "kontak";
+    | "kontak"
+    | "akun";
 };
 
 const menuItems = [
@@ -30,7 +35,7 @@ const menuItems = [
   },
   {
     key: "success",
-    label: "Success History",
+    label: "Cerita Sukses",
     href: "/dashboard_karyawan/success-history",
   },
   {
@@ -53,9 +58,23 @@ const menuItems = [
     label: "Kontak Pelanggan",
     href: "/dashboard_karyawan/kontak-pelanggan",
   },
+  {
+    key: "akun",
+    label: "Kelola Akun",
+    href: "/dashboard_karyawan/kelola-akun",
+  },
 ] as const;
 
-export function EmployeeSidebar({ active }: EmployeeSidebarProps) {
+export async function EmployeeSidebar({ active }: EmployeeSidebarProps) {
+  const employee = await readCurrentEmployee();
+  if (employee?.mustChangePassword && active !== "profile") {
+    redirect("/dashboard_karyawan/profile?forceReset=1");
+  }
+  const isAdmin = normalizeEmployeeRole(employee?.role) === "admin";
+  const visibleMenuItems = menuItems.filter(
+    (item) => item.key !== "akun" || isAdmin,
+  );
+
   return (
     <aside className="project-sidebar">
       <div className="project-brand">
@@ -69,7 +88,7 @@ export function EmployeeSidebar({ active }: EmployeeSidebarProps) {
       </div>
       <p className="project-menu-label">Menu</p>
       <nav className="project-nav">
-        {menuItems.map((item) => (
+        {visibleMenuItems.map((item) => (
           <a
             key={item.key}
             className={`project-link${active === item.key ? " active" : ""}`}

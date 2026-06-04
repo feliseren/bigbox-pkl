@@ -2,6 +2,7 @@ import Image from "next/image";
 import { readEmployeeSessionId } from "@/lib/auth";
 import ChipsInput from "@/components/chips-input";
 import { prisma } from "@/lib/prisma";
+import { normalizeEmployeeRole } from "@/lib/employee-role";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
 import SuccessHistoryEditor from "@/components/success-history-editor";
@@ -15,7 +16,7 @@ export default async function SuccessHistoryPage() {
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
   const employeeName = employee?.fullName ?? "Karyawan";
-  const roleName = employee?.role.toLowerCase();
+  const roleName = normalizeEmployeeRole(employee?.role);
   const canManageNews =
     roleName === "project manager" || roleName === "project_management";
 

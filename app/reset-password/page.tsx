@@ -1,5 +1,5 @@
 type ResetPasswordPageProps = {
-  searchParams?: Promise<{ token?: string; error?: string }>;
+  searchParams?: Promise<{ token?: string; error?: string; type?: string }>;
 };
 
 export default async function ResetPasswordPage({
@@ -8,6 +8,7 @@ export default async function ResetPasswordPage({
   const params = (await searchParams) ?? {};
   const token = params.token ?? "";
   const error = params.error ?? "";
+  const type = params.type ?? "customer";
 
   return (
     <div className="min-h-screen bg-[#14121d] px-6 py-12">
@@ -36,6 +37,7 @@ export default async function ResetPasswordPage({
           action="/api/password-reset/confirm"
         >
           <input type="hidden" name="token" value={token} />
+          <input type="hidden" name="type" value={type} />
           <div>
             <label
               className="text-sm font-semibold text-[#3a3a3a]"

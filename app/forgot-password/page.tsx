@@ -1,5 +1,5 @@
 type ForgotPasswordPageProps = {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string; status?: string }>;
 };
 
 export default async function ForgotPasswordPage({
@@ -7,6 +7,7 @@ export default async function ForgotPasswordPage({
 }: ForgotPasswordPageProps) {
   const params = (await searchParams) ?? {};
   const error = params.error ?? "";
+  const status = params.status ?? "";
 
   return (
     <div className="min-h-screen bg-[#14121d] px-6 py-12">
@@ -15,12 +16,22 @@ export default async function ForgotPasswordPage({
           Lupa Password
         </h1>
         <p className="mt-2 text-sm text-[#6b6b6b]">
-          Masukkan email Anda untuk menerima link reset password.
+          Masukkan email Anda untuk mengajukan reset password ke admin.
         </p>
 
         {error === "1" && (
           <p className="mt-4 text-sm font-semibold text-[#c0392b]">
             Email tidak ditemukan atau tidak valid.
+          </p>
+        )}
+        {status === "requested" && (
+          <p className="mt-4 text-sm font-semibold text-[#2d7a4f]">
+            Permintaan reset password sudah diajukan ke admin.
+          </p>
+        )}
+        {status === "pending" && (
+          <p className="mt-4 text-sm font-semibold text-[#8a6d1d]">
+            Permintaan reset masih menunggu persetujuan admin.
           </p>
         )}
 

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { normalizeEmployeeRole } from "@/lib/employee-role";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { ProductActionButtons } from "@/components/product-action-buttons";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
@@ -22,7 +23,7 @@ export default async function BigSocialPage() {
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
-  const roleName = employee?.role.toLowerCase();
+  const roleName = normalizeEmployeeRole(employee?.role);
   const canManageProducts =
     roleName === "admin" || roleName === "marketing";
   const [products, orders] = await Promise.all([

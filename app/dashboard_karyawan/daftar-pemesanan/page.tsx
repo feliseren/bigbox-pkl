@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
+import { normalizeEmployeeRole } from "@/lib/employee-role";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
@@ -33,7 +34,7 @@ export default async function DaftarPemesananPage({
   const employee = employeeId
     ? await prisma.employee.findUnique({ where: { id: employeeId } })
     : null;
-  const canConfirmOrders = employee?.role.toLowerCase() === "admin";
+  const canConfirmOrders = normalizeEmployeeRole(employee?.role) === "admin";
   const orders = await prisma.order.findMany({
     orderBy: { createdAt: "desc" },
     include: { product: true, payment: true },

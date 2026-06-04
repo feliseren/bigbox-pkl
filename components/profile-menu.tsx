@@ -27,6 +27,7 @@ export function ProfileMenu({ fullName }: ProfileMenuProps) {
         className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#524a4e]"
         onClick={() => setOpen((prev) => !prev)}
         type="button"
+        suppressHydrationWarning
       >
         Profil
       </button>
@@ -40,6 +41,7 @@ export function ProfileMenu({ fullName }: ProfileMenuProps) {
             <button
               className="w-full px-3 py-2 text-left text-[#3a3a3a] hover:bg-[#f5f5f5]"
               type="submit"
+              suppressHydrationWarning
             >
               Keluar
             </button>

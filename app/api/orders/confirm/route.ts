@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
+import { normalizeEmployeeRole } from "@/lib/employee-role";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId }, select: { role: true },
   });
-  const roleName = employee?.role.toLowerCase();
+  const roleName = normalizeEmployeeRole(employee?.role);
   if (!employee || roleName !== "admin") {
     return NextResponse.redirect(
       new URL("/dashboard_karyawan/daftar-pemesanan?error=forbidden", request.url),

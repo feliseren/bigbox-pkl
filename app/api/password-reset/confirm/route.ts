@@ -1,32 +1,43 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
-import { findValidToken } from "@/lib/password-reset";
+import {
+  completePasswordResetRequest,
+  findValidPasswordResetRequestToken,
+} from "@/lib/password-reset-requests";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
   const token = String(formData.get("token") || "").trim();
   const password = String(formData.get("password") || "");
+  const type = String(formData.get("type") || "customer").trim();
 
   if (!token || !password) {
     return NextResponse.redirect(new URL("/reset-password?error=1", request.url));
   }
 
-  const tokenRecord = await findValidToken(token);
+  const tokenRecord = await findValidPasswordResetRequestToken(token);
   if (!tokenRecord) {
     return NextResponse.redirect(new URL("/reset-password?error=2", request.url));
   }
 
   const hashedPassword = await hashPassword(password);
-  await prisma.user.update({
-    where: { id: tokenRecord.userId },
-    data: { password: hashedPassword },
-  });
+  if (tokenRecord.userId) {
+    await prisma.user.update({
+      where: { id: tokenRecord.userId },
+      data: { password: hashedPassword, hasLocalPassword: true },
+    });
+  } else if (tokenRecord.employeeId) {
+    await prisma.employee.update({
+      where: { id: tokenRecord.employeeId },
+      data: { password: hashedPassword },
+    });
+  } else {
+    return NextResponse.redirect(new URL("/reset-password?error=2", request.url));
+  }
 
-  await prisma.passwordResetToken.update({
-    where: { id: tokenRecord.id },
-    data: { usedAt: new Date() },
-  });
+  await completePasswordResetRequest(tokenRecord.id);
 
-  return NextResponse.redirect(new URL("/login?reset=2", request.url));
+  const destination = type === "employee" ? "/login_karyawan?reset=2" : "/login?reset=2";
+  return NextResponse.redirect(new URL(destination, request.url));
 }

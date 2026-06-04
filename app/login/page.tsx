@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ResetRequestLink } from "@/components/reset-request-link";
 
 type LoginPageProps = {
   searchParams?: Promise<{ error?: string; reset?: string }>;
@@ -91,7 +92,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               ) : null}
               {reset === "1" && (
                 <p className="text-sm font-semibold text-[#2d7a4f]">
-                  Link reset sudah dikirim ke email Anda.
+                  Permintaan reset password sudah diajukan ke admin.
                 </p>
               )}
               {reset === "2" && (
@@ -111,9 +112,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 <label htmlFor="remember">Ingat saya</label>
               </div>
 
-              <a className="text-[10px] font-semibold text-[#3f4ce0] sm:text-[11px]" href="/forgot-password">
+              <ResetRequestLink
+                className="text-[10px] font-semibold text-[#3f4ce0] sm:text-[11px]"
+                href="/forgot-password"
+              >
                 Lupa Kata Sandi?
-              </a>
+              </ResetRequestLink>
 
               <button
                 className="mt-1 w-full rounded-lg bg-[#151a5b] py-1.5 text-sm font-semibold text-white"
