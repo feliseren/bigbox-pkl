@@ -22,11 +22,19 @@ export async function POST(request: Request) {
   const result = await requestEmployeePasswordReset(employee.id);
   if (result.kind === "issued") {
     return NextResponse.redirect(
-      new URL(`/reset-password?token=${result.token}&type=employee`, request.url),
+      new URL(
+        `/reset-password?token=${result.token}&type=employee&status=approved`,
+        request.url,
+      ),
     );
   }
 
-  const status = result.kind === "pending" ? "pending" : "requested";
+  const status =
+    result.kind === "pending"
+      ? "pending"
+      : result.kind === "requested_after_rejected"
+        ? "rejected_requested"
+        : "requested";
   return NextResponse.redirect(
     new URL(`/forgot-password-karyawan?status=${status}`, request.url),
   );

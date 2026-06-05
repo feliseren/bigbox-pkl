@@ -1,5 +1,10 @@
 type ResetPasswordPageProps = {
-  searchParams?: Promise<{ token?: string; error?: string; type?: string }>;
+  searchParams?: Promise<{
+    token?: string;
+    error?: string;
+    type?: string;
+    status?: string;
+  }>;
 };
 
 export default async function ResetPasswordPage({
@@ -9,6 +14,7 @@ export default async function ResetPasswordPage({
   const token = params.token ?? "";
   const error = params.error ?? "";
   const type = params.type ?? "customer";
+  const status = params.status ?? "";
 
   return (
     <div className="min-h-screen bg-[#14121d] px-6 py-12">
@@ -28,6 +34,11 @@ export default async function ResetPasswordPage({
         {error === "2" && (
           <p className="mt-4 text-sm font-semibold text-[#c0392b]">
             Token reset sudah kadaluarsa atau sudah digunakan.
+          </p>
+        )}
+        {status === "approved" && (
+          <p className="mt-4 text-sm font-semibold text-[#2d7a4f]">
+            Pengajuan reset password sudah disetujui. Silakan buat password baru.
           </p>
         )}
 

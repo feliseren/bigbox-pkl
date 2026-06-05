@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashPassword, readSessionUserId, verifyPassword } from "@/lib/auth";
+import {
+  clearSessionCookie,
+  hashPassword,
+  readSessionUserId,
+  verifyPassword,
+} from "@/lib/auth";
 
 export async function POST(request: Request) {
   const userId = await readSessionUserId();
@@ -43,6 +48,9 @@ export async function POST(request: Request) {
     data: { password: hashed, hasLocalPassword: true },
   });
 
-  const successParam = wasLocal ? "1" : "2";
-  return NextResponse.redirect(new URL(`/profile?success=${successParam}`, request.url));
+  const response = NextResponse.redirect(
+    new URL("/login?reset=2", request.url),
+  );
+  response.cookies.set(clearSessionCookie());
+  return response;
 }

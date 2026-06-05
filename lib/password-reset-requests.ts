@@ -17,7 +17,6 @@ function approvedOrIssuedFilter() {
 }
 
 export async function requestCustomerPasswordReset(userId: string) {
-  const now = new Date();
   const activeRequest = await prisma.passwordResetRequest.findFirst({
     where: {
       userId,
@@ -49,6 +48,11 @@ export async function requestCustomerPasswordReset(userId: string) {
     return { kind: "pending" as const };
   }
 
+  const latestRequest = await prisma.passwordResetRequest.findFirst({
+    where: { userId },
+    orderBy: [{ updatedAt: "desc" }],
+  });
+
   await prisma.passwordResetRequest.create({
     data: {
       accountType: "customer",
@@ -62,7 +66,12 @@ export async function requestCustomerPasswordReset(userId: string) {
     },
   });
 
-  return { kind: "requested" as const };
+  return {
+    kind:
+      latestRequest?.status === "rejected"
+        ? ("requested_after_rejected" as const)
+        : ("requested" as const),
+  };
 }
 
 export async function requestEmployeePasswordReset(employeeId: string) {
@@ -97,6 +106,11 @@ export async function requestEmployeePasswordReset(employeeId: string) {
     return { kind: "pending" as const };
   }
 
+  const latestRequest = await prisma.passwordResetRequest.findFirst({
+    where: { employeeId },
+    orderBy: [{ updatedAt: "desc" }],
+  });
+
   await prisma.passwordResetRequest.create({
     data: {
       accountType: "employee",
@@ -110,7 +124,12 @@ export async function requestEmployeePasswordReset(employeeId: string) {
     },
   });
 
-  return { kind: "requested" as const };
+  return {
+    kind:
+      latestRequest?.status === "rejected"
+        ? ("requested_after_rejected" as const)
+        : ("requested" as const),
+  };
 }
 
 export async function approvePasswordResetRequest(id: string, approvedById: string) {

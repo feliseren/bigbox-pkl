@@ -34,6 +34,11 @@ export default async function ForgotPasswordPage({
             Permintaan reset masih menunggu persetujuan admin.
           </p>
         )}
+        {status === "rejected_requested" && (
+          <p className="mt-4 text-sm font-semibold text-[#8a6d1d]">
+            Pengajuan reset sebelumnya ditolak. Permintaan baru sudah diajukan ke admin.
+          </p>
+        )}
 
         <form
           className="mt-6 space-y-4"

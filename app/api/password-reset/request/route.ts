@@ -18,10 +18,18 @@ export async function POST(request: Request) {
   const result = await requestCustomerPasswordReset(user.id);
   if (result.kind === "issued") {
     return NextResponse.redirect(
-      new URL(`/reset-password?token=${result.token}&type=customer`, request.url),
+      new URL(
+        `/reset-password?token=${result.token}&type=customer&status=approved`,
+        request.url,
+      ),
     );
   }
 
-  const status = result.kind === "pending" ? "pending" : "requested";
+  const status =
+    result.kind === "pending"
+      ? "pending"
+      : result.kind === "requested_after_rejected"
+        ? "rejected_requested"
+        : "requested";
   return NextResponse.redirect(new URL(`/forgot-password?status=${status}`, request.url));
 }

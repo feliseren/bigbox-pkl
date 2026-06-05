@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { hashPassword, readEmployeeSessionId, verifyPassword } from "@/lib/auth";
+import {
+  clearEmployeeSessionCookie,
+  hashPassword,
+  readEmployeeSessionId,
+  verifyPassword,
+} from "@/lib/auth";
 
 export async function POST(request: Request) {
   const employeeId = await readEmployeeSessionId();
@@ -43,8 +48,10 @@ export async function POST(request: Request) {
     data: { password: hashed, mustChangePassword: false },
   });
 
-  return NextResponse.redirect(
-    new URL("/dashboard_karyawan/profile?success=1", request.url),
+  const response = NextResponse.redirect(
+    new URL("/login_karyawan?reset=2", request.url),
   );
+  response.cookies.set(clearEmployeeSessionCookie());
+  return response;
 }
 
