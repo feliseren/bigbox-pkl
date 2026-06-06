@@ -1,0 +1,17 @@
+.git
+.github
+.next
+node_modules
+.env.local
+.env
+coverage
+build
+out
+*.log
+*.tsbuildinfo
+
+# Local/generated uploads should live on a Railway volume in production.
+public/uploads
+
+# Local helper files not needed for deployment.
+tmp-prisma-migrations.js
