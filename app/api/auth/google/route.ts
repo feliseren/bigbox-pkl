@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { toAppUrl } from "@/lib/app-url";
 
 const OAUTH_STATE_COOKIE = "bb_oauth_state";
 
 function getRedirectUri(requestUrl: string) {
-  const origin = new URL(requestUrl).origin;
-  return process.env.GOOGLE_REDIRECT_URI || `${origin}/api/auth/google/callback`;
+  return process.env.GOOGLE_REDIRECT_URI || toAppUrl("/api/auth/google/callback", requestUrl).toString();
 }
 
 export async function GET(request: Request) {
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
   if (!clientId || !clientSecret) {
-    return NextResponse.redirect(new URL("/login?error=google_config", request.url));
+    return NextResponse.redirect(toAppUrl("/login?error=google_config", request.url));
   }
 
   const state = crypto.randomBytes(16).toString("hex");

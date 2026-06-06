@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSessionCookie, hashPassword } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -10,15 +11,15 @@ export async function POST(request: Request) {
   const agreement = formData.get("agreement") === "1";
 
   if (!fullName || !email || !password) {
-    return NextResponse.redirect(new URL("/signup?error=1", request.url));
+    return NextResponse.redirect(toAppUrl("/signup?error=1", request.url));
   }
   if (!agreement) {
-    return NextResponse.redirect(new URL("/signup?error=terms", request.url));
+    return NextResponse.redirect(toAppUrl("/signup?error=terms", request.url));
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    return NextResponse.redirect(new URL("/signup?error=exists", request.url));
+    return NextResponse.redirect(toAppUrl("/signup?error=exists", request.url));
   }
 
   const hashed = await hashPassword(password);
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
     },
   });
 
-  const response = NextResponse.redirect(new URL("/", request.url));
+  const response = NextResponse.redirect(toAppUrl("/", request.url));
   response.cookies.set(createSessionCookie(user.id));
   return response;
 }

@@ -6,11 +6,12 @@ import {
   readEmployeeSessionId,
   verifyPassword,
 } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 
 export async function POST(request: Request) {
   const employeeId = await readEmployeeSessionId();
   if (!employeeId) {
-    return NextResponse.redirect(new URL("/login_karyawan", request.url));
+    return NextResponse.redirect(toAppUrl("/login_karyawan", request.url));
   }
 
   const formData = await request.formData();
@@ -20,25 +21,25 @@ export async function POST(request: Request) {
 
   if (!currentPassword || !newPassword || !confirmPassword) {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/profile?error=1", request.url),
+      toAppUrl("/dashboard_karyawan/profile?error=1", request.url),
     );
   }
 
   if (newPassword !== confirmPassword) {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/profile?error=2", request.url),
+      toAppUrl("/dashboard_karyawan/profile?error=2", request.url),
     );
   }
 
   const employee = await prisma.employee.findUnique({ where: { id: employeeId } });
   if (!employee) {
-    return NextResponse.redirect(new URL("/login_karyawan", request.url));
+    return NextResponse.redirect(toAppUrl("/login_karyawan", request.url));
   }
 
   const isValid = await verifyPassword(currentPassword, employee.password);
   if (!isValid) {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/profile?error=3", request.url),
+      toAppUrl("/dashboard_karyawan/profile?error=3", request.url),
     );
   }
 
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
   });
 
   const response = NextResponse.redirect(
-    new URL("/login_karyawan?reset=2", request.url),
+    toAppUrl("/login_karyawan?reset=2", request.url),
   );
   response.cookies.set(clearEmployeeSessionCookie());
   return response;

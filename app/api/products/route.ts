@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { normalizeEmployeeRole } from "@/lib/employee-role";
+import { toAppUrl } from "@/lib/app-url";
 
 type ProductType = "big-assistant" | "big-legal" | "big-social" | "big-vision";
 
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
 
   const employeeId = await readEmployeeSessionId();
   if (!employeeId) {
-    return NextResponse.redirect(new URL("/login_karyawan", request.url));
+    return NextResponse.redirect(toAppUrl("/login_karyawan", request.url));
   }
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId }, select: { role: true },
@@ -44,11 +45,11 @@ export async function POST(request: Request) {
     !employee ||
     (roleName !== "admin" && roleName !== "marketing")
   ) {
-    return NextResponse.redirect(new URL(`${redirectTo}?error=forbidden`, request.url));
+    return NextResponse.redirect(toAppUrl(`${redirectTo}?error=forbidden`, request.url));
   }
 
   if (!productType || !name || !price || !description || !duration) {
-    return NextResponse.redirect(new URL(redirectTo, request.url));
+    return NextResponse.redirect(toAppUrl(redirectTo, request.url));
   }
 
   const categoryName = productCategoryByType[productType];
@@ -57,7 +58,7 @@ export async function POST(request: Request) {
     select: { id: true },
   });
   if (!category) {
-    return NextResponse.redirect(new URL(`${redirectTo}?error=category`, request.url));
+    return NextResponse.redirect(toAppUrl(`${redirectTo}?error=category`, request.url));
   }
   const id = await generateUniqueId();
 
@@ -73,6 +74,6 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.redirect(new URL(redirectTo, request.url));
+  return NextResponse.redirect(toAppUrl(redirectTo, request.url));
 }
 

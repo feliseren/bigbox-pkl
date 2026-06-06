@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSessionCookie, hashPassword } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 
 const OAUTH_STATE_COOKIE = "bb_oauth_state";
 
@@ -17,8 +18,7 @@ type GoogleUserInfo = {
 };
 
 function getRedirectUri(requestUrl: string) {
-  const origin = new URL(requestUrl).origin;
-  return process.env.GOOGLE_REDIRECT_URI || `${origin}/api/auth/google/callback`;
+  return process.env.GOOGLE_REDIRECT_URI || toAppUrl("/api/auth/google/callback", requestUrl).toString();
 }
 
 export async function GET(request: Request) {
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
     if (!code || !state || !clientId || !clientSecret) {
-      return NextResponse.redirect(new URL("/login?error=google", request.url));
+      return NextResponse.redirect(toAppUrl("/login?error=google", request.url));
     }
 
     const cookieState = request.headers.get("cookie")?.match(
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     )?.[1];
 
     if (!cookieState || cookieState !== state) {
-      return NextResponse.redirect(new URL("/login?error=google_state", request.url));
+      return NextResponse.redirect(toAppUrl("/login?error=google_state", request.url));
     }
 
     const redirectUri = getRedirectUri(request.url);
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
 
     const tokenJson = (await tokenResponse.json()) as GoogleTokenResponse;
     if (!tokenJson.access_token) {
-      return NextResponse.redirect(new URL("/login?error=google_token", request.url));
+      return NextResponse.redirect(toAppUrl("/login?error=google_token", request.url));
     }
 
     const userInfoResponse = await fetch(
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
     const emailVerified = Boolean(userInfo.email_verified);
 
     if (!email || !emailVerified) {
-      return NextResponse.redirect(new URL("/login?error=google_email", request.url));
+      return NextResponse.redirect(toAppUrl("/login?error=google_email", request.url));
     }
 
     let user = await prisma.user.findUnique({ where: { email } });
@@ -94,7 +94,7 @@ export async function GET(request: Request) {
       });
     }
 
-    const response = NextResponse.redirect(new URL("/", request.url));
+    const response = NextResponse.redirect(toAppUrl("/", request.url));
     response.cookies.set(createSessionCookie(user.id, true));
     response.cookies.set({
       name: OAUTH_STATE_COOKIE,
@@ -118,7 +118,7 @@ export async function GET(request: Request) {
     return response;
   } catch (error) {
     console.error("Google login failed:", error);
-    return NextResponse.redirect(new URL("/login?error=google", request.url));
+    return NextResponse.redirect(toAppUrl("/login?error=google", request.url));
   }
 }
 

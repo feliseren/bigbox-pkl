@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { clearSessionCookie } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 
 export async function POST(request: Request) {
-  const response = NextResponse.redirect(new URL("/", request.url));
+  const response = NextResponse.redirect(toAppUrl("/", request.url));
   response.cookies.set(clearSessionCookie());
   response.cookies.set({
     name: "bb_remember",
