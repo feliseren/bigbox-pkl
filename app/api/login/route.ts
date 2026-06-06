@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSessionCookie, verifyPassword } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 
 export async function POST(request: Request) {
   try {
@@ -10,20 +11,20 @@ export async function POST(request: Request) {
     const remember = formData.get("remember") === "1";
 
     if (!email || !password) {
-      return NextResponse.redirect(new URL("/login?error=1", request.url));
+      return NextResponse.redirect(toAppUrl("/login?error=1", request.url));
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return NextResponse.redirect(new URL("/login?error=1", request.url));
+      return NextResponse.redirect(toAppUrl("/login?error=1", request.url));
     }
 
     const isValid = await verifyPassword(password, user.password);
     if (!isValid) {
-      return NextResponse.redirect(new URL("/login?error=1", request.url));
+      return NextResponse.redirect(toAppUrl("/login?error=1", request.url));
     }
 
-    const response = NextResponse.redirect(new URL("/", request.url));
+    const response = NextResponse.redirect(toAppUrl("/", request.url));
     response.cookies.set(createSessionCookie(user.id, remember));
     response.cookies.set({
       name: "bb_remember",
@@ -37,6 +38,6 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     console.error("Customer login failed:", error);
-    return NextResponse.redirect(new URL("/login?error=db", request.url));
+    return NextResponse.redirect(toAppUrl("/login?error=db", request.url));
   }
 }
