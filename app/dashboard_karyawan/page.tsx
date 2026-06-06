@@ -629,8 +629,8 @@ export default async function DashboardKaryawanPage({
                   {revenueRange.rangeLabelDisplay}
                 </div>
               </div>
-              <div className="mt-4 overflow-hidden rounded-xl border border-slate-200">
-                <div className="grid grid-cols-[40px_1.4fr_1fr_1fr_1fr] gap-3 bg-slate-50 px-4 py-2 text-[11px] font-semibold text-[#7a8092]">
+              <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
+                <div className="grid min-w-[720px] grid-cols-[40px_1.4fr_1fr_1fr_1fr] gap-3 bg-slate-50 px-4 py-2 text-[11px] font-semibold text-[#7a8092]">
                   <span>#</span>
                   <span>Nama Produk</span>
                   <span>Harga Produk</span>
@@ -640,7 +640,7 @@ export default async function DashboardKaryawanPage({
                 {topProducts.map((item, index) => (
                   <div
                     key={`${item.name}-${index}`}
-                    className="grid grid-cols-[40px_1.4fr_1fr_1fr_1fr] gap-3 border-t border-slate-200 px-4 py-3 text-xs text-[#2b2f3b]"
+                    className="grid min-w-[720px] grid-cols-[40px_1.4fr_1fr_1fr_1fr] gap-3 border-t border-slate-200 px-4 py-3 text-xs text-[#2b2f3b]"
                   >
                     <span>{String(index + 1).padStart(2, "0")}</span>
                     <span>{item.name}</span>

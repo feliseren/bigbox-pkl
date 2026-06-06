@@ -76,37 +76,79 @@ export async function EmployeeSidebar({ active }: EmployeeSidebarProps) {
   );
 
   return (
-    <aside className="project-sidebar">
-      <div className="project-brand">
-        <Image
-          src="/bigbox_logo-removebg-preview.png"
-          alt="BigBox logo"
-          width={160}
-          height={52}
-          className="project-logo"
-        />
+    <>
+      <div className="project-mobile-nav">
+        <details className="project-mobile-nav-details">
+          <summary className="project-mobile-nav-summary">
+            <span>Menu Dashboard</span>
+            <span aria-hidden="true">+</span>
+          </summary>
+          <div className="project-mobile-nav-panel">
+            <div className="project-mobile-brand">
+              <Image
+                src="/bigbox_logo-removebg-preview.png"
+                alt="BigBox logo"
+                width={160}
+                height={52}
+                className="project-logo"
+              />
+            </div>
+            <nav className="project-mobile-links">
+              {visibleMenuItems.map((item) => (
+                <a
+                  key={item.key}
+                  className={`project-link${active === item.key ? " active" : ""}`}
+                  href={item.href}
+                >
+                  <span className="project-link-label">{item.label}</span>
+                </a>
+              ))}
+            </nav>
+            <form
+              className="project-logout-form"
+              method="post"
+              action="/api/logout_karyawan"
+            >
+              <button className="project-logout" type="submit">
+                Keluar
+              </button>
+            </form>
+          </div>
+        </details>
       </div>
-      <p className="project-menu-label">Menu</p>
-      <nav className="project-nav">
-        {visibleMenuItems.map((item) => (
-          <a
-            key={item.key}
-            className={`project-link${active === item.key ? " active" : ""}`}
-            href={item.href}
-          >
-            <span className="project-link-label">{item.label}</span>
-          </a>
-        ))}
-      </nav>
-      <form
-        className="project-logout-form"
-        method="post"
-        action="/api/logout_karyawan"
-      >
-        <button className="project-logout" type="submit">
-          Keluar
-        </button>
-      </form>
-    </aside>
+
+      <aside className="project-sidebar">
+        <div className="project-brand">
+          <Image
+            src="/bigbox_logo-removebg-preview.png"
+            alt="BigBox logo"
+            width={160}
+            height={52}
+            className="project-logo"
+          />
+        </div>
+        <p className="project-menu-label">Menu</p>
+        <nav className="project-nav">
+          {visibleMenuItems.map((item) => (
+            <a
+              key={item.key}
+              className={`project-link${active === item.key ? " active" : ""}`}
+              href={item.href}
+            >
+              <span className="project-link-label">{item.label}</span>
+            </a>
+          ))}
+        </nav>
+        <form
+          className="project-logout-form"
+          method="post"
+          action="/api/logout_karyawan"
+        >
+          <button className="project-logout" type="submit">
+            Keluar
+          </button>
+        </form>
+      </aside>
+    </>
   );
 }

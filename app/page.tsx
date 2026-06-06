@@ -124,7 +124,7 @@ export default async function Home() {
   return (
     <div className="min-h-screen bg-[var(--bg)]">
       <header className="sticky top-0 z-30 site-header">
-        <div className="mx-auto flex h-[60px] max-w-[1237px] items-center justify-between px-6">
+        <div className="mx-auto flex min-h-[60px] max-w-[1237px] items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link className="flex items-center gap-3" href="/">
             <Image
               src="/bigbox_logo-removebg-preview.png"
@@ -149,14 +149,31 @@ export default async function Home() {
               Daftar Pembaruan
             </Link>
           </nav>
+          <details className="site-mobile-menu md:hidden">
+            <summary className="site-mobile-menu-trigger">Menu</summary>
+            <nav className="site-mobile-menu-panel">
+              <Link className="site-mobile-menu-link" href="/">
+                Beranda
+              </Link>
+              <Link className="site-mobile-menu-link" href="/produk">
+                Produk
+              </Link>
+              <Link className="site-mobile-menu-link" href="/cerita-kami">
+                Cerita Kami
+              </Link>
+              <Link className="site-mobile-menu-link" href="/whats-new">
+                Daftar Pembaruan
+              </Link>
+            </nav>
+          </details>
           {user ? (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <NotificationBell items={notifications} />
               <ProfileMenu fullName={user.fullName} />
             </div>
           ) : (
             <Link
-              className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[#524a4e]"
+              className="flex items-center gap-2 rounded-md bg-[var(--accent)] px-3 py-2 text-sm font-semibold text-[#524a4e] sm:px-4"
               href="/login"
             >
               Masuk
@@ -230,7 +247,7 @@ export default async function Home() {
 
         <section className="mx-auto max-w-[1237px] px-6 py-14">
           <div className="mb-10 text-center">
-            <h2 className="text-[36px] font-bold text-[var(--ink)]">
+            <h2 className="text-[28px] font-bold text-[var(--ink)] md:text-[36px]">
               Berkolaborasi & Membantu Banyak Pihak
             </h2>
             <div className="mx-auto mt-3 h-[4px] w-[760px] max-w-full bg-[var(--ink)]" />
@@ -248,12 +265,14 @@ export default async function Home() {
                     fill
                     className="zoom-image object-cover group-hover:scale-110 transition-transform duration-300"
                   />
-                  <div className="absolute inset-x-0 top-6 text-center text-[24px] font-bold text-white drop-shadow">
+                  <div className="absolute inset-x-0 top-6 px-4 text-center text-[20px] font-bold text-white drop-shadow md:text-[24px]">
                     {item.stat}
                   </div>
                 </div>
                 <div className="px-5 py-6 text-center">
-                  <p className="text-[20px] font-bold text-black">{item.desc}</p>
+                  <p className="text-[16px] font-bold text-black md:text-[20px]">
+                    {item.desc}
+                  </p>
                 </div>
               </div>
             ))}
@@ -262,7 +281,9 @@ export default async function Home() {
 
         <section className="mx-auto max-w-[1237px] px-6 py-8">
           <div className="mb-10 text-center">
-            <h2 className="text-[36px] font-bold text-[var(--ink)]">PENGHARGAAN</h2>
+            <h2 className="text-[28px] font-bold text-[var(--ink)] md:text-[36px]">
+              PENGHARGAAN
+            </h2>
             <div className="mx-auto mt-3 h-[4px] w-[147px] bg-[var(--ink)]" />
           </div>
           <div className="award-surface">
@@ -357,7 +378,7 @@ export default async function Home() {
               Conditions
             </p>
           </div>
-          <div className="space-y-2 text-right md:justify-self-end">
+          <div className="space-y-2 text-left md:justify-self-end md:text-right">
             <p className="text-[14px] font-semibold uppercase tracking-[0.06em] text-white">
               Tentang Kami
             </p>
