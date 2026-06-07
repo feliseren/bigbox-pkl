@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { hashPassword } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 import { normalizeEmployeeRole } from "@/lib/employee-role";
 import { readCurrentEmployee } from "@/lib/employee-session";
 import { prisma } from "@/lib/prisma";
@@ -10,7 +11,7 @@ export async function POST(request: Request) {
 
   if (!currentEmployee || roleName !== "admin") {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan?error=forbidden", request.url),
+      toAppUrl("/dashboard_karyawan?error=forbidden", request.url),
     );
   }
 
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
 
   if (!employeeId || !fullName || !roleId) {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/kelola-akun?error=invalid_role", request.url),
+      toAppUrl("/dashboard_karyawan/kelola-akun?error=invalid_role", request.url),
     );
   }
 
@@ -32,13 +33,13 @@ export async function POST(request: Request) {
 
   if (existingEmployee) {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/kelola-akun?error=employee_exists", request.url),
+      toAppUrl("/dashboard_karyawan/kelola-akun?error=employee_exists", request.url),
     );
   }
 
   if (!role) {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/kelola-akun?error=invalid_role", request.url),
+      toAppUrl("/dashboard_karyawan/kelola-akun?error=invalid_role", request.url),
     );
   }
 
@@ -54,6 +55,6 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.redirect(
-    new URL("/dashboard_karyawan/kelola-akun?success=employee_created", request.url),
+    toAppUrl("/dashboard_karyawan/kelola-akun?success=employee_created", request.url),
   );
 }

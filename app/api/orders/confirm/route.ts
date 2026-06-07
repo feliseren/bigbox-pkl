@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 import { normalizeEmployeeRole } from "@/lib/employee-role";
 
 export async function POST(request: Request) {
@@ -9,7 +10,7 @@ export async function POST(request: Request) {
   const employeeId = await readEmployeeSessionId();
 
   if (!employeeId) {
-    return NextResponse.redirect(new URL("/login_karyawan", request.url));
+    return NextResponse.redirect(toAppUrl("/login_karyawan", request.url));
   }
 
   const employee = await prisma.employee.findUnique({
@@ -18,13 +19,13 @@ export async function POST(request: Request) {
   const roleName = normalizeEmployeeRole(employee?.role);
   if (!employee || roleName !== "admin") {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/daftar-pemesanan?error=forbidden", request.url),
+      toAppUrl("/dashboard_karyawan/daftar-pemesanan?error=forbidden", request.url),
     );
   }
 
   if (!orderId) {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/daftar-pemesanan?error=1", request.url),
+      toAppUrl("/dashboard_karyawan/daftar-pemesanan?error=1", request.url),
     );
   }
 
@@ -34,6 +35,6 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.redirect(
-    new URL("/dashboard_karyawan/daftar-pemesanan", request.url),
+    toAppUrl("/dashboard_karyawan/daftar-pemesanan", request.url),
   );
 }

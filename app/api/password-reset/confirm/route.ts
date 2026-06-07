@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 import {
   completePasswordResetRequest,
   findValidPasswordResetRequestToken,
@@ -13,12 +14,12 @@ export async function POST(request: Request) {
   const type = String(formData.get("type") || "customer").trim();
 
   if (!token || !password) {
-    return NextResponse.redirect(new URL("/reset-password?error=1", request.url));
+    return NextResponse.redirect(toAppUrl("/reset-password?error=1", request.url));
   }
 
   const tokenRecord = await findValidPasswordResetRequestToken(token);
   if (!tokenRecord) {
-    return NextResponse.redirect(new URL("/reset-password?error=2", request.url));
+    return NextResponse.redirect(toAppUrl("/reset-password?error=2", request.url));
   }
 
   const hashedPassword = await hashPassword(password);
@@ -33,11 +34,11 @@ export async function POST(request: Request) {
       data: { password: hashedPassword },
     });
   } else {
-    return NextResponse.redirect(new URL("/reset-password?error=2", request.url));
+    return NextResponse.redirect(toAppUrl("/reset-password?error=2", request.url));
   }
 
   await completePasswordResetRequest(tokenRecord.id);
 
   const destination = type === "employee" ? "/login_karyawan?reset=2" : "/login?reset=2";
-  return NextResponse.redirect(new URL(destination, request.url));
+  return NextResponse.redirect(toAppUrl(destination, request.url));
 }

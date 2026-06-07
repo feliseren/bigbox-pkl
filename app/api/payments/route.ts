@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { readSessionUserId } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 import path from "path";
 import { mkdir, writeFile } from "fs/promises";
 
@@ -27,11 +28,11 @@ async function generateUniqueOrderId() {
 export async function POST(request: Request) {
   const userId = await readSessionUserId();
   if (!userId) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(toAppUrl("/login", request.url));
   }
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(toAppUrl("/login", request.url));
   }
 
   const formData = await request.formData();
@@ -42,11 +43,11 @@ export async function POST(request: Request) {
   const paymentProof = formData.get("paymentProof");
 
   if (!productType || !productId || !total || !paymentMethod) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(toAppUrl("/", request.url));
   }
   const categoryName = productCategoryByType[productType];
   if (!categoryName) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(toAppUrl("/", request.url));
   }
   const product = await prisma.product.findFirst({
     where: {
@@ -57,13 +58,13 @@ export async function POST(request: Request) {
     select: { id: true },
   });
   if (!product) {
-    return NextResponse.redirect(new URL("/pembayaran?error=product", request.url));
+    return NextResponse.redirect(toAppUrl("/pembayaran?error=product", request.url));
   }
 
   const proofFile =
     paymentProof && typeof paymentProof !== "string" ? paymentProof : null;
   if (!proofFile) {
-    return NextResponse.redirect(new URL("/pembayaran", request.url));
+    return NextResponse.redirect(toAppUrl("/pembayaran", request.url));
   }
   const originalName = proofFile.name || "bukti";
   const ext = path.extname(originalName).toLowerCase();
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
     orderBy: { createdAt: "asc" },
   });
   if (!defaultConfirmer) {
-    return NextResponse.redirect(new URL("/pembayaran?error=employee", request.url));
+    return NextResponse.redirect(toAppUrl("/pembayaran?error=employee", request.url));
   }
 
   await prisma.$transaction(async (tx) => {
@@ -108,5 +109,5 @@ export async function POST(request: Request) {
     });
   });
 
-  return NextResponse.redirect(new URL("/profile", request.url));
+  return NextResponse.redirect(toAppUrl("/profile", request.url));
 }

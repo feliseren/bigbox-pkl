@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { readSessionUserId } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 
 export const runtime = "nodejs";
 
@@ -15,13 +16,13 @@ export async function POST(request: Request) {
   const userId = await readSessionUserId();
   if (!userId) {
     return NextResponse.redirect(
-      new URL(`/login?redirect=${encodeURIComponent(redirectTo)}`, request.url),
+      toAppUrl(`/login?redirect=${encodeURIComponent(redirectTo)}`, request.url),
       303,
     );
   }
 
   if (!reviewId || !newsId) {
-    return NextResponse.redirect(new URL(redirectTo, request.url), 303);
+    return NextResponse.redirect(toAppUrl(redirectTo, request.url), 303);
   }
 
   const review = await prisma.newsReview.findFirst({
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     select: { userId: true, newsStoryId: true, comment: true },
   });
   if (!review || review.userId !== userId || review.newsStoryId !== newsId) {
-    return NextResponse.redirect(new URL(redirectTo, request.url), 303);
+    return NextResponse.redirect(toAppUrl(redirectTo, request.url), 303);
   }
 
   try {
@@ -53,13 +54,13 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Failed to delete review:", error);
     return NextResponse.redirect(
-      new URL(`${redirectTo}?review=error`, request.url),
+      toAppUrl(`${redirectTo}?review=error`, request.url),
       303,
     );
   }
 
   return NextResponse.redirect(
-    new URL(`${redirectTo}?review=deleted`, request.url),
+    toAppUrl(`${redirectTo}?review=deleted`, request.url),
     303,
   );
 }

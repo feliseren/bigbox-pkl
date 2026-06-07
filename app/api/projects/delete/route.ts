@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 import { normalizeEmployeeRole } from "@/lib/employee-role";
 
 export async function POST(request: Request) {
@@ -9,7 +10,7 @@ export async function POST(request: Request) {
 
   const employeeId = await readEmployeeSessionId();
   if (!employeeId) {
-    return NextResponse.redirect(new URL("/login_karyawan", request.url));
+    return NextResponse.redirect(toAppUrl("/login_karyawan", request.url));
   }
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId }, select: { role: true },
@@ -20,20 +21,20 @@ export async function POST(request: Request) {
     (roleName !== "project manager" && roleName !== "project_management")
   ) {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/daftar-projek?error=forbidden", request.url),
+      toAppUrl("/dashboard_karyawan/daftar-projek?error=forbidden", request.url),
     );
   }
 
   if (!projectId) {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/daftar-projek?error=1", request.url),
+      toAppUrl("/dashboard_karyawan/daftar-projek?error=1", request.url),
     );
   }
 
   const existing = await prisma.project.findUnique({ where: { id: projectId } });
   if (!existing) {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/daftar-projek?error=1", request.url),
+      toAppUrl("/dashboard_karyawan/daftar-projek?error=1", request.url),
     );
   }
   const now = new Date();
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
     prisma.project.delete({ where: { id: projectId } }),
   ]);
 
-  return NextResponse.redirect(new URL("/dashboard_karyawan/daftar-projek", request.url));
+  return NextResponse.redirect(toAppUrl("/dashboard_karyawan/daftar-projek", request.url));
 }
 
 

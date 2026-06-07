@@ -6,11 +6,12 @@ import {
   readSessionUserId,
   verifyPassword,
 } from "@/lib/auth";
+import { toAppUrl } from "@/lib/app-url";
 
 export async function POST(request: Request) {
   const userId = await readSessionUserId();
   if (!userId) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(toAppUrl("/login", request.url));
   }
 
   const formData = await request.formData();
@@ -19,26 +20,26 @@ export async function POST(request: Request) {
   const confirmPassword = String(formData.get("confirmPassword") || "").trim();
 
   if (!newPassword || !confirmPassword) {
-    return NextResponse.redirect(new URL("/profile?error=1", request.url));
+    return NextResponse.redirect(toAppUrl("/profile?error=1", request.url));
   }
 
   if (newPassword !== confirmPassword) {
-    return NextResponse.redirect(new URL("/profile?error=2", request.url));
+    return NextResponse.redirect(toAppUrl("/profile?error=2", request.url));
   }
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(toAppUrl("/login", request.url));
   }
 
   const wasLocal = user.hasLocalPassword;
   if (wasLocal) {
     if (!currentPassword) {
-      return NextResponse.redirect(new URL("/profile?error=1", request.url));
+      return NextResponse.redirect(toAppUrl("/profile?error=1", request.url));
     }
     const isValid = await verifyPassword(currentPassword, user.password);
     if (!isValid) {
-      return NextResponse.redirect(new URL("/profile?error=3", request.url));
+      return NextResponse.redirect(toAppUrl("/profile?error=3", request.url));
     }
   }
 
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
   });
 
   const response = NextResponse.redirect(
-    new URL("/login?reset=2", request.url),
+    toAppUrl("/login?reset=2", request.url),
   );
   response.cookies.set(clearSessionCookie());
   return response;

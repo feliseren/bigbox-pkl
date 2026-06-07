@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { readSessionUserId } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { toAppUrl } from "@/lib/app-url";
 
 function readValue(formData: FormData, key: string) {
   const value = formData.get(key);
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
   const userId = await readSessionUserId();
   if (!userId) {
     return NextResponse.redirect(
-      new URL(`/login?redirect=${encodeURIComponent("/hubungi-kami")}`, request.url),
+      toAppUrl(`/login?redirect=${encodeURIComponent("/hubungi-kami")}`, request.url),
     );
   }
 
@@ -38,7 +39,7 @@ export async function POST(request: Request) {
     !message ||
     !agreement
   ) {
-    return NextResponse.redirect(new URL("/hubungi-kami?error=1", request.url));
+    return NextResponse.redirect(toAppUrl("/hubungi-kami?error=1", request.url));
   }
 
   await prisma.customerContact.create({
@@ -56,5 +57,5 @@ export async function POST(request: Request) {
     },
   });
 
-  return NextResponse.redirect(new URL("/hubungi-kami?success=1", request.url));
+  return NextResponse.redirect(toAppUrl("/hubungi-kami?success=1", request.url));
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { createNews } from "@/lib/news-db";
+import { toAppUrl } from "@/lib/app-url";
 import { prisma } from "@/lib/prisma";
 import { normalizeEmployeeRole } from "@/lib/employee-role";
 import { saveUpload } from "@/lib/upload";
@@ -10,7 +11,7 @@ export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   return NextResponse.redirect(
-    new URL("/dashboard_karyawan/daftar-berita", request.url),
+    toAppUrl("/dashboard_karyawan/daftar-berita", request.url),
     303,
   );
 }
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
 
   const employeeId = await readEmployeeSessionId();
   if (!employeeId) {
-    return NextResponse.redirect(new URL("/login_karyawan", request.url), 303);
+    return NextResponse.redirect(toAppUrl("/login_karyawan", request.url), 303);
   }
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId }, select: { role: true },
@@ -46,11 +47,11 @@ export async function POST(request: Request) {
     !employee ||
     (roleName !== "project manager" && roleName !== "project_management")
   ) {
-    return NextResponse.redirect(new URL(`${redirectTo}?error=forbidden`, request.url), 303);
+    return NextResponse.redirect(toAppUrl(`${redirectTo}?error=forbidden`, request.url), 303);
   }
 
   if (!title || !category) {
-    return NextResponse.redirect(new URL(redirectTo, request.url), 303);
+    return NextResponse.redirect(toAppUrl(redirectTo, request.url), 303);
   }
 
   try {
@@ -93,10 +94,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Failed to create news story:", error);
     return NextResponse.redirect(
-      new URL(`${redirectTo}?error=1`, request.url),
+      toAppUrl(`${redirectTo}?error=1`, request.url),
       303,
     );
   }
 
-  return NextResponse.redirect(new URL(redirectTo, request.url), 303);
+  return NextResponse.redirect(toAppUrl(redirectTo, request.url), 303);
 }

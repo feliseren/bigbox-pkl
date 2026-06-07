@@ -3,6 +3,7 @@ import {
   approvePasswordResetRequest,
   rejectPasswordResetRequest,
 } from "@/lib/password-reset-requests";
+import { toAppUrl } from "@/lib/app-url";
 import { readCurrentEmployee } from "@/lib/employee-session";
 import { normalizeEmployeeRole } from "@/lib/employee-role";
 
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
 
   if (!employee || roleName !== "admin") {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan?error=forbidden", request.url),
+      toAppUrl("/dashboard_karyawan?error=forbidden", request.url),
     );
   }
 
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
 
   if (!requestId || (actionType !== "approve" && actionType !== "reject")) {
     return NextResponse.redirect(
-      new URL("/dashboard_karyawan/kelola-akun", request.url),
+      toAppUrl("/dashboard_karyawan/kelola-akun", request.url),
     );
   }
 
@@ -33,6 +34,6 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.redirect(
-    new URL("/dashboard_karyawan/kelola-akun", request.url),
+    toAppUrl("/dashboard_karyawan/kelola-akun", request.url),
   );
 }
