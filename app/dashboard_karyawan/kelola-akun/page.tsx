@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
+import { CREATABLE_EMPLOYEE_ROLE_IDS } from "@/lib/employee-create-role";
 import { readCurrentEmployee } from "@/lib/employee-session";
 import { normalizeEmployeeRole } from "@/lib/employee-role";
 import { prisma } from "@/lib/prisma";
@@ -14,7 +15,6 @@ type KelolaAkunPageProps = {
 export default async function KelolaAkunPage({
   searchParams,
 }: KelolaAkunPageProps) {
-  const allowedRoleIds = ["01", "02", "2"];
   const employee = await readCurrentEmployee();
   const roleName = normalizeEmployeeRole(employee?.role);
   const params = (await searchParams) ?? {};
@@ -30,7 +30,7 @@ export default async function KelolaAkunPage({
     orderBy: [{ name: "asc" }],
     where: {
       id: {
-        in: allowedRoleIds,
+        in: [...CREATABLE_EMPLOYEE_ROLE_IDS],
       },
     },
   });

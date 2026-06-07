@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { hashPassword } from "@/lib/auth";
 import { toAppUrl } from "@/lib/app-url";
+import { isCreatableEmployeeRoleId } from "@/lib/employee-create-role";
 import { normalizeEmployeeRole } from "@/lib/employee-role";
 import { readCurrentEmployee } from "@/lib/employee-session";
 import { prisma } from "@/lib/prisma";
@@ -21,6 +22,12 @@ export async function POST(request: Request) {
   const roleId = String(formData.get("roleId") || "").trim();
 
   if (!employeeId || !fullName || !roleId) {
+    return NextResponse.redirect(
+      toAppUrl("/dashboard_karyawan/kelola-akun?error=invalid_role", request.url),
+    );
+  }
+
+  if (!isCreatableEmployeeRoleId(roleId)) {
     return NextResponse.redirect(
       toAppUrl("/dashboard_karyawan/kelola-akun?error=invalid_role", request.url),
     );
