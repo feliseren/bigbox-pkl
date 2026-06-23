@@ -27,7 +27,11 @@ const orderStatusLabel: Record<OrderStatus, string> = {
 export default async function DaftarPemesananPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string | string[]; status?: string | string[] }>;
+  searchParams?: Promise<{
+    q?: string | string[];
+    status?: string | string[];
+    error?: string | string[];
+  }>;
 }) {
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
@@ -50,9 +54,11 @@ export default async function DaftarPemesananPage({
   }));
   const rawQuery = resolvedSearchParams?.q;
   const rawStatus = resolvedSearchParams?.status;
+  const rawError = resolvedSearchParams?.error;
   const query =
     (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery)?.trim() ?? "";
   const statusFilter = Array.isArray(rawStatus) ? rawStatus[0] : rawStatus;
+  const error = Array.isArray(rawError) ? rawError[0] : rawError;
   const normalizedStatus: OrderStatus | undefined =
     statusFilter === "Pending" || statusFilter === "Done"
       ? statusFilter
@@ -112,6 +118,11 @@ export default async function DaftarPemesananPage({
           </header>
 
           <main className="project-content">
+            {error === "confirmed" ? (
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                Pembayaran sudah dikonfirmasi dan tidak bisa dikonfirmasi ulang.
+              </div>
+            ) : null}
             <section className="project-card">
               <div className="project-toolbar">
                 <div className="project-tabs">
@@ -292,13 +303,17 @@ export default async function DaftarPemesananPage({
                         <input value={orderStatusLabel[order.status]} readOnly />
                       </label>
                       <div className="project-form-actions">
-                        {canConfirmOrders ? (
+                        {canConfirmOrders && order.status === "Pending" ? (
                           <form method="post" action="/api/orders/confirm">
                             <input type="hidden" name="orderId" value={order.id} />
                             <button className="btn-confirm" type="submit">
                               Konfirmasi Pembayaran
                             </button>
                           </form>
+                        ) : canConfirmOrders ? (
+                          <button className="btn-confirm" type="button" disabled>
+                            Sudah Dikonfirmasi
+                          </button>
                         ) : null}
                         <a href="#" className="ghost">
                           Tutup

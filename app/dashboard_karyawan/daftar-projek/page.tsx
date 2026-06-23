@@ -8,13 +8,18 @@ import { EmployeeProfileMenu } from "@/components/employee-profile-menu";
 import { ProjectActionButtons } from "@/components/project-action-buttons";
 import { ProjectCreateButton } from "@/components/project-create-button";
 import { EmployeeSidebar } from "@/components/employee-sidebar";
+import { ProjectDateFields } from "@/components/project-date-fields";
 
 export const dynamic = "force-dynamic";
 
 export default async function DaftarProjekPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string | string[]; status?: string | string[] }>;
+  searchParams?: Promise<{
+    q?: string | string[];
+    status?: string | string[];
+    error?: string | string[];
+  }>;
 }) {
   const resolvedSearchParams = await searchParams;
   const employeeId = await readEmployeeSessionId();
@@ -26,9 +31,11 @@ export default async function DaftarProjekPage({
     roleName === "project manager" || roleName === "project_management";
   const rawQuery = resolvedSearchParams?.q;
   const rawStatus = resolvedSearchParams?.status;
+  const rawError = resolvedSearchParams?.error;
   const query =
     (Array.isArray(rawQuery) ? rawQuery[0] : rawQuery)?.trim() ?? "";
   const statusFilter = Array.isArray(rawStatus) ? rawStatus[0] : rawStatus;
+  const error = Array.isArray(rawError) ? rawError[0] : rawError;
   const normalizedStatus =
     statusFilter === "Process" || statusFilter === "Done" ? statusFilter : undefined;
   const buildTabHref = (status?: "Process" | "Done") => {
@@ -90,6 +97,16 @@ export default async function DaftarProjekPage({
           </header>
 
           <main className="project-content">
+            {error === "date" ? (
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                Target selesai tidak boleh lebih awal dari tanggal mulai.
+              </div>
+            ) : null}
+            {error === "duplicate-id" ? (
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                Project ID tidak boleh sama dengan proyek yang sudah ada.
+              </div>
+            ) : null}
             <section className="project-card">
               <div className="project-toolbar">
                 <div className="project-tabs">
@@ -227,14 +244,7 @@ export default async function DaftarProjekPage({
                       Project ID
                       <input name="projectId" placeholder="#6548" required />
                     </label>
-                    <label>
-                      Tanggal Mulai
-                      <input name="startLabel" type="date" required />
-                    </label>
-                    <label>
-                      Target Selesai
-                      <input name="targetLabel" type="date" required />
-                    </label>
+                    <ProjectDateFields />
                     <input type="hidden" name="owner" value={employee?.fullName ?? ""} />
                     <label>
                       Status
@@ -280,24 +290,10 @@ export default async function DaftarProjekPage({
                             Project ID
                             <input value={project.id} disabled />
                           </label>
-                          <label>
-                            Tanggal Mulai
-                            <input
-                              name="startLabel"
-                              type="date"
-                              defaultValue={project.startLabel}
-                              required
-                            />
-                          </label>
-                          <label>
-                            Target Selesai
-                            <input
-                              name="targetLabel"
-                              type="date"
-                              defaultValue={project.targetLabel}
-                              required
-                            />
-                          </label>
+                          <ProjectDateFields
+                            defaultStartLabel={project.startLabel}
+                            defaultTargetLabel={project.targetLabel}
+                          />
                           <input
                             type="hidden"
                             name="owner"

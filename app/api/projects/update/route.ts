@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { readEmployeeSessionId } from "@/lib/auth";
 import { toAppUrl } from "@/lib/app-url";
 import { normalizeEmployeeRole } from "@/lib/employee-role";
+import { isProjectDateRangeValid } from "@/lib/project-date-validation";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -31,6 +32,12 @@ export async function POST(request: Request) {
   if (!projectId || !startLabel || !targetLabel || !status) {
     return NextResponse.redirect(
       toAppUrl("/dashboard_karyawan/daftar-projek?error=1", request.url),
+    );
+  }
+
+  if (!isProjectDateRangeValid(startLabel, targetLabel)) {
+    return NextResponse.redirect(
+      toAppUrl("/dashboard_karyawan/daftar-projek?error=date", request.url),
     );
   }
 
