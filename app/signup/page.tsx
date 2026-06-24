@@ -85,6 +85,23 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
                 />
               </div>
 
+              <div>
+                <label
+                  className="text-[10px] font-semibold text-[#334155] sm:text-[11px]"
+                  htmlFor="confirmPassword"
+                >
+                  Tulis Ulang Kata Sandi
+                </label>
+                <input
+                  className="mt-1 w-full rounded-lg border border-[#d7ddea] px-3.5 py-1.5 text-sm text-[#111827] outline-none focus:border-[#2f2f6f] focus:ring-2 focus:ring-[#c6c9ff]"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  placeholder="Tulis ulang kata sandi"
+                  type="password"
+                  suppressHydrationWarning
+                />
+              </div>
+
               {error === "exists" && (
                 <p className="text-[11px] font-semibold text-[#c0392b]">
                   Email sudah terdaftar.
@@ -93,6 +110,11 @@ export default async function SignupPage({ searchParams }: SignupPageProps) {
               {error === "1" && (
                 <p className="text-[11px] font-semibold text-[#c0392b]">
                   Lengkapi semua data terlebih dahulu.
+                </p>
+              )}
+              {error === "password_mismatch" && (
+                <p className="text-[11px] font-semibold text-[#c0392b]">
+                  Kata sandi dan konfirmasi kata sandi tidak sama.
                 </p>
               )}
               {error === "terms" && (

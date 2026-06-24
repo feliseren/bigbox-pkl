@@ -8,10 +8,16 @@ export async function POST(request: Request) {
   const fullName = String(formData.get("fullName") || "").trim();
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
+  const confirmPassword = String(formData.get("confirmPassword") || "");
   const agreement = formData.get("agreement") === "1";
 
-  if (!fullName || !email || !password) {
+  if (!fullName || !email || !password || !confirmPassword) {
     return NextResponse.redirect(toAppUrl("/signup?error=1", request.url));
+  }
+  if (password !== confirmPassword) {
+    return NextResponse.redirect(
+      toAppUrl("/signup?error=password_mismatch", request.url),
+    );
   }
   if (!agreement) {
     return NextResponse.redirect(toAppUrl("/signup?error=terms", request.url));
